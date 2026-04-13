@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Products | Precision Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c7c5d6",
+                    "surface-container-high": "#e7e8ec",
+                    "primary-fixed-dim": "#a3e8bc",
+                    "surface-container-low": "#f2f3f7",
+                    "inverse-primary": "#a3e8bc",
+                    "secondary": "#595a8c",
+                    "on-primary-container": "#a3e8bc",
+                    "background": "#f8f9fd",
+                    "tertiary": "#662500",
+                    "surface-container": "#edeef2",
+                    "surface-dim": "#d9dade",
+                    "secondary-container": "#c4c4fd",
+                    "tertiary-fixed-dim": "#ffb595",
+                    "surface-tint": "#1DB954",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed-dim": "#c1c1fa",
+                    "primary": "#1DB954",
+                    "on-primary-fixed-variant": "#158e3f",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#464554",
+                    "surface": "#f8f9fd",
+                    "on-tertiary-fixed-variant": "#7c2e00",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#e1e2e6",
+                    "on-surface": "#191c1f",
+                    "primary-fixed": "#d3f5df",
+                    "tertiary-container": "#8b3500",
+                    "outline": "#777585",
+                    "on-secondary-fixed-variant": "#414272",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-container": "#ffb08d",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2e3134",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-tertiary-fixed": "#351000",
+                    "on-primary-fixed": "#00210b",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#4f5081",
+                    "on-secondary-fixed": "#151544",
+                    "surface-bright": "#f8f9fd",
+                    "surface-variant": "#e1e2e6",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#e1dfff",
+                    "primary-container": "#1DB954",
+                    "on-background": "#191c1f",
+                    "inverse-on-surface": "#eff1f5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Manrope"],
+                    "label": ["Manrope"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .ghost-border { border: 1px solid rgba(199, 197, 214, 0.2); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50 bg-[#f8f9fd] dark:bg-slate-950 backdrop-blur-xl">
+<div class="flex items-center gap-4 flex-1">
+<button class="text-[#1DB954] dark:text-[#a3e8bc] hover:bg-[#f2f3f7] dark:hover:bg-slate-800 transition-colors p-2 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex-1 relative">
+<div class="flex items-center bg-surface-container-lowest rounded-xl px-4 py-2.5 shadow-sm border border-outline-variant/10">
+<span class="material-symbols-outlined text-on-surface-variant/60 mr-3" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder:text-on-surface-variant/40" placeholder="Search by item name..." type="text"/>
+<button class="text-[#1DB954] dark:text-[#a3e8bc] ml-2">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+</button>
+</div>
+</div>
+<button class="text-[#1DB954] dark:text-[#a3e8bc] hover:bg-[#f2f3f7] p-2 rounded-lg">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+</div>
+</header>
+<main class="px-6 pb-32 max-w-3xl mx-auto space-y-4">
+<!-- Create New Item Card - Scaled Down -->
+<section class="mt-2">
+<div class="border border-dashed border-primary/40 bg-primary/5 rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/10 transition-colors group">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="add">add</span>
+</div>
+<span class="text-primary font-bold text-[13px]">+ Create New Item</span>
+</div>
+</section>
+<!-- Product List -->
+<section class="space-y-4">
+<div class="flex justify-between items-center">
+<h2 class="text-on-surface-variant font-bold text-[11px] tracking-widest uppercase">POPULAR ITEMS</h2>
+<span class="text-on-surface-variant/60 text-[11px]">24 items</span>
+</div>
+<!-- Item Card 1 - Compact -->
+<div class="bg-surface-container-lowest rounded-xl p-3 flex items-center justify-between shadow-[0_2px_8px_rgba(26,26,46,0.03)] border border-outline-variant/10 hover:shadow-sm transition-shadow">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-[#1DB954]/10 flex items-center justify-center text-primary font-bold text-base">
+                        A
+                    </div>
+<div>
+<h3 class="text-on-surface font-bold text-body-md leading-tight">Amul Butter 500gm</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-primary font-bold text-sm">₹220/BOX</span>
+<span class="text-on-surface-variant/60 text-[11px]">Stock: 142</span>
+</div>
+</div>
+</div>
+<!-- Stepper - Smaller -->
+<div class="flex items-center gap-2 bg-surface-container-low rounded-lg p-1">
+<button class="text-primary hover:bg-white rounded p-0.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="do_not_disturb_on">do_not_disturb_on</span>
+</button>
+<span class="font-bold text-on-surface min-w-[16px] text-center text-sm">2</span>
+<button class="text-primary hover:bg-white rounded p-0.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+</button>
+</div>
+</div>
+<!-- Item Card 2 - Compact -->
+<div class="bg-surface-container-lowest rounded-xl p-3 flex items-center justify-between shadow-[0_2px_8px_rgba(26,26,46,0.03)] border border-outline-variant/10 hover:shadow-sm transition-shadow">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-base">
+                        B
+                    </div>
+<div>
+<h3 class="text-on-surface font-bold text-body-md leading-tight">Britannia Marie Gold 250g</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-primary font-bold text-sm">₹35/PKT</span>
+<span class="text-on-surface-variant/60 text-[11px]">Stock: 89</span>
+</div>
+</div>
+</div>
+<!-- Stepper - Smaller -->
+<div class="flex items-center gap-2 bg-surface-container-low rounded-lg p-1">
+<button class="text-on-surface-variant/40 rounded p-0.5">
+<span class="material-symbols-outlined text-[18px]" data-icon="do_not_disturb_on">do_not_disturb_on</span>
+</button>
+<span class="font-bold text-on-surface/40 min-w-[16px] text-center text-sm">0</span>
+<button class="text-primary hover:bg-white rounded p-0.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+</button>
+</div>
+</div>
+<!-- Item Card 3 - Compact -->
+<div class="bg-surface-container-lowest rounded-xl p-3 flex items-center justify-between shadow-[0_2px_8px_rgba(26,26,46,0.03)] border border-outline-variant/10 hover:shadow-sm transition-shadow">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base">
+                        C
+                    </div>
+<div>
+<h3 class="text-on-surface font-bold text-body-md leading-tight">Cadbury Silk Oreo 130g</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-primary font-bold text-sm">₹175/PCS</span>
+<span class="text-on-surface-variant/60 text-[11px]">Stock: 12</span>
+</div>
+</div>
+</div>
+<!-- Stepper - Smaller -->
+<div class="flex items-center gap-2 bg-surface-container-low rounded-lg p-1">
+<button class="text-primary hover:bg-white rounded p-0.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="do_not_disturb_on">do_not_disturb_on</span>
+</button>
+<span class="font-bold text-on-surface min-w-[16px] text-center text-sm">8</span>
+<button class="text-primary hover:bg-white rounded p-0.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+</button>
+</div>
+</div>
+<!-- Item Card 4 - Compact & Empty State -->
+<div class="bg-surface-container-lowest rounded-xl p-3 flex items-center justify-between shadow-[0_2px_8px_rgba(26,26,46,0.03)] border border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-base">
+                        D
+                    </div>
+<div>
+<h3 class="text-on-surface font-bold text-body-md leading-tight">Daawat Basmati 5kg</h3>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="text-primary font-bold text-sm">₹850/BAG</span>
+<span class="text-error text-[11px]">Stock: -5</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-low rounded-lg p-1">
+<button class="text-on-surface-variant/40 rounded p-0.5">
+<span class="material-symbols-outlined text-[18px]" data-icon="do_not_disturb_on">do_not_disturb_on</span>
+</button>
+<span class="font-bold text-on-surface/40 min-w-[16px] text-center text-sm">0</span>
+<button class="text-primary hover:bg-white rounded p-0.5 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar - Scaled Down Button -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-[#c7c5d6]/20 shadow-[0_-4px_12px_rgba(26,26,46,0.06)] px-6 py-3 pb-safe flex justify-between items-center">
+<div class="flex flex-col">
+<span class="text-[#464554] text-[10px] font-bold uppercase tracking-wider">Summary</span>
+<div class="flex items-baseline gap-1.5">
+<span class="text-on-surface font-headline font-bold text-base">2 items</span>
+<span class="text-on-surface-variant/40 text-sm">|</span>
+<span class="text-primary font-headline font-extrabold text-lg">₹1,840</span>
+</div>
+</div>
+<button class="flex items-center justify-center bg-[#1DB954] text-white rounded-lg px-6 py-2.5 text-sm font-bold hover:opacity-90 active:scale-[0.98] transition-all gap-2 shadow-lg shadow-primary/20">
+<span>Add to Invoice</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</footer>
+</body></html>

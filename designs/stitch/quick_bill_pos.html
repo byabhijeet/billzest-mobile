@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quick Bill | BillZest POS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-surface": "#2e3132",
+                        "tertiary-fixed": "#ffdad9",
+                        "secondary-container": "#e8dddd",
+                        "tertiary-container": "#ff767b",
+                        "on-tertiary-fixed": "#400009",
+                        "on-surface-variant": "#3d4a3d",
+                        "on-error": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary-container": "#696161",
+                        "on-primary-fixed": "#002108",
+                        "on-primary-fixed-variant": "#005320",
+                        "primary-fixed": "#72fe8f",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#a8353e",
+                        "primary-container": "#1db954",
+                        "primary-fixed-dim": "#53e076",
+                        "outline-variant": "#bccbb9",
+                        "surface-container-high": "#e7e8ec",
+                        "primary": "#1DB954",
+                        "on-surface": "#191c1d",
+                        "inverse-primary": "#53e076",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-variant": "#e1e3e4",
+                        "surface-dim": "#d9dadb",
+                        "outline": "#6d7b6c",
+                        "on-primary-container": "#004118",
+                        "secondary": "#645d5c",
+                        "on-tertiary-fixed-variant": "#881d28",
+                        "on-secondary-fixed-variant": "#4c4545",
+                        "surface-bright": "#f8f9fa",
+                        "inverse-on-surface": "#f0f1f2",
+                        "background": "#f8f9fa",
+                        "on-primary": "#ffffff",
+                        "surface-container": "#edeeef",
+                        "secondary-fixed-dim": "#cfc4c4",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8f9fa",
+                        "on-tertiary-container": "#730a1b",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#201a1a",
+                        "tertiary-fixed-dim": "#ffb3b3",
+                        "surface-tint": "#1DB954",
+                        "on-error-container": "#93000a",
+                        "on-background": "#191c1d",
+                        "secondary-fixed": "#ebe0df"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #f8f9fa; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { min-height: max(884px, 100dvh); }
+    </style>
+</head>
+<body class="text-on-surface bg-background">
+<!-- TopAppBar Replacement: Header from SCREEN_5 -->
+<header class="flex justify-between items-center px-6 py-4 w-full sticky top-0 z-50 bg-[#f8f9fd] dark:bg-slate-950 backdrop-blur-xl">
+<div class="flex items-center gap-4 flex-1">
+<button class="text-[#1DB954] dark:text-[#a3e8bc] hover:bg-[#f2f3f7] dark:hover:bg-slate-800 transition-colors p-2 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex-1 relative">
+<div class="flex items-center bg-surface-container-lowest rounded-xl px-4 py-2.5 shadow-sm border border-outline-variant/10">
+<span class="material-symbols-outlined text-on-surface-variant/60 mr-3" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-on-surface-variant/40" placeholder="Search by item name..." type="text"/>
+<button class="text-[#1DB954] dark:text-[#a3e8bc] ml-2">
+<span class="material-symbols-outlined" data-icon="qr_code_scanner">qr_code_scanner</span>
+</button>
+</div>
+</div>
+<button class="text-[#1DB954] dark:text-[#a3e8bc] hover:bg-[#f2f3f7] p-2 rounded-lg">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+</div>
+</header>
+<main class="max-w-2xl mx-auto pb-32">
+<!-- Count Strip -->
+<section class="px-6 py-4">
+<p class="text-secondary text-sm font-medium">Showing 6 of 6 products</p>
+</section>
+<!-- Product Grid -->
+<section class="px-6 grid grid-cols-2 gap-4">
+<!-- Card: Selected -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-3 relative border-[#1DB954] bg-[#f0fff4] shadow-sm border-2">
+<div class="aspect-square bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="product" class="w-full h-full object-cover" data-alt="Modern red athletic running shoe displayed against a clean grey studio background with soft professional lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD43vzBD8m9Q3oJ2yXaBSZeIQ-Gx2d0OoIOxuK66obW6MnBqS2FgT7rW3x0JVS-1TzeFFBKkxACjlK5LiXTTvQ5j5R982BP57jZqQru_Z7r1rnzs5y954xG6zlytGwX4NuEJShndM9rDyTSODp-KFq0OpDn2f1XOe7MKnTKJUb99MJ87veULfY0cY7DOWak9X2GYiWVmW5Qs3hB0FZ72WAps0FUKhPMaVdpuNE9EZ61pFSEFUMevsScjDceYKy9XPiAxfp3ygz5OtQ"/>
+</div>
+<div>
+<h3 class="font-bold text-[15px] leading-tight text-on-surface">Red Sports Trainer</h3>
+<p class="text-[#1DB954] text-[14px] font-semibold">₹1,299</p>
+</div>
+<div class="flex items-center justify-between bg-white/60 rounded-lg p-1">
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-bold text-sm">2</span>
+<button class="w-8 h-8 flex items-center justify-center text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Card: Normal -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-3 relative shadow-sm">
+<div class="aspect-square bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="product" class="w-full h-full object-cover" data-alt="Minimalist silver wrist watch with white face and brown leather strap on a light neutral surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCW_RzALAyni3useNcz56E6zZQxL9tojXv571uwo4BaaH3w0CkX4ojtziWs2jHLV5pIAY8McnwB9sreezzLpHyjZ75cj5kWojW9LMh9YzHLgx5JFMi1NwJkz4hQL6zrXVxw4y2ozRzi17l6s-q3Ve5KRCmpupumIBIJwGNBlX4nxOpBvdFDKti81knqSyql6p9-xHd7Ta-CxJ_R4qnqmAkt-M6QGppIAlugt8tBZWx_28V4Ohl_KrOJLh0NU0FermJ23UkaOcwXT3I"/>
+</div>
+<div>
+<h3 class="font-bold text-[15px] leading-tight text-on-surface">Minimalist Watch</h3>
+<p class="text-[#1DB954] text-[14px] font-semibold">₹2,450</p>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-bold text-sm">0</span>
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Card: Selected -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-3 relative border-[#1DB954] bg-[#f0fff4] shadow-sm border-2">
+<div class="aspect-square bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="product" class="w-full h-full object-cover" data-alt="Premium gold-toned wireless over-ear headphones isolated on a grey background with elegant studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiJe1dUMyaOAHLhWHKAMENGud8LKLHlp3QzWDScC6PLJ48BgftA1ehM9JEYhHnEyR9B3Rl3yAiSfE9Shh4Eg9nY7Rfav2L5P8NN11R8hGzRwE3weF--gE83PpSlSCgLC-eT_0aLiCzNp6dG0HhVQuHEVBL99dq0WBpS0l1QyKPYbdpQvTeKhA0Hb7bQU5D8mSmwB_H1oHpm-yL3iYcQgJSsSPn0Z3HbSCSdnLlvm-aEhuU2pzKkIuYewQKtat_Wro8eUPgC3V4ols"/>
+</div>
+<div>
+<h3 class="font-bold text-[15px] leading-tight text-on-surface">Elite Headphones</h3>
+<p class="text-[#1DB954] text-[14px] font-semibold">₹5,999</p>
+</div>
+<div class="flex items-center justify-between bg-white/60 rounded-lg p-1">
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-bold text-sm">1</span>
+<button class="w-8 h-8 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Card: Out of Stock -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-3 relative shadow-sm overflow-hidden">
+<div class="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center">
+<span class="bg-zinc-800 text-white text-[10px] font-black px-3 py-1 rounded-full tracking-widest">OUT OF STOCK</span>
+</div>
+<div class="aspect-square bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="product" class="w-full h-full object-cover grayscale" data-alt="Classic canvas high-top sneakers in yellow and white against a neutral studio backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDFGSeSXAjuCAqciWdkH-WYo4nE8msrKOwV-0c3CLfbAHMIwRCTY_7RNhG5kgyVzJmP4_ZfbL5RpzE-BVtnQ0fJoU4OOWAbikjY7BSotYaqcjMrPT58PNohgX5BgdYUQ_Jn5jIR1d92C3iKRYDbI3tk3begWJErmF7eKNGVPf7no8mlpHPl0VTNfJsl8tcWLyxKQjqJDUoIrQSoR70NvF57C1XE0auuPsIROffgnBRFWFH8s_o-1O_4Q0K7ZmTbdtd6wnmr9TMAlY"/>
+</div>
+<div>
+<h3 class="font-bold text-[15px] leading-tight text-zinc-400">Classic Canvas</h3>
+<p class="text-zinc-400 text-[14px] font-semibold">₹899</p>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1 opacity-50">
+<button class="w-8 h-8 flex items-center justify-center text-zinc-300" disabled="">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-bold text-sm text-zinc-300">0</span>
+<button class="w-8 h-8 flex items-center justify-center text-zinc-300" disabled="">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Card: Normal -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-3 relative shadow-sm">
+<div class="aspect-square bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="product" class="w-full h-full object-cover" data-alt="Ceramic travel coffee mug with a dark green glaze and cork base sitting on a wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6FLc_lvV9s6F0iHXLIsddYDSGbIFjJ29yWu2dnFCxbl0HDwVCESu-LjmTQu6JCQRNhvhT1H6gxpnMl8khNElQjsreY6YlKOZXYCI0Nhf8FEFOUs5c6VlAg1vKFDT7FAICfdukjHHdlcgVKC_NgaOIrbfEYJgkiwEsSo_flESUKOKsTq-0Iy6n_jm39wHUkaz9WpfKNHpVfn8loBYpZykpQBgrih-N1bNqcU4isJBDuv7V8gyaUtgTsxKGvkcClJXy4A2VpgnwjiQ"/>
+</div>
+<div>
+<h3 class="font-bold text-[15px] leading-tight text-on-surface">Ceramic Mug</h3>
+<p class="text-[#1DB954] text-[14px] font-semibold">₹450</p>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-bold text-sm">0</span>
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Card: Normal -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-3 relative shadow-sm">
+<div class="aspect-square bg-zinc-100 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="product" class="w-full h-full object-cover" data-alt="Polished stainless steel mechanical pencil on a design sketchpad with sharp shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPwcWb0r550EAnwqO8X0GOMqWEK0bwfIpWO71XQ8DGzUrupYUxdOinMREY3l-CfkJzKSTY8P17ye-YFoNTBNcV4-c2xjseyWRjEFcvgZ3xgqs8VyTNBghnLUEMHTy-xHGlRPYqEFS9TdHNd_eoj4njkupQYMbsuQtIFnStmXE7h-h323jPX-zIQgvL3qzBVKv9qLEoGg46QtcTCpD21YpTbAFXnB3jUDKpc-Fmh7_KqGs0_H7vhqF8rAiZt7c8cyuq5Et8xL0sYus"/>
+</div>
+<div>
+<h3 class="font-bold text-[15px] leading-tight text-on-surface">Pro Pencil Kit</h3>
+<p class="text-[#1DB954] text-[14px] font-semibold">₹1,120</p>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low rounded-lg p-1">
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-bold text-sm">0</span>
+<button class="w-8 h-8 flex items-center justify-center text-zinc-400">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Sticky Cart Bar -->
+<div class="fixed bottom-0 left-0 right-0 p-4 bg-white shadow-[0px_-4px_16px_rgba(0,0,0,0.04)] z-50">
+<div class="max-w-2xl mx-auto flex items-center justify-between gap-4">
+<div class="flex flex-col">
+<span class="text-zinc-500 text-[11px] font-bold uppercase tracking-widest">3 items selected</span>
+<span class="text-xl font-black text-on-surface tracking-tighter">₹8,597</span>
+</div>
+<button class="bg-[#1DB954] text-white px-8 py-4 rounded-xl font-bold flex items-center gap-2 active:scale-95 duration-150 transition-transform shadow-lg shadow-primary/20">
+                Proceed
+                <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

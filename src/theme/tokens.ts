@@ -1,0 +1,72 @@
+export const lightTokens = {
+  background: 'hsl(0, 0%, 100%)',
+  foreground: 'hsl(0, 0%, 7%)',
+  card: 'hsl(0, 0%, 98%)',
+  cardForeground: 'hsl(0, 0%, 7%)',
+  popover: 'hsl(0, 0%, 100%)',
+  popoverForeground: 'hsl(0, 0%, 7%)',
+  primary: 'hsl(141, 73%, 42%)', // Spotify Green
+  primaryForeground: 'hsl(0, 0%, 100%)',
+  secondary: 'hsl(0, 0%, 96%)',
+  secondaryForeground: 'hsl(0, 0%, 7%)',
+  muted: 'hsl(0, 0%, 96%)',
+  mutedForeground: 'hsl(0, 0%, 45%)',
+  accent: 'hsl(141, 73%, 42%)', // Spotify Green
+  accentForeground: 'hsl(0, 0%, 100%)',
+  success: 'hsl(141, 73%, 42%)',
+  successForeground: 'hsl(0, 0%, 100%)',
+  warning: 'hsl(38, 92%, 50%)',
+  warningForeground: 'hsl(0, 0%, 100%)',
+  destructive: 'hsl(0, 84%, 60%)',
+  destructiveForeground: 'hsl(0, 0%, 100%)',
+  border: 'hsl(0, 0%, 90%)',
+  input: 'hsl(0, 0%, 90%)',
+  ring: 'hsl(141, 73%, 42%)',
+  sidebarBackground: 'hsl(0, 0%, 98%)',
+  sidebarForeground: 'hsl(0, 0%, 26%)',
+  sidebarPrimary: 'hsl(0, 0%, 10%)',
+  sidebarPrimaryForeground: 'hsl(0, 0%, 98%)',
+  sidebarAccent: 'hsl(0, 0%, 95%)',
+  sidebarAccentForeground: 'hsl(0, 0%, 10%)',
+  sidebarBorder: 'hsl(0, 0%, 91%)',
+  sidebarRing: 'hsl(141, 73%, 42%)',
+  radius: 16,
+} as const;
+
+export const darkTokens = {
+  background: 'hsl(0, 0%, 7%)', // Spotify Black
+  foreground: 'hsl(0, 0%, 95%)',
+  card: 'hsl(0, 0%, 12%)', // Spotify Elevation 1
+  cardForeground: 'hsl(0, 0%, 95%)',
+  popover: 'hsl(0, 0%, 12%)',
+  popoverForeground: 'hsl(0, 0%, 95%)',
+  primary: 'hsl(141, 73%, 42%)', // Spotify Green
+  primaryForeground: 'hsl(0, 0%, 100%)',
+  secondary: 'hsl(0, 0%, 15%)',
+  secondaryForeground: 'hsl(0, 0%, 95%)',
+  muted: 'hsl(0, 0%, 15%)',
+  mutedForeground: 'hsl(0, 0%, 65%)',
+  accent: 'hsl(141, 73%, 42%)', // Spotify Green
+  accentForeground: 'hsl(0, 0%, 100%)',
+  success: 'hsl(141, 73%, 42%)',
+  successForeground: 'hsl(0, 0%, 100%)',
+  warning: 'hsl(38, 92%, 50%)',
+  warningForeground: 'hsl(0, 0%, 100%)',
+  destructive: 'hsl(0, 63%, 31%)',
+  destructiveForeground: 'hsl(0, 0%, 95%)',
+  border: 'hsl(0, 0%, 20%)',
+  input: 'hsl(0, 0%, 12%)',
+  ring: 'hsl(141, 73%, 42%)',
+  sidebarBackground: 'hsl(0, 0%, 8%)',
+  sidebarForeground: 'hsl(0, 0%, 90%)',
+  sidebarPrimary: 'hsl(141, 73%, 42%)',
+  sidebarPrimaryForeground: 'hsl(0, 0%, 100%)',
+  sidebarAccent: 'hsl(0, 0%, 15%)',
+  sidebarAccentForeground: 'hsl(0, 0%, 95%)',
+  sidebarBorder: 'hsl(0, 0%, 15%)',
+  sidebarRing: 'hsl(141, 73%, 42%)',
+  radius: 16,
+} as const;
+
+// ThemeTokens should work for both light and dark schemes
+export type ThemeTokens = typeof lightTokens | typeof darkTokens;
