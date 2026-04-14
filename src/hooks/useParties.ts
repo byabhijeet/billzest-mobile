@@ -27,7 +27,8 @@ export const usePartyMutations = () => {
       return partiesService.createParty(organizationId, input);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['parties'] });
+      queryClient.invalidateQueries({ queryKey: ['parties', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['party', organizationId] });
     },
   });
 
@@ -37,14 +38,16 @@ export const usePartyMutations = () => {
       return partiesService.updateParty(id, updates);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['parties'] });
+      queryClient.invalidateQueries({ queryKey: ['parties', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['party', organizationId] });
     },
   });
 
   const deleteParty = useMutation({
     mutationFn: partiesService.deleteParty,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['parties'] });
+      queryClient.invalidateQueries({ queryKey: ['parties', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['party', organizationId] });
     },
   });
 

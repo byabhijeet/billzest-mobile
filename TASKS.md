@@ -92,15 +92,15 @@ Only after both pass, mark `[x]` and ask for review.
 - [x] **Task 52** (Audit): Remove or functionally replace the dead "Units" and "Categories" placeholder alerts so the UI reflects shipping-readiness. locked-by: codex-session | 2026-04-14 22:01:41 +05:30
 - [x] **Task 60** (Audit 2.1): `src/logic/partyLogic.ts` implement missing customer helper hooks such as `useCustomerDetail`, `calculateCustomerBalance`, and `recordCustomerPayment` to support customer/party flows consistently.
 - [x] **Task 61** [REMOVED - Offline Removed]: Offline party operations logic.
-- [ ] **Task 62** (Audit 2.3): `src/hooks/useParties.ts` fix party mutation invalidation so `queryClient.invalidateQueries` refreshes the filtered `['parties', orgId, 'customers']` and `['parties', orgId, 'suppliers']` query caches.
+- [/] **Task 62** (Audit 2.3): `src/hooks/useParties.ts` fix party mutation invalidation so `queryClient.invalidateQueries` refreshes the filtered `['parties', orgId, 'customers']` and `['parties', orgId, 'suppliers']` query caches. locked-by: antigravity-session | 2026-04-14 23:25:00 +05:30
 - [x] **Task 63** (Audit 2.4): `src/supabase/partyBalanceService.ts` extend `getCustomerFinancialSummary` to include `credit_transactions` data so outstanding balance matches the party ledger.
 - [x] **Task 64** [REMOVED - Offline Removed]: Sync engine support for credit transactions.
 
 ### `src/screens/Invoices/InvoicesListScreen.tsx`
-- [/] **Task 72** (Audit Invoices): Modify `FlatList` rendering. Implement `onEndReached` handling to fetch invoices incrementally within `useOrders` or bounded queries instead of exhaustive fetching. locked-by: codex-session | 2026-04-14 21:07:06 +05:30
+- [/] **Task 72** (Audit Invoices): Modify `FlatList` rendering. Implement `onEndReached` handling to fetch invoices incrementally within `useOrders` or bounded queries instead of exhaustive fetching. locked-by: antigravity-session | 2026-04-14 23:25:00 +05:30
 
 ### `src/navigation/` & Routing Refactoring
-- [ ] **Task 73** (Audit Invoices): Replace `useNavigation<any>()` and `useRoute<any>()` instances with explicit `<NativeStackNavigationProp>` generics inside `InvoicesListScreen.tsx`, `InvoiceDetailScreen.tsx`, and `AddSaleScreen.tsx`.
+- [/] **Task 73** (Audit Invoices): Replace `useNavigation<any>()` and `useRoute<any>()` instances with explicit `<NativeStackNavigationProp>` generics inside `InvoicesListScreen.tsx`, `InvoiceDetailScreen.tsx`, and `AddSaleScreen.tsx`. locked-by: antigravity-session | 2026-04-14 23:25:00 +05:30
 
 ---
 
@@ -131,12 +131,12 @@ Only after both pass, mark `[x]` and ask for review.
 - [ ] **Task 29** (Audit 7.5): Determine which is in use. If one is dead, rename/delete. If both are used, merge into one with both sets of exports.
 
 ### `src/theme/tokens.ts`
-- [ ] **Task 30** (Audit 8.1): Add tokens: `white: 'hsl(0, 0%, 100%)'`, `shadowColor: '#1a1a2e'`, `radiusSm: 8`, `radiusMd: 12`, `radiusLg: 16`, `radiusXl: 24`, `radiusFull: 999`.
+- [/] **Task 30** (Audit 8.1): Add tokens: `white: 'hsl(0, 0%, 100%)'`, `shadowColor: '#1a1a2e'`, `radiusSm: 8`, `radiusMd: 12`, `radiusLg: 16`, `radiusXl: 24`, `radiusFull: 999`. locked-by: antigravity-session | 2026-04-14 23:25:00 +05:30
 
 ### `src/screens/Dashboard/DashboardScreen.tsx`
 - [ ] **Task 31** (Audit 8.6): Add `accessibilityLabel` to: date range pills, refresh button.
 - [ ] **Task 32** (Audit 11.5): Reduce `paddingBottom` from `100` to `80` (L483).
-- [ ] **Task 33** (Audit 11.6): Remove `rotateAnim` from the `useEffect` dependency array (L228–L240) to fix animation restart issue.
+- [x] **Task 33** (Audit 11.6): Remove `rotateAnim` from the `useEffect` dependency array (L228–L240) to fix animation restart issue. locked-by: codex-session | 2026-04-14 23:40:00 +05:30
 
 ### `src/navigation/types.ts`
 - [x] **Task 34** (Audit 9.1): Create navigation param list types `RootDrawerParamList`, `MainTabsParamList`, `DashboardStackParamList`, `ProductsStackParamList`, `CustomersStackParamList`, `InvoicesStackParamList`, `PurchaseStackParamList`, `CreditBookStackParamList`, `SettingsStackParamList`, `AuthStackParamList`. Each lists all route names and their expected params.
@@ -172,7 +172,7 @@ Only after both pass, mark `[x]` and ask for review.
 ## 🎨 Stitch Design Integration - Create Invoice Flow
 *Note: These tasks represent the uncompleted Stitch designs and should be executed alongside or after the component extractions (Tasks 35-38).*
 
-- [ ] **Task 42** (Stitch UI - Base Layout): Integrate **"Create Invoice (Green)"** design into the `AddSaleScreen` shell. Implement the "Architectural Editor" base, using `tokens.background`, removing 1px solid borders in favor of the "No-Line" rule with tonal surface layers.
+- [/] **Task 42** (Stitch UI - Base Layout): Integrate **"Create Invoice (Green)"** design into the `AddSaleScreen` shell. Implement the "Architectural Editor" base, using `tokens.background`, removing 1px solid borders in favor of the "No-Line" rule with tonal surface layers. locked-by: antigravity-session | 2026-04-14 23:25:00 +05:30
 - [ ] **Task 43** (Stitch UI - Party Selector): Integrate **"Select Party (Green)"** design into the `BillToCard` and the party selection list. Apply deep green `primary` tokens and Manrope typography for the customer names and balances.
 - [ ] **Task 44** (Stitch UI - Adjustments): Integrate **"Edit Adjustments Bottom Sheet"** design into the invoice adjustments modal. Use functional glassmorphism, ambient shadows for the floating sheet, and soft `on_surface_variant` labels.
 - [ ] **Task 45** (Stitch UI - CTAs): Integrate **"Updated Invoice Summary Buttons"** into the `InvoiceBottomBar` component. Build the sticky HUD footer with `surface_container_lowest` at 80% opacity and backdrop-blur, utilizing the refined green primary/secondary button specs.

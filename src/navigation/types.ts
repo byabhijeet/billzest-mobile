@@ -28,7 +28,9 @@ export type CustomersStackParamList = {
 export type InvoicesStackParamList = {
   InvoicesMain: undefined;
   InvoiceDetail: { orderId: string; invoice?: any };
-  AddSale: { initialMode?: 'sale' | 'purchase'; invoiceId?: string };
+  AddSale: { initialMode?: 'sale' | 'purchase'; invoiceId?: string; orderId?: string };
+  SimplifiedPOS: undefined;
+  AddItems: undefined;
   InvoiceSummary: {
     invoiceId: string;
     invoiceNumber: string;
@@ -40,10 +42,8 @@ export type InvoicesStackParamList = {
     amountReceived: number;
     dueDate: string;
   };
-  AddItems: undefined;
   CustomerForm: { customerId?: string };
   AddPartySheet: { type?: 'customer' | 'supplier' };
-  SimplifiedPOS: undefined;
 };
 
 export type PurchaseStackParamList = {

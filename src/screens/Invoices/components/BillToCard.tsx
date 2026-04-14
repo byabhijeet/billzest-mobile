@@ -76,19 +76,17 @@ export default function BillToCard({
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
     card: {
-      backgroundColor: tokens.card,
-      borderRadius: 14,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: tokens.border + "20",
-      shadowColor: "#1a1a2e",
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: 24,
+      padding: 18,
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 4,
     },
     cardSectionLabel: {
-      fontSize: 10,
+      fontSize: 11,
       fontWeight: "800",
       color: tokens.mutedForeground,
       letterSpacing: 1.2,
@@ -98,11 +96,9 @@ const createStyles = (tokens: ThemeTokens) =>
     partyRow: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: tokens.muted,
-      borderRadius: 10,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: tokens.border + "18",
+      backgroundColor: tokens.background,
+      borderRadius: 16,
+      padding: 14,
     },
     partyAvatar: {
       width: 40,

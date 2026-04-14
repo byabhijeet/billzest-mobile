@@ -55,9 +55,9 @@ export const ordersService = {
    */
   async listOrders(
     orgId: string,
-    params: { search?: string; status?: string } = {},
+    params: { search?: string; status?: string; from?: number; to?: number } = {},
   ): Promise<OrderWithParty[]> {
-    const { search, status } = params;
+    const { search, status, from, to } = params;
 
     let query = supabase
       .from('orders')
@@ -74,6 +74,10 @@ export const ordersService = {
       query = query.or(
         `invoice_number.ilike.%${term}%,customer_name.ilike.%${term}%,customer_phone.ilike.%${term}%`,
       );
+    }
+
+    if (typeof from === 'number' && typeof to === 'number') {
+      query = query.range(from, to);
     }
 
     const { data, error } = await query;

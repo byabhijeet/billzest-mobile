@@ -101,15 +101,13 @@ const InvoiceItemsList: React.FC<InvoiceItemsListProps> = ({
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
     itemsCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 14,
-      borderWidth: 1,
-      borderColor: tokens.border + "20",
-      shadowColor: "#1a1a2e",
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: 24,
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 4,
       overflow: "hidden",
     },
     itemsHeader: {

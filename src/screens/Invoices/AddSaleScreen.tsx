@@ -14,8 +14,8 @@ import {
   UIManager,
   KeyboardAvoidingView,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import type { NavigationProp, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useThemeTokens } from "../../theme/ThemeProvider";
 import { ThemeTokens } from "../../theme/tokens";
 import { useInvoiceStore } from "../../stores/invoiceStore";
@@ -34,30 +34,18 @@ import InvoiceMetaStrip from "./components/InvoiceMetaStrip";
 import BillToCard from "./components/BillToCard";
 import InvoiceTotalsCard from "./components/InvoiceTotalsCard";
 import InvoiceBottomBar from "./components/InvoiceBottomBar";
-import Button from "../../components/ui/Button";
 import { formatCurrency } from "../../utils/formatting";
-import {
-  ArrowLeft,
-  Settings,
-  Edit2,
-  User,
-  ChevronDown,
-  PlusCircle,
-  Plus,
-  Trash2,
-  Minus,
-  Search,
-  ScanLine,
-} from "lucide-react-native";
-import type { AppNavigationParamList } from "../../navigation/types";
+import { ArrowLeft, Settings, Search, ScanLine } from "lucide-react-native";
+import type { InvoicesStackParamList } from "../../navigation/types";
 
 type Mode = "sale" | "purchase";
 
 const AddSaleScreen = () => {
   const { tokens } = useThemeTokens();
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
-  const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
-  const route = useRoute<RouteProp<AppNavigationParamList, "AddSale">>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<InvoicesStackParamList>>();
+  const route = useRoute<RouteProp<InvoicesStackParamList, "AddSale">>();
   const { data: products = [] } = useProducts();
   const { organizationId } = useOrganization();
 
@@ -198,18 +186,19 @@ const AddSaleScreen = () => {
   const finalTotal = grandTotal + chargeAmt - discountAmt + roundOffAmt;
   const balanceDue = finalTotal - amountReceived;
 
-  const { validate, submitInvoice, handleBack, handleScan, isSubmitting } = useInvoiceFlow({
-    finalTotal,
-    subtotal,
-    taxAmount,
-    cgst,
-    sgst,
-    amountReceived,
-    discountAmt,
-    products,
-    setScannerVisible,
-    existingInvoice,
-  });
+  const { validate, submitInvoice, handleBack, handleScan, isSubmitting } =
+    useInvoiceFlow({
+      finalTotal,
+      subtotal,
+      taxAmount,
+      cgst,
+      sgst,
+      amountReceived,
+      discountAmt,
+      products,
+      setScannerVisible,
+      existingInvoice,
+    });
 
   return (
     <View style={styles.container}>
@@ -218,87 +207,90 @@ const AddSaleScreen = () => {
         style={{ flex: 1 }}
       >
         {/* ── App Bar ──────────────────────────────────────────────────────────── */}
-      <View style={styles.appBar}>
-        <Pressable onPress={handleBack} style={styles.appBarBack}>
-          <ArrowLeft size={24} color={tokens.primary} strokeWidth={2.5} />
-        </Pressable>
-        <Text style={styles.appBarTitle}>
-          {isEditMode
-            ? "Edit Invoice"
-            : mode === "sale"
-              ? "Create Invoice"
-              : "Create Purchase"}
-        </Text>
-        <Pressable onPress={() => resetInvoice()} style={styles.appBarAction}>
-          <Settings size={22} color={tokens.mutedForeground} strokeWidth={2} />
-        </Pressable>
-      </View>
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* 1. Invoice Meta Strip */}
-        <InvoiceMetaStrip
-          isEditMode={isEditMode}
-          invoiceId={invoiceId}
-          invoiceDate={invoiceDate}
-          tokens={tokens}
-        />
-
-        {/* 2. Bill To */}
-        <BillToCard
-          selectedClient={selectedClient}
-          onOpenPartySheet={() => setPartySheetVisible(true)}
-          tokens={tokens}
-        />
-
-        {/* 3. Items */}
-        <InvoiceItemsList
-          lineItems={lineItems}
-          subtotal={subtotal}
-          updateQuantity={updateQuantity}
-          removeLineItem={removeLineItem}
-          onAddItems={openAddItems}
-          formatCurrency={formatCurrency}
-          tokens={tokens}
-        />
-
-        {/* 4. Search Bar */}
-        <Pressable style={styles.searchBar} onPress={() => openAddItems()}>
-          <Search size={18} color={tokens.mutedForeground} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search or scan item..."
-            placeholderTextColor={tokens.mutedForeground}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            onFocus={openAddItems}
-          />
-          <Pressable onPress={() => setScannerVisible(true)}>
-            <ScanLine size={20} color={tokens.primary} />
+        <View style={styles.appBar}>
+          <Pressable onPress={handleBack} style={styles.appBarBack}>
+            <ArrowLeft size={24} color={tokens.primary} strokeWidth={2.5} />
           </Pressable>
-        </Pressable>
+          <Text style={styles.appBarTitle}>
+            {isEditMode
+              ? "Edit Invoice"
+              : mode === "sale"
+                ? "Create Invoice"
+                : "Create Purchase"}
+          </Text>
+          <Pressable onPress={() => resetInvoice()} style={styles.appBarAction}>
+            <Settings
+              size={22}
+              color={tokens.mutedForeground}
+              strokeWidth={2}
+            />
+          </Pressable>
+        </View>
 
-        {/* 5, 6, 7. Totals Card (Adjustments, GST, Totals) */}
-        <InvoiceTotalsCard
-          chargeAmt={chargeAmt}
-          discountAmt={discountAmt}
-          roundOffAmt={roundOffAmt}
-          adjustments={adjustments}
-          taxAmount={taxAmount}
-          cgst={cgst}
-          sgst={sgst}
-          finalTotal={finalTotal}
-          amountReceived={amountReceived}
-          balanceDue={balanceDue}
-          onOpenAdjustments={() => setAdjustmentsSheetVisible(true)}
-          formatCurrency={formatCurrency}
-          tokens={tokens}
-        />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* 1. Invoice Meta Strip */}
+          <InvoiceMetaStrip
+            isEditMode={isEditMode}
+            invoiceId={invoiceId}
+            invoiceDate={invoiceDate}
+            tokens={tokens}
+          />
 
+          {/* 2. Bill To */}
+          <BillToCard
+            selectedClient={selectedClient}
+            onOpenPartySheet={() => setPartySheetVisible(true)}
+            tokens={tokens}
+          />
+
+          {/* 3. Items */}
+          <InvoiceItemsList
+            lineItems={lineItems}
+            subtotal={subtotal}
+            updateQuantity={updateQuantity}
+            removeLineItem={removeLineItem}
+            onAddItems={openAddItems}
+            formatCurrency={formatCurrency}
+            tokens={tokens}
+          />
+
+          {/* 4. Search Bar */}
+          <Pressable style={styles.searchBar} onPress={() => openAddItems()}>
+            <Search size={18} color={tokens.mutedForeground} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search or scan item..."
+              placeholderTextColor={tokens.mutedForeground}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onFocus={openAddItems}
+            />
+            <Pressable onPress={() => setScannerVisible(true)}>
+              <ScanLine size={20} color={tokens.primary} />
+            </Pressable>
+          </Pressable>
+
+          {/* 5, 6, 7. Totals Card (Adjustments, GST, Totals) */}
+          <InvoiceTotalsCard
+            chargeAmt={chargeAmt}
+            discountAmt={discountAmt}
+            roundOffAmt={roundOffAmt}
+            adjustments={adjustments}
+            taxAmount={taxAmount}
+            cgst={cgst}
+            sgst={sgst}
+            finalTotal={finalTotal}
+            amountReceived={amountReceived}
+            balanceDue={balanceDue}
+            onOpenAdjustments={() => setAdjustmentsSheetVisible(true)}
+            formatCurrency={formatCurrency}
+            tokens={tokens}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -381,7 +373,7 @@ const createStyles = (tokens: ThemeTokens) =>
       alignItems: "center",
       justifyContent: "space-between",
       paddingHorizontal: 20,
-      height: 60,
+      height: 64,
       backgroundColor: tokens.background,
     },
     appBarBack: {
@@ -413,19 +405,17 @@ const createStyles = (tokens: ThemeTokens) =>
 
     // Card
     card: {
-      backgroundColor: tokens.card,
-      borderRadius: 14,
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: 24,
       padding: 16,
-      borderWidth: 1,
-      borderColor: tokens.border + "20",
-      shadowColor: "#1a1a2e",
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 4,
     },
     cardSectionLabel: {
-      fontSize: 10,
+      fontSize: 11,
       fontWeight: "800",
       color: tokens.mutedForeground,
       letterSpacing: 1.2,
@@ -438,18 +428,20 @@ const createStyles = (tokens: ThemeTokens) =>
     searchBar: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: tokens.muted,
-      borderRadius: 14,
-      paddingHorizontal: 14,
-      paddingVertical: 12,
-      borderWidth: 1,
-      borderColor: tokens.border + "10",
-      gap: 10,
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: 18,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      gap: 12,
+      shadowColor: tokens.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 6,
+      elevation: 2,
     },
     searchIcon: { fontSize: 16, color: tokens.mutedForeground },
     searchInput: { flex: 1, fontSize: 14, color: tokens.foreground },
     scanIcon: { fontSize: 20, color: tokens.primary },
-
   });
 
 export default AddSaleScreen;

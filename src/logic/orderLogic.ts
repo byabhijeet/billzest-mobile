@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
   ordersService,
   OrderWithParty,
@@ -30,6 +30,24 @@ export const useOrders = (search?: string, status?: string) => {
     retry: 1,
     refetchOnReconnect: true,
     refetchOnMount: false,
+  });
+};
+
+export const useInfiniteOrders = (search?: string, status?: string, pageSize = 20) => {
+  const { organizationId } = useOrganization();
+  return useInfiniteQuery<OrderWithParty[]>({
+    queryKey: ['infinite-orders', organizationId, { search, status }],
+    queryFn: ({ pageParam = 0 }) => {
+      const from = (pageParam as number) * pageSize;
+      const to = from + pageSize - 1;
+      return ordersService.listOrders(organizationId!, { search, status, from, to });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.length === pageSize ? allPages.length : undefined;
+    },
+    enabled: !!organizationId,
+    staleTime: 1000 * 60,
   });
 };
 

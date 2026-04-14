@@ -30,6 +30,14 @@ export const lightTokens = {
   sidebarAccentForeground: 'hsl(0, 0%, 10%)',
   sidebarBorder: 'hsl(0, 0%, 91%)',
   sidebarRing: 'hsl(141, 73%, 42%)',
+  white: 'hsl(0, 0%, 100%)',
+  shadowColor: 'rgba(26, 26, 46, 0.1)',
+  surface_container_lowest: 'hsl(0, 0%, 100%)',
+  radiusSm: 8,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusXl: 24,
+  radiusFull: 999,
   radius: 16,
 } as const;
 
@@ -65,6 +73,14 @@ export const darkTokens = {
   sidebarAccentForeground: 'hsl(0, 0%, 95%)',
   sidebarBorder: 'hsl(0, 0%, 15%)',
   sidebarRing: 'hsl(141, 73%, 42%)',
+  white: 'hsl(0, 0%, 100%)',
+  shadowColor: 'rgba(0, 0, 0, 0.5)',
+  surface_container_lowest: 'hsl(0, 0%, 8%)',
+  radiusSm: 8,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusXl: 24,
+  radiusFull: 999,
   radius: 16,
 } as const;
 

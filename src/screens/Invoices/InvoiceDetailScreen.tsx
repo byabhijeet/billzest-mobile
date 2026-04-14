@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import type { NavigationProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import DetailHeader from '../../components/DetailHeader';
@@ -32,7 +32,7 @@ import {
 import { pdfService } from '../../services/pdfService';
 import StatusBadge from '../../components/ui/StatusBadge';
 import { Send, CheckCircle, ArrowRight } from 'lucide-react-native';
-import type { AppNavigationParamList } from '../../navigation/types';
+import type { InvoicesStackParamList } from '../../navigation/types';
 
 const formatCurrency = (value: number) =>
   `₹${(value ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -48,14 +48,7 @@ type InvoiceSummary = {
   total_amount: number;
 };
 
-type InvoiceDetailRoute = RouteProp<
-  {
-    InvoiceDetail: {
-      invoice?: InvoiceSummary;
-    };
-  },
-  'InvoiceDetail'
->;
+type InvoiceDetailRoute = RouteProp<InvoicesStackParamList, 'InvoiceDetail'>;
 
 const EMPTY_INVOICE: InvoiceSummary = {
   id: '',
@@ -112,7 +105,7 @@ const getStatusBadgeType = (
 const InvoiceDetailScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
-  const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<InvoicesStackParamList>>();
   const route = useRoute<InvoiceDetailRoute>();
   const routeInvoice = route.params?.invoice ?? EMPTY_INVOICE;
 
@@ -591,11 +584,14 @@ const createStyles = (tokens: ThemeTokens) =>
     // Card, table and footer styles are now owned by BillingPreview
     sectionCard: {
       borderRadius: 20,
-      borderWidth: 1,
-      borderColor: tokens.border,
       backgroundColor: tokens.card,
       padding: 18,
       marginBottom: 16,
+      shadowColor: tokens.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
     },
     sectionHeader: {
       flexDirection: 'row',
@@ -636,11 +632,14 @@ const createStyles = (tokens: ThemeTokens) =>
       flexDirection: 'row',
       alignItems: 'center',
       borderRadius: 16,
-      borderWidth: 1,
-      borderColor: tokens.border,
       padding: 14,
       marginTop: 8,
       backgroundColor: tokens.background,
+      shadowColor: tokens.shadowColor,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.03,
+      shadowRadius: 2,
+      elevation: 1,
     },
     paymentCopy: {
       flex: 1,
@@ -670,7 +669,7 @@ const createStyles = (tokens: ThemeTokens) =>
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 999,
-      borderWidth: 1,
+      backgroundColor: tokens.muted,
       paddingHorizontal: 18,
       paddingVertical: 10,
       marginTop: 12,
@@ -703,11 +702,9 @@ const createStyles = (tokens: ThemeTokens) =>
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 12,
-      borderWidth: 1,
-      borderColor: tokens.border,
       paddingHorizontal: 16,
       paddingVertical: 12,
-      backgroundColor: tokens.card,
+      backgroundColor: tokens.muted,
       gap: 8,
     },
     statusButtonPrimary: {

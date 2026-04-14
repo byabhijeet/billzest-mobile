@@ -119,15 +119,13 @@ const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
     // Adjustments
     adjustmentsCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 14,
-      borderWidth: 1,
-      borderColor: tokens.border + "20",
-      shadowColor: "#1a1a2e",
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: 24,
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 4,
       overflow: "hidden",
     },
     adjustmentRow: {
@@ -154,8 +152,6 @@ const createStyles = (tokens: ThemeTokens) =>
       paddingVertical: 5,
       borderRadius: 999,
       backgroundColor: tokens.primary + "10",
-      borderWidth: 1,
-      borderColor: tokens.primary + "25",
     },
     gstPillLabel: {
       fontSize: 10,
@@ -167,18 +163,14 @@ const createStyles = (tokens: ThemeTokens) =>
 
     // Total Card
     totalCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 14,
-      padding: 18,
-      borderWidth: 1,
-      borderColor: tokens.border + "20",
-      borderLeftWidth: 4,
-      borderLeftColor: tokens.primary,
-      shadowColor: "#1a1a2e",
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: 24,
+      padding: 20,
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 4,
       gap: 12,
     },
     totalTopRow: {

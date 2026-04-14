@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { NavigationProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import InvoiceCard from '../../components/InvoiceCard';
@@ -22,7 +22,8 @@ import ScreenWrapper from '../../components/ScreenWrapper';
 import FAB from '../../components/ui/FAB';
 import EmptyState from '../../components/EmptyState';
 import InvoiceListSkeleton from '../../components/skeletons/InvoiceListSkeleton';
-import { useOrders } from '../../logic/orderLogic';
+import { useInfiniteOrders } from '../../logic/orderLogic';
+import type { Order } from '../../types/domain';
 import InvoiceFilterSheet, {
   InvoiceFilters,
 } from '../../components/modals/InvoiceFilterSheet';
@@ -39,7 +40,7 @@ import {
   Plus,
   FileText,
 } from 'lucide-react-native';
-import type { AppNavigationParamList } from '../../navigation/types';
+import type { InvoicesStackParamList } from '../../navigation/types';
 
 const STATUS_FILTERS = ['All', 'Paid', 'Sent', 'Overdue', 'Draft'];
 const INVOICES_PAGE_SIZE = 20;
@@ -47,26 +48,32 @@ const INVOICES_PAGE_SIZE = 20;
 const InvoicesListScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
   const styles = useMemo(() => createStyles(tokens), [tokens]);
-  const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<InvoicesStackParamList>>();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState(STATUS_FILTERS[0]);
   const [isFilterSheetVisible, setFilterSheetVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<InvoiceFilters>({});
-  const [visibleCount, setVisibleCount] = useState(INVOICES_PAGE_SIZE);
   const { simplifiedPOSEnabled } = useAppSettingsStore();
   const {
-    data: invoices = [],
+    data,
     isLoading,
     isRefetching,
     error,
     refetch,
-  } = useOrders(searchTerm, selectedStatus);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteOrders(searchTerm, selectedStatus, INVOICES_PAGE_SIZE);
+
+  const invoices = useMemo(() => {
+    return data?.pages.flatMap(page => page) ?? [];
+  }, [data]);
 
   const kpis = useMemo(() => {
-    const paid = invoices
+    const paid = (invoices as Order[])
       .filter(inv => inv.status === 'paid')
       .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
-    const pending = invoices
+    const pending = (invoices as Order[])
       .filter(inv => inv.status !== 'paid')
       .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
     return [
@@ -80,24 +87,11 @@ const InvoicesListScreen: React.FC = () => {
     ];
   }, [invoices]);
 
-  useEffect(() => {
-    setVisibleCount(INVOICES_PAGE_SIZE);
-  }, [searchTerm, selectedStatus, invoices.length]);
-
-  const visibleInvoices = useMemo(
-    () => invoices.slice(0, visibleCount),
-    [invoices, visibleCount],
-  );
-
-  const hasMoreInvoices = visibleCount < invoices.length;
-
   const handleLoadMore = useCallback(() => {
-    if (isLoading || isRefetching || !hasMoreInvoices) {
-      return;
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-
-    setVisibleCount(current => Math.min(current + INVOICES_PAGE_SIZE, invoices.length));
-  }, [hasMoreInvoices, invoices.length, isLoading, isRefetching]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const handleShareInvoice = useCallback(async (orderId: string) => {
     try {
@@ -148,9 +142,9 @@ const InvoicesListScreen: React.FC = () => {
       switch (id) {
         case 'create':
           if (simplifiedPOSEnabled) {
-            navigation.navigate('SimplifiedPOS');
+            navigation.navigate('SimplifiedPOS' as any);
           } else {
-            navigation.navigate('AddSale');
+            navigation.navigate('AddSale' as any, { initialMode: 'sale' });
           }
           break;
         case 'share':
@@ -204,7 +198,7 @@ const InvoicesListScreen: React.FC = () => {
             tintColor={tokens.primary}
           />
         }
-        data={visibleInvoices}
+        data={invoices}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={
           <>
@@ -325,8 +319,8 @@ const InvoicesListScreen: React.FC = () => {
               actionLabel="New Invoice"
               onAction={() =>
                 simplifiedPOSEnabled
-                  ? navigation.navigate('SimplifiedPOS')
-                  : navigation.navigate('AddSale')
+                  ? navigation.navigate('SimplifiedPOS' as any)
+                  : navigation.navigate('AddSale' as any, { initialMode: 'sale' })
               }
             />
           ) : null
@@ -359,7 +353,7 @@ const InvoicesListScreen: React.FC = () => {
         onEndReachedThreshold={0.3}
         ListFooterComponent={
           <View style={styles.footerSpacer}>
-            {hasMoreInvoices ? (
+            {isFetchingNextPage ? (
               <ActivityIndicator color={tokens.primary} size="small" />
             ) : null}
           </View>
@@ -378,8 +372,8 @@ const InvoicesListScreen: React.FC = () => {
         icon={<Plus color="#fff" size={24} />}
         onPress={() =>
           simplifiedPOSEnabled
-            ? navigation.navigate('SimplifiedPOS')
-            : navigation.navigate('AddSale')
+            ? navigation.navigate('SimplifiedPOS' as any)
+            : navigation.navigate('AddSale' as any, { initialMode: 'sale' })
         }
         accessibilityLabel="Create new invoice"
       />
@@ -406,9 +400,12 @@ const createStyles = (tokens: ThemeTokens) =>
       backgroundColor: tokens.card,
       borderRadius: 16,
       padding: 12,
-      borderWidth: 1,
-      borderColor: tokens.border,
       marginHorizontal: 6,
+      shadowColor: tokens.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
     },
     summaryLabel: {
       color: tokens.mutedForeground,
@@ -423,12 +420,15 @@ const createStyles = (tokens: ThemeTokens) =>
       backgroundColor: tokens.card,
       borderRadius: 20,
       padding: 18,
-      borderWidth: 1,
-      borderColor: tokens.border,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: 18,
+      shadowColor: tokens.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
     },
     heroContent: {
       flex: 1,
@@ -468,20 +468,21 @@ const createStyles = (tokens: ThemeTokens) =>
       borderRadius: 14,
       paddingHorizontal: 16,
       paddingVertical: 12,
-      borderWidth: 1,
-      borderColor: tokens.border,
       color: tokens.foreground,
     },
     roundedIconButton: {
       width: 60,
       height: 52,
       borderRadius: 14,
-      borderWidth: 1,
-      borderColor: tokens.border,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: tokens.card,
       marginLeft: 6,
+      shadowColor: tokens.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
     },
     roundedIconButtonActive: {
       borderColor: tokens.primary,
@@ -501,8 +502,7 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     filterChip: {
       borderRadius: 999,
-      borderWidth: 1,
-      borderColor: tokens.border,
+      backgroundColor: tokens.muted,
       paddingHorizontal: 16,
       paddingVertical: 8,
       marginRight: 10,
