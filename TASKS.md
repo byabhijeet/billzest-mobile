@@ -216,3 +216,51 @@ Only after both pass, mark `[x]` and ask for review.
 
 ### `src/screens/Billing/BillingScreen.tsx`
 - [x] **Task 89** (Audit UX 3.3): Move `BillingScreen` entrypoints behind an "Advanced Billing" affordance and remove it from primary quick flows to avoid duplicate billing paradigms in day-to-day cashier operation. locked-by: codex-session | 2026-04-15 01:07:10 +05:30
+
+---
+
+## 🟥 High Priority (Products Audit)
+
+### `src/screens/Products/ProductFormScreen.tsx`
+- [ ] **Task 90** (Audit 2.1): Fix `category_id` wiring (L154–175, L242–262). Change form state to store `category_id` (UUID) instead of category name string. Update payload to send actual `category_id` from selected category instead of `null`.
+- [ ] **Task 91** (Audit 2.2): Add category dropdown selector (L367–373). Replace free-text category input with dropdown populated from `categoriesService.getCategories()` showing category names but storing IDs.
+
+### `src/screens/Products/CategoriesListScreen.tsx`
+- [ ] **Task 92** (Audit 1.2): Fix hardcoded product count (L133–135). Replace `{${0} products}` with actual product count query. Either join with products table or add computed count field to category query.
+
+### `src/supabase/productsService.ts`
+- [ ] **Task 93** (Audit 2.3): Add category join to `getProducts()` (L38–53). Update query to `.select('*, categories(*)')` so `product.category` is populated. Update `mapProductRow` to map category relation properly.
+
+---
+
+## 🟧 Medium Priority (Products Audit)
+
+### `src/screens/Products/ProductStockAdjustScreen.tsx`
+- [ ] **Task 94** (Audit 4.1): Enable stock adjustment screen. Uncomment and wire the commented UI (L73–152) to backend. Use `inventoryService` pattern from web: call `supabase.from('stock_ledger').insert()` with `movement_type: 'ADJUSTMENT'` and sync `products.stock_quantity`.
+
+### `src/screens/Products/ProductsListScreen.tsx`
+- [ ] **Task 95** (Audit 5.1): Add pagination support (L66–72). Replace `getProducts()` that loads all products with paginated query using `.range(from, to)`. Add `onEndReached` to FlatList for infinite scroll.
+
+### `src/logic/productLogic.ts`
+- [ ] **Task 96** (Audit 3.1): Add real-time sync subscription. Add `useEffect` with `supabase.channel('products-realtime')` subscribing to `postgres_changes` on products table, invalidating `['products', orgId]` query cache on changes (same pattern as web `useProducts.ts:232–257`).
+- [ ] **Task 97** (Audit 3.2): Add inventory stats hook. Create `useInventoryStats()` hook returning `{ totalProducts, totalInventory, purchaseValue, saleValue, potentialProfit, profitMargin, lowStockCount, outOfStockCount }` computed from products query.
+
+### `src/screens/Products/StockSummaryScreen.tsx`
+- [ ] **Task 98** (Audit 5.2): Wire up filter handlers. Connect the "Show stock as on Date" Switch (L148–157), Filter pill (L159–162), and Header Export buttons (L122–143) to actual implementations or hide if not available.
+
+### Design System - Borders
+- [ ] **Task 99** (Audit 1.1): Remove hardcoded borders from Products screens. Eliminate `borderWidth: 1` usage in `ProductsListScreen.tsx` (L427–432, L476–484), `ProductFormScreen.tsx` (L586–588), `ProductCard.tsx` (L184–185), `StockSummaryScreen.tsx` (L369), `CategoriesListScreen.tsx` (L217–219, L275), `CategoryFormSheet.tsx` (L193–201, L215–223). Replace with tonal surface backgrounds per Stitch "No-Line Rule".
+
+---
+
+## 🟨 Low Priority (Products Audit)
+
+### `src/screens/Products/ProductDetailScreen.tsx`
+- [ ] **Task 100** (Audit 4.2): Add batch tracking panel. Create tab or section showing batch numbers, quantities, mfg/expiry dates from `batches` table (leverage web `BatchTrackingPanel` component pattern).
+
+### `src/screens/Products/ProductFormScreen.tsx`
+- [ ] **Task 101** (Audit 4.3): Add product variants support. Extend form to support size/color variants with separate SKUs and prices (similar to web `product_variants` table structure).
+- [ ] **Task 102** (Audit 4.4): Add image upload functionality. Integrate `expo-image-picker` for product images, upload to Supabase storage, store `image_url` in product record.
+
+### `src/screens/Inventory/BarcodeGeneratorScreen.tsx`
+- [ ] **Task 103** (Audit UX): Add barcode format options. Add settings for barcode type (CODE128, EAN, UPC) and label size presets in label settings section (L261–286).
