@@ -31,6 +31,8 @@ import { useInvoiceFlow } from "./hooks/useInvoiceFlow";
 import InvoiceItemsList from "./components/InvoiceItemsList";
 import InvoiceMetaStrip from "./components/InvoiceMetaStrip";
 import BillToCard from "./components/BillToCard";
+import InvoiceTotalsCard from "./components/InvoiceTotalsCard";
+import InvoiceBottomBar from "./components/InvoiceBottomBar";
 import Button from "../../components/ui/Button";
 import {
   ArrowLeft,
@@ -44,9 +46,6 @@ import {
   Minus,
   Search,
   ScanLine,
-  ChevronRight,
-  Inbox,
-  Receipt,
 } from "lucide-react-native";
 
 type Mode = "sale" | "purchase";
@@ -293,121 +292,34 @@ const AddSaleScreen = () => {
           </Pressable>
         </Pressable>
 
-        {/* 5. Adjustments Card */}
-        <View style={styles.adjustmentsCard}>
-          <Pressable
-            style={styles.adjustmentRow}
-            onPress={() => setAdjustmentsSheetVisible(true)}
-          >
-            <Text style={styles.adjustmentLabel}>
-              {chargeAmt > 0
-                ? `+ Additional Charges (${formatCurrency(chargeAmt)})`
-                : "+ Additional Charges"}
-            </Text>
-            <ChevronRight size={20} color={tokens.mutedForeground} />
-          </Pressable>
-          <View style={styles.adjustmentDivider} />
-          <Pressable
-            style={styles.adjustmentRow}
-            onPress={() => setAdjustmentsSheetVisible(true)}
-          >
-            <Text style={styles.adjustmentLabel}>
-              {discountAmt > 0
-                ? `+ Discount (−${formatCurrency(discountAmt)})`
-                : "+ Discount"}
-            </Text>
-            <ChevronRight size={20} color={tokens.mutedForeground} />
-          </Pressable>
-          <View style={styles.adjustmentDivider} />
-          <Pressable
-            style={styles.adjustmentRow}
-            onPress={() => setAdjustmentsSheetVisible(true)}
-          >
-            <Text style={styles.adjustmentLabel}>
-              {adjustments.roundOff
-                ? `+ Round Off (${roundOffAmt >= 0 ? "+" : ""}${formatCurrency(roundOffAmt)})`
-                : "+ Round Off"}
-            </Text>
-            <ChevronRight size={20} color={tokens.mutedForeground} />
-          </Pressable>
-        </View>
-
-        {/* 6. GST Pills */}
-        {taxAmount > 0 && (
-          <View style={styles.gstStrip}>
-            <View style={styles.gstPill}>
-              <Text style={styles.gstPillLabel}>CGST 9%</Text>
-              <Text style={styles.gstPillValue}>{formatCurrency(cgst)}</Text>
-            </View>
-            <View style={styles.gstPill}>
-              <Text style={styles.gstPillLabel}>SGST 9%</Text>
-              <Text style={styles.gstPillValue}>{formatCurrency(sgst)}</Text>
-            </View>
-          </View>
-        )}
-
-        {/* 7. Totals Card */}
-        <View style={styles.totalCard}>
-          <View style={styles.totalTopRow}>
-            <Text style={styles.totalAmountLabel}>Total Amount</Text>
-            <Text style={styles.totalAmountValue}>
-              {formatCurrency(finalTotal)}
-            </Text>
-          </View>
-          <View style={styles.totalDivider} />
-          <Pressable
-            style={styles.totalRow}
-            onPress={() =>
-              Alert.alert("Record Payment", "Enter amount received.")
-            }
-          >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
-            >
-              <PlusCircle size={14} color={tokens.primary} />
-              <Text style={styles.amountReceivedLink}>Amount Received</Text>
-            </View>
-            <Text style={styles.amountReceivedValue}>
-              {formatCurrency(amountReceived)}
-            </Text>
-          </Pressable>
-          <View style={styles.totalRow}>
-            <Text style={styles.balanceDueLabel}>Balance Due</Text>
-            <Text style={styles.balanceDueValue}>
-              {formatCurrency(balanceDue)}
-            </Text>
-          </View>
-        </View>
+        {/* 5, 6, 7. Totals Card (Adjustments, GST, Totals) */}
+        <InvoiceTotalsCard
+          chargeAmt={chargeAmt}
+          discountAmt={discountAmt}
+          roundOffAmt={roundOffAmt}
+          adjustments={adjustments}
+          taxAmount={taxAmount}
+          cgst={cgst}
+          sgst={sgst}
+          finalTotal={finalTotal}
+          amountReceived={amountReceived}
+          balanceDue={balanceDue}
+          onOpenAdjustments={() => setAdjustmentsSheetVisible(true)}
+          formatCurrency={formatCurrency}
+          tokens={tokens}
+        />
 
         </ScrollView>
       </KeyboardAvoidingView>
 
       {/* 8. Bottom CTA Bar */}
-      <View style={styles.bottomBar}>
-        <View style={styles.bottomBarInner}>
-          <Pressable style={styles.draftButton} onPress={handleBack}>
-            <Inbox size={18} color={tokens.primary} />
-            <Text style={styles.draftText}>Save Draft</Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.generateButton,
-              isSubmitting && { opacity: 0.7 },
-            ]}
-            onPress={submitInvoice}
-            disabled={isSubmitting}
-          >
-            <Receipt size={18} color="#fff" />
-            <Text style={styles.generateText}>
-              {isSubmitting
-                ? "Saving…"
-                : isEditMode
-                  ? "Update Bill"
-                  : "Generate Bill"}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
+      <InvoiceBottomBar
+        onDraft={handleBack}
+        onGenerate={submitInvoice}
+        isSubmitting={isSubmitting}
+        isEditMode={isEditMode}
+        tokens={tokens}
+      />
 
       {/* Sheets & Modals */}
       <SelectPartyBottomSheet
@@ -548,164 +460,6 @@ const createStyles = (tokens: ThemeTokens) =>
     searchInput: { flex: 1, fontSize: 14, color: tokens.foreground },
     scanIcon: { fontSize: 20, color: tokens.primary },
 
-    // Adjustments
-    adjustmentsCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 14,
-      borderWidth: 1,
-      borderColor: tokens.border + "20",
-      shadowColor: "#1a1a2e",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
-      overflow: "hidden",
-    },
-    adjustmentRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 16,
-      paddingVertical: 14,
-    },
-    adjustmentLabel: {
-      fontSize: 13,
-      fontWeight: "500",
-      color: tokens.mutedForeground,
-    },
-    adjustmentChevron: {
-      fontSize: 20,
-      color: tokens.mutedForeground,
-      fontWeight: "300",
-    },
-    adjustmentDivider: { height: 1, backgroundColor: tokens.border + "10" },
-
-    // GST Pills
-    gstStrip: { flexDirection: "row", gap: 8, paddingHorizontal: 4 },
-    gstPill: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      paddingHorizontal: 12,
-      paddingVertical: 5,
-      borderRadius: 999,
-      backgroundColor: tokens.primary + "10",
-      borderWidth: 1,
-      borderColor: tokens.primary + "25",
-    },
-    gstPillLabel: {
-      fontSize: 10,
-      fontWeight: "700",
-      color: tokens.primary,
-      letterSpacing: 0.5,
-    },
-    gstPillValue: { fontSize: 11, fontWeight: "800", color: tokens.foreground },
-
-    // Total Card
-    totalCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 14,
-      padding: 18,
-      borderWidth: 1,
-      borderColor: tokens.border + "20",
-      borderLeftWidth: 4,
-      borderLeftColor: tokens.primary,
-      shadowColor: "#1a1a2e",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.06,
-      shadowRadius: 12,
-      elevation: 3,
-      gap: 12,
-    },
-    totalTopRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-end",
-    },
-    totalAmountLabel: {
-      fontSize: 14,
-      color: tokens.mutedForeground,
-      fontWeight: "500",
-    },
-    totalAmountValue: {
-      fontSize: 26,
-      fontWeight: "900",
-      color: tokens.primary,
-    },
-    totalDivider: { height: 1, backgroundColor: tokens.border + "18" },
-    totalRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    amountReceivedLink: {
-      fontSize: 13,
-      fontWeight: "700",
-      color: tokens.primary,
-    },
-    amountReceivedValue: {
-      fontSize: 14,
-      fontWeight: "700",
-      color: tokens.foreground,
-    },
-    balanceDueLabel: { fontSize: 13, color: tokens.mutedForeground },
-    balanceDueValue: {
-      fontSize: 15,
-      fontWeight: "900",
-      color: tokens.destructive,
-    },
-
-    // Bottom Bar
-    bottomBar: {
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      backgroundColor: tokens.card + "E0",
-      borderTopWidth: 1,
-      borderTopColor: tokens.border + "20",
-      paddingBottom: 28,
-    },
-    bottomBarInner: {
-      flexDirection: "row",
-      gap: 12,
-      paddingHorizontal: 16,
-      paddingTop: 12,
-    },
-    draftButton: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8,
-      borderWidth: 1.5,
-      borderColor: tokens.primary + "40",
-      borderRadius: 14,
-      paddingVertical: 14,
-    },
-    draftIcon: { fontSize: 18, color: tokens.primary },
-    draftText: { fontSize: 14, fontWeight: "600", color: tokens.primary },
-    generateButton: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8,
-      backgroundColor: tokens.primary,
-      borderRadius: 14,
-      paddingVertical: 14,
-      shadowColor: tokens.primary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
-      elevation: 6,
-    },
-    generateIcon: { fontSize: 18, color: tokens.primaryForeground },
-    generateText: {
-      fontSize: 14,
-      fontWeight: "700",
-      color: tokens.primaryForeground,
-    },
   });
 
 export default AddSaleScreen;

@@ -41,7 +41,7 @@
 
 ### `src/screens/Invoices/AddSaleScreen.tsx`
 - [x] **Task 11** (Audit 6.2): Wrap the root `<View>` in `<KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>`. Import `KeyboardAvoidingView` and `Platform`.
-- [ ] **Task 12** (Audit 10.8): Final assembly. Convert `AddSaleScreen` to a ~200 line shell that wires up the `useInvoiceFlow` hook and renders the newly extracted components. *(Note: Do this after minor components are extracted)*
+- [x] **Task 12** (Audit 10.8): Final assembly. Convert `AddSaleScreen` to a ~200 line shell that wires up the `useInvoiceFlow` hook and renders the newly extracted components. *(Note: Do this after minor components are extracted)*
 
 ### `src/screens/Invoices/components/InvoiceItemsList.tsx`
 - [x] **Task 13** (Audit 10.5): Create new component. Extract the items card (L574–L654 original) into its own component. Props: `lineItems`, `updateQuantity`, `removeLineItem`, `onAddItems`, `formatCurrency`, `tokens`.
@@ -92,8 +92,8 @@
 ### Components Extraction
 - [x] **Task 35** (Audit 10.3) - `src/screens/Invoices/components/InvoiceMetaStrip.tsx`: Extract the meta strip JSX (L492–L510 original) into its own component. Props: `isEditMode`, `invoiceId`, `invoiceDate`.
 - [x] **Task 36** (Audit 10.4) - `src/screens/Invoices/components/BillToCard.tsx`: Extract the "Bill To" card (L512–L572 original). Props: `selectedClient`, `onOpenPartySheet`, `tokens`.
-- [ ] **Task 37** (Audit 10.6) - `src/screens/Invoices/components/InvoiceTotalsCard.tsx`: Extract totals card + GST pills + Adjustments card. Props: computed values from store.
-- [ ] **Task 38** (Audit 10.7) - `src/screens/Invoices/components/InvoiceBottomBar.tsx`: Extract the bottom CTA bar. Props: `onDraft`, `onGenerate`, `isSubmitting`, `isEditMode`, `mode`.
+- [x] **Task 37** (Audit 10.6) - `src/screens/Invoices/components/InvoiceTotalsCard.tsx`: Extract totals card + GST pills + Adjustments card. Props: computed values from store.
+- [x] **Task 38** (Audit 10.7) - `src/screens/Invoices/components/InvoiceBottomBar.tsx`: Extract the bottom CTA bar. Props: `onDraft`, `onGenerate`, `isSubmitting`, `isEditMode`, `mode`.
 
 ### Other Miscellaneous
 - [ ] **Task 39** (Audit 11.1) - `src/utils/testSupabaseConnection.ts`: Gate all `console.log` calls behind `if (__DEV__)` or delete the file if it's not imported anywhere.
