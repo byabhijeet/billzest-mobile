@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -28,7 +28,8 @@ import { useClientMutations } from '../../logic/partyLogic';
 import { partiesService } from '../../supabase/partiesService';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { Party } from '../../types/domain';
-import { CommonActions } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CustomersStackParamList } from '../../navigation/types';
 
 type PartyFormState = {
   businessName: string;
@@ -38,24 +39,28 @@ type PartyFormState = {
 };
 
 type CustomerFormRoute = RouteProp<
-  { CustomerForm: { intent?: 'sale' | 'purchase' } },
+  CustomersStackParamList,
   'CustomerForm'
 >;
 
 const CustomerFormScreen = () => {
   const { tokens } = useThemeTokens();
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
-  const navigation = useNavigation<any>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<CustomersStackParamList>>();
   const route = useRoute<CustomerFormRoute>();
-  const { createClient } = useClientMutations();
+  const { createClient, updateClient } = useClientMutations();
   const { organizationId } = useOrganization();
+  const customerId = route.params?.customerId;
+  const isEditMode = !!customerId;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(isEditMode);
   const [formState, setFormState] = useState<PartyFormState>({
     businessName: '',
     contactPerson: '',
     phone: '',
-    type: route.params?.intent === 'purchase' ? 'vendor' : 'customer',
+    type: 'customer',
   });
 
   const handleChange = (field: keyof PartyFormState, value: string) => {
@@ -100,8 +105,59 @@ const CustomerFormScreen = () => {
     };
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCustomer = async () => {
+      if (!customerId) {
+        setIsLoadingCustomer(false);
+        return;
+      }
+
+      try {
+        const customer = await partiesService.getPartyById(customerId);
+        if (!isMounted) return;
+
+        if (!customer) {
+          Alert.alert('Not found', 'Customer record could not be loaded.');
+          navigation.goBack();
+          return;
+        }
+
+        setFormState(prev => ({
+          ...prev,
+          businessName: customer.name ?? '',
+          contactPerson: '',
+          phone: customer.mobile ?? customer.phone ?? '',
+          type: customer.type === 'vendor' ? 'vendor' : 'customer',
+        }));
+      } catch (error) {
+        if (!isMounted) return;
+        const message =
+          error instanceof Error ? error.message : 'Unable to load customer.';
+        Alert.alert('Load failed', message);
+        navigation.goBack();
+      } finally {
+        if (isMounted) setIsLoadingCustomer(false);
+      }
+    };
+
+    loadCustomer();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [customerId, navigation]);
+
   const handleSave = async () => {
-    if (isSubmitting || createClient.isPending) return;
+    if (
+      isSubmitting ||
+      isLoadingCustomer ||
+      createClient.isPending ||
+      updateClient.isPending
+    ) {
+      return;
+    }
 
     const validation = validateForm();
     if (!validation.isValid) {
@@ -119,7 +175,7 @@ const CustomerFormScreen = () => {
         organizationId!,
         phoneNormalized,
       );
-      if (existing) {
+      if (existing && existing.id !== customerId) {
         Alert.alert(
           'Duplicate party',
           'A party with this phone already exists.',
@@ -143,9 +199,16 @@ const CustomerFormScreen = () => {
         notes: null,
       };
 
-      await createClient.mutateAsync(payload as any); // Using mutateAsync from hook
+      if (isEditMode && customerId) {
+        await updateClient.mutateAsync({
+          id: customerId,
+          updates: payload,
+        });
+      } else {
+        await createClient.mutateAsync(payload as any); // Using mutateAsync from hook
+      }
 
-      Alert.alert('Success', 'Party created successfully', [
+      Alert.alert('Success', `Party ${isEditMode ? 'updated' : 'created'} successfully`, [
         {
           text: 'OK',
           onPress: () => {
@@ -162,9 +225,9 @@ const CustomerFormScreen = () => {
     }
   };
 
-  const headerTitle = `New ${
-    formState.type === 'customer' ? 'Customer' : 'Supplier'
-  }`;
+  const headerTitle = isEditMode
+    ? `Edit ${formState.type === 'customer' ? 'Customer' : 'Supplier'}`
+    : `New ${formState.type === 'customer' ? 'Customer' : 'Supplier'}`;
 
   return (
     <ScreenWrapper>
