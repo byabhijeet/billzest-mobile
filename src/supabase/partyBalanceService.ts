@@ -45,61 +45,71 @@ export const partyBalanceService = {
     orgId: string,
     partyId: string,
   ): Promise<CustomerFinancialSummary> {
-    // Fetch orders for this party
-    const { data: orders, error: ordersError } = await supabase
-      .from('orders')
-      .select('id, total_amount, created_at')
-      .eq('organization_id', orgId)
-      .eq('party_id', partyId)
-      .eq('is_cancelled', false);
+    // Fetch orders and credit transactions for this party in parallel
+    const [ordersResult, creditResult] = await Promise.all([
+      supabase
+        .from('orders')
+        .select('id, total_amount, created_at')
+        .eq('organization_id', orgId)
+        .eq('party_id', partyId)
+        .eq('is_cancelled', false),
+      supabase
+        .from('credit_transactions')
+        .select('amount, type')
+        .eq('organization_id', orgId)
+        .eq('party_id', partyId),
+    ]);
 
-    if (ordersError) {
-      logger.error('[PartyBalance] Failed to fetch orders', ordersError);
+    if (ordersResult.error) {
+      logger.error('[PartyBalance] Failed to fetch orders', ordersResult.error);
       throw toAppError(
         'partyBalance.orders',
-        ordersError,
+        ordersResult.error,
         'Unable to load party orders.',
       );
     }
-
-    const orderRows = orders ?? [];
-
-    if (orderRows.length === 0) {
-      return {
-        totalBilled: 0,
-        totalPaid: 0,
-        outstanding: 0,
-        orderCount: 0,
-        lastOrderDate: null,
-      };
+    
+    if (creditResult.error) {
+      logger.error('[PartyBalance] Failed to fetch credit transactions', creditResult.error);
+      // Non-fatal, just log it. We won't block the summary if only manual credits fail to load.
     }
+
+    const orderRows = (ordersResult.data ?? []) as { id: string; total_amount: number; created_at: string }[];
+    const creditRows = (creditResult.data ?? []) as { amount: number; type: string }[];
 
     const orderIds = orderRows.map(r => r.id);
+    let paymentRows: { amount: number; order_id: string }[] = [];
 
-    // Fetch payments for these orders
-    const { data: payments, error: paymentsError } = await supabase
-      .from('payments')
-      .select('amount, order_id')
-      .eq('organization_id', orgId)
-      .in('order_id', orderIds);
+    // Fetch payments for these orders if there are any
+    if (orderIds.length > 0) {
+      const { data: payments, error: paymentsError } = await supabase
+        .from('payments')
+        .select('amount, order_id')
+        .eq('organization_id', orgId)
+        .in('order_id', orderIds);
 
-    if (paymentsError) {
-      logger.error('[PartyBalance] Failed to fetch payments', paymentsError);
-      throw toAppError(
-        'partyBalance.payments',
-        paymentsError,
-        'Unable to load party payments.',
-      );
+      if (paymentsError) {
+        logger.error('[PartyBalance] Failed to fetch payments', paymentsError);
+        throw toAppError(
+          'partyBalance.payments',
+          paymentsError,
+          'Unable to load party payments.',
+        );
+      }
+      paymentRows = (payments ?? []) as { amount: number; order_id: string }[];
     }
 
-    const totalBilled = orderRows.reduce(
-      (sum, r) => sum + (r.total_amount ?? 0),
-      0,
-    );
-    const totalPaid = (payments ?? []).reduce(
-      (sum, r) => sum + (r.amount ?? 0),
-      0,
-    );
+    let totalBilled = orderRows.reduce((sum, r) => sum + (r.total_amount ?? 0), 0);
+    let totalPaid = paymentRows.reduce((sum, r) => sum + (r.amount ?? 0), 0);
+
+    // Fold manual credit transactions into totals
+    for (const credit of creditRows) {
+      if (credit.type === 'given') {
+        totalBilled += (credit.amount ?? 0);
+      } else if (credit.type === 'received') {
+        totalPaid += (credit.amount ?? 0);
+      }
+    }
 
     const lastOrderDate =
       orderRows

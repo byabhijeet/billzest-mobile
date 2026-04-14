@@ -93,7 +93,7 @@ Only after both pass, mark `[x]` and ask for review.
 - [ ] **Task 60** (Audit 2.1): `src/logic/partyLogic.ts` implement missing customer helper hooks such as `useCustomerDetail`, `calculateCustomerBalance`, and `recordCustomerPayment` to support customer/party flows consistently.
 - [ ] **Task 61** (Audit 2.2): `src/supabase/partiesService.ts` ensure offline party create/update/delete operations update local cache state and support temp IDs in addition to queueing the mutation.
 - [ ] **Task 62** (Audit 2.3): `src/hooks/useParties.ts` fix party mutation invalidation so `queryClient.invalidateQueries` refreshes the filtered `['parties', orgId, 'customers']` and `['parties', orgId, 'suppliers']` query caches.
-- [ ] **Task 63** (Audit 2.4): `src/supabase/partyBalanceService.ts` extend `getCustomerFinancialSummary` to include `credit_transactions` data so outstanding balance matches the party ledger.
+- [x] **Task 63** (Audit 2.4): `src/supabase/partyBalanceService.ts` extend `getCustomerFinancialSummary` to include `credit_transactions` data so outstanding balance matches the party ledger.
 - [ ] **Task 64** (Audit 2.5): `src/offline/syncEngine.ts` add `credit_transaction` processing support to `processQueue` so manual payment/credit mutations can sync when connectivity returns.
 
 ### `src/screens/Invoices/InvoicesListScreen.tsx`
