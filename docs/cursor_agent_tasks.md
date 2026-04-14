@@ -71,7 +71,7 @@
 - [ ] **Task 15** (Audit 9.4): Replace `useRoute<any>()` with typed `useRoute<RouteProp<XxxParamList, 'ScreenName'>>()` across all screens.
 
 ### `src/screens/Products/StockSummaryScreen.tsx`
-- [ ] **Task 50** (Audit): Address dead handlers in the UI. Wire up the "Show stock as on Date" Switch (`onValueChange`), the Filter pill (`onPress`), and the Header Export buttons so they trigger functional flows instead of empty functions or placeholders.
+- [/] **Task 50** (Audit): Address dead handlers in the UI. Wire up the "Show stock as on Date" Switch (`onValueChange`), the Filter pill (`onPress`), and the Header Export buttons so they trigger functional flows instead of empty functions or placeholders.
 
 ### `src/navigation/` & Routing Refactoring
 - [ ] **Task 51** (Audit): Eliminate `useNavigation<any>()` instances strictly in `ProductFormScreen.tsx`, `ProductDetailScreen.tsx`, `ProductsListScreen.tsx`, `StockSummaryScreen.tsx`, `CategoriesListScreen.tsx`, and `useRoute<any>()` in `CategoryFormSheet.tsx` using precise `NativeStackNavigationProp`.
@@ -83,9 +83,6 @@
 - [ ] **Task 62** (Audit 2.3): `src/hooks/useParties.ts` fix party mutation invalidation so `queryClient.invalidateQueries` refreshes the filtered `['parties', orgId, 'customers']` and `['parties', orgId, 'suppliers']` query caches.
 - [ ] **Task 63** (Audit 2.4): `src/supabase/partyBalanceService.ts` extend `getCustomerFinancialSummary` to include `credit_transactions` data so outstanding balance matches the party ledger.
 - [ ] **Task 64** (Audit 2.5): `src/offline/syncEngine.ts` add `credit_transaction` processing support to `processQueue` so manual payment/credit mutations can sync when connectivity returns.
-
-### `src/screens/Invoices/InvoiceDetailScreen.tsx`
-- [ ] **Task 71** (Audit Invoices): Modify `handleEdit` (L298–L308). Add a status threshold check at the beginning of the function to block editing if `invoice.status !== 'draft'`.
 
 ### `src/screens/Invoices/InvoicesListScreen.tsx`
 - [ ] **Task 72** (Audit Invoices): Modify `FlatList` rendering. Implement `onEndReached` handling to fetch invoices incrementally within `useOrders` or bounded queries instead of exhaustive fetching.

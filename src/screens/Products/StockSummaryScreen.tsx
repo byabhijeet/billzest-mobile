@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   ScrollView,
   View,
@@ -15,7 +15,7 @@ import DetailHeader from '../../components/DetailHeader';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { useProducts } from '../../logic/productLogic';
-import { FileText, FileSpreadsheet, Filter } from 'lucide-react-native';
+import { FileText, FileSpreadsheet, Filter, X } from 'lucide-react-native';
 import EmptyState from '../../components/EmptyState';
 import { getProductStatus } from '../../components/ProductCard';
 
@@ -26,6 +26,15 @@ const StockSummaryScreen: React.FC = () => {
   const styles = useMemo(() => createStyles(tokens), [tokens]);
   const navigation = useNavigation<any>();
   const { data: products = [], isLoading, error, refetch, isRefetching } = useProducts();
+
+  // State for "Show as of date"
+  const [showAsOfDate, setShowAsOfDate] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // State for filters
+  const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const metrics = useMemo(() => {
     const totalItems = products.length;
@@ -43,6 +52,66 @@ const StockSummaryScreen: React.FC = () => {
   const sortedProducts = useMemo(() => {
     return [...products].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   }, [products]);
+
+  // Handler for "Show as of date" toggle
+  const handleToggleAsOfDate = useCallback((value: boolean) => {
+    setShowAsOfDate(value);
+    if (value) {
+      Alert.alert(
+        'Select Date',
+        'Enter date to view stock as-of that date (YYYY-MM-DD):',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => setShowAsOfDate(false),
+            style: 'cancel',
+          },
+          {
+            text: 'Use Today',
+            onPress: () => {
+              setSelectedDate(new Date().toISOString().split('T')[0]);
+            },
+          },
+          {
+            text: 'Custom',
+            onPress: () => {
+              Alert.prompt(
+                'Enter Date',
+                'Format: YYYY-MM-DD',
+                [
+                  { text: 'Cancel', onPress: () => setShowAsOfDate(false), style: 'cancel' },
+                  {
+                    text: 'OK',
+                    onPress: (date) => {
+                      if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                        setSelectedDate(date);
+                      } else {
+                        Alert.alert('Invalid', 'Please enter date in YYYY-MM-DD format');
+                        setShowAsOfDate(false);
+                      }
+                    },
+                  },
+                ],
+                'plain-text',
+                selectedDate,
+              );
+            },
+          },
+        ],
+      );
+    }
+  }, [selectedDate]);
+
+  // Handler for Filter button
+  const handleOpenFilters = useCallback(() => {
+    setShowFilters(true);
+  }, []);
+
+  // Handler to clear filters
+  const handleClearFilters = useCallback(() => {
+    setFilterCategory(null);
+    setFilterStatus(null);
+  }, []);
 
   return (
     <ScreenWrapper>
@@ -75,10 +144,17 @@ const StockSummaryScreen: React.FC = () => {
 
         <View style={styles.rowBetween}>
           <View style={styles.inlineRow}>
-            <Switch value={false} onValueChange={() => {}} disabled thumbColor={tokens.border} trackColor={{ false: tokens.border, true: tokens.primary }} />
-            <Text style={styles.mutedText}>Show stock as on Date: 11/12/2025</Text>
+            <Switch 
+              value={showAsOfDate} 
+              onValueChange={handleToggleAsOfDate}
+              thumbColor={tokens.primaryForeground}
+              trackColor={{ false: tokens.muted, true: tokens.primary }} 
+            />
+            <Text style={styles.mutedText}>
+              {showAsOfDate ? `Stock as on: ${selectedDate}` : 'Show stock as on Date'}
+            </Text>
           </View>
-          <Pressable style={styles.filterPill} onPress={() => {}}>
+          <Pressable style={styles.filterPill} onPress={handleOpenFilters}>
             <Filter color={tokens.foreground} size={16} />
             <Text style={styles.filterPillText}>Filters</Text>
           </Pressable>
@@ -181,6 +257,52 @@ const StockSummaryScreen: React.FC = () => {
           })
         )}
       </ScrollView>
+
+      {/* Filter Modal Overlay */}
+      {showFilters && (
+        <View style={styles.filterOverlay}>
+          <Pressable style={styles.filterBackdrop} onPress={() => setShowFilters(false)} />
+          <View style={styles.filterModal}>
+            <View style={styles.filterHeader}>
+              <Text style={styles.filterTitle}>Filters</Text>
+              <Pressable onPress={() => setShowFilters(false)}>
+                <X color={tokens.foreground} size={24} />
+              </Pressable>
+            </View>
+
+            {/* Filter by Status */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Stock Status</Text>
+              {['All', 'Low Stock', 'Out of Stock', 'In Stock'].map(status => (
+                <Pressable
+                  key={status}
+                  style={[
+                    styles.filterOption,
+                    filterStatus === status && styles.filterOptionActive,
+                  ]}
+                  onPress={() => setFilterStatus(status === 'All' ? null : status)}
+                >
+                  <Text
+                    style={[
+                      styles.filterOptionText,
+                      filterStatus === status && styles.filterOptionTextActive,
+                    ]}
+                  >
+                    {status}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* Clear Filters */}
+            {(filterCategory || filterStatus) && (
+              <Pressable style={styles.clearFiltersBtn} onPress={handleClearFilters}>
+                <Text style={styles.clearFiltersBtnText}>Clear All Filters</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      )}
     </ScreenWrapper>
   );
 };
@@ -326,6 +448,96 @@ const createStyles = (tokens: ThemeTokens) =>
     expiryDateExpired: {
       color: tokens.destructive,
       fontWeight: '700',
+    },
+
+    // Filter Modal
+    filterOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      justifyContent: 'flex-end',
+      zIndex: 999,
+    },
+    filterBackdrop: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    filterModal: {
+      backgroundColor: tokens.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingTop: 16,
+      paddingHorizontal: 16,
+      paddingBottom: 24,
+      maxHeight: '70%',
+    },
+    filterHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+      paddingBottom: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: tokens.border,
+    },
+    filterTitle: {
+      fontSize: 18,
+      fontWeight: '800',
+      color: tokens.foreground,
+    },
+    filterSection: {
+      marginBottom: 16,
+    },
+    filterSectionTitle: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: tokens.mutedForeground,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+      letterSpacing: 0.5,
+    },
+    filterOption: {
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+      backgroundColor: 'transparent',
+      marginBottom: 6,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    filterOptionActive: {
+      backgroundColor: tokens.primary + '15',
+      borderColor: tokens.primary,
+    },
+    filterOptionText: {
+      fontSize: 14,
+      color: tokens.foreground,
+      fontWeight: '600',
+    },
+    filterOptionTextActive: {
+      color: tokens.primary,
+      fontWeight: '700',
+    },
+    clearFiltersBtn: {
+      marginTop: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      backgroundColor: tokens.destructive + '15',
+      borderWidth: 1,
+      borderColor: tokens.destructive + '30',
+    },
+    clearFiltersBtnText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: tokens.destructive,
+      textAlign: 'center',
     },
   });
 
