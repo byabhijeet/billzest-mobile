@@ -86,7 +86,7 @@ const OfflineIndicator: React.FC = () => {
           <>
             <WifiOff size={16} color={tokens.primaryForeground} />
             <Text style={styles.text}>
-              You're offline. Changes will sync when connected.
+              You&apos;re offline. Changes will sync when connected.
             </Text>
           </>
         ) : failedCount > 0 ? (

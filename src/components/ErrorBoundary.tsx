@@ -139,7 +139,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, onReset }) => {
         </View>
         <Text style={styles.title}>Something went wrong</Text>
         <Text style={styles.message}>
-          We're sorry, but something unexpected happened. Please try again.
+          We&apos;re sorry, but something unexpected happened. Please try again.
         </Text>
         {error && __DEV__ && (
           <View style={styles.errorDetails}>

@@ -1,7 +1,7 @@
 ## Audit/Review report to tasks
 
 You have just completed a feature audit and produced a findings report.
-Now convert that report into executable tasks and APPEND them to `docs/cursor_agent_tasks.md`.
+Now convert that report into executable tasks and APPEND them to `TASKS.md`.
 
 ## Rules for task creation
 
@@ -24,5 +24,5 @@ Now convert that report into executable tasks and APPEND them to `docs/cursor_ag
 - Do NOT add a preamble section or modify anything above the appended content.
 
 ## Output
-Append the new tasks directly to `docs/cursor_agent_tasks.md` under the correct priority sections.
+Append the new tasks directly to `TASKS.md` under the correct priority sections.
 Print a short summary: total tasks added, breakdown by priority.

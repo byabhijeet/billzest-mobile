@@ -33,7 +33,7 @@ BillZest Mobile is a comprehensive POS (Point of Sale) and invoicing system buil
 - `src/theme/` - Source of truth for `ThemeProvider` context and the Stitch design `tokens`.
 - `src/types/` - Shared TypeScript definitions across abstractions.
 - `src/utils/` - Utility handlers for string formatting, mathematical validations, and testing.
-- `docs/` - Contains internal audit documents like `cursor_agent_tasks.md`.
+- `docs/` - Contains internal audit documents like `TASKS.md`.
 
 ## Development Setup
 1. **Install Dependencies:** `npm install`
@@ -65,7 +65,7 @@ BillZest Mobile is a comprehensive POS (Point of Sale) and invoicing system buil
 ## Important Files & Entry Points
 - `App.tsx`: Global execution boundary containing the multi-layered Providers (Theme, Organization, Supabase, QueryClient) required for context parsing.
 - `src/navigation/RootNavigator.tsx`: Orchestrates the fundamental tab, drawer, and auth navigation guards.
-- `docs/cursor_agent_tasks.md`: This markdown document actively holds the high-priority refactoring/architectural task lists. **ALWAYS cross-reference this file before modifying database logic.**
+- `TASKS.md`: This markdown document actively holds the high-priority refactoring/architectural task lists. **ALWAYS cross-reference this file before modifying database logic.**
 - `src/supabase/ordersService.ts`: Gateway logic file for executing CRUD flows over sales entries. Frequently updated bridging code for backend Postgres functions.
 
 ## External Services & Integrations

@@ -160,6 +160,7 @@ const ProductCard = React.memo(
     );
   },
 );
+ProductCard.displayName = 'ProductCard';
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 

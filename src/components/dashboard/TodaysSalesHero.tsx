@@ -18,7 +18,7 @@ const TodaysSalesHero: React.FC<TodaysSalesHeroProps> = ({
 
   return (
     <View style={styles.todaysSalesCard}>
-      <Text style={styles.todaysSalesLabel}>Today's Sales</Text>
+      <Text style={styles.todaysSalesLabel}>Today&apos;s Sales</Text>
       <Text style={styles.todaysSalesValue}>
         {isLoading ? '…' : `₹${Math.round(sales).toLocaleString('en-IN')}`}
       </Text>

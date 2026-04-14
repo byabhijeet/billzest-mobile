@@ -89,7 +89,9 @@ const VerifyOTPScreen = () => {
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
-                  ref={el => inputRefs.current[index] = el}
+                  ref={el => {
+                    inputRefs.current[index] = el;
+                  }}
                   style={[styles.otpInput, digit ? styles.otpInputFilled : null]}
                   keyboardType="number-pad"
                   maxLength={1}
@@ -104,7 +106,7 @@ const VerifyOTPScreen = () => {
 
             {/* Resend Logic */}
             <View style={styles.resendContainer}>
-              <Text style={styles.resendText}>Didn't receive code? </Text>
+              <Text style={styles.resendText}>Didn&apos;t receive code? </Text>
               <TouchableOpacity>
                 <Text style={styles.resendAction}>Resend OTP</Text>
               </TouchableOpacity>

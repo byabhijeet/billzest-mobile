@@ -4,6 +4,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Pressable,
   Switch,
   Alert,
   ActivityIndicator,
@@ -131,7 +132,7 @@ const BillConfigScreen: React.FC = () => {
           </View>
           
           <View style={styles.switchRow}>
-            <View flex={1}>
+            <View style={styles.switchTextContainer}>
               <Text style={styles.switchLabel}>Show Business Logo</Text>
               <Text style={styles.switchSub}>Include logo at the top</Text>
             </View>
@@ -143,7 +144,7 @@ const BillConfigScreen: React.FC = () => {
           </View>
 
           <View style={styles.switchRow}>
-            <View flex={1}>
+            <View style={styles.switchTextContainer}>
               <Text style={styles.switchLabel}>Show Tax Details</Text>
               <Text style={styles.switchSub}>Include GST summary</Text>
             </View>
@@ -155,7 +156,7 @@ const BillConfigScreen: React.FC = () => {
           </View>
 
           <View style={styles.switchRow}>
-            <View flex={1}>
+            <View style={styles.switchTextContainer}>
               <Text style={styles.switchLabel}>Print QR Code</Text>
               <Text style={styles.switchSub}>Show UPI/Order QR at bottom</Text>
             </View>
@@ -268,6 +269,9 @@ const createStyles = (tokens: ThemeTokens) =>
       fontSize: 15,
       fontWeight: '600',
       color: tokens.foreground,
+    },
+    switchTextContainer: {
+      flex: 1,
     },
     switchSub: {
       fontSize: 12,

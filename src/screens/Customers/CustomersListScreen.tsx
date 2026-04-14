@@ -323,7 +323,7 @@ const CustomersListScreen: React.FC = () => {
               title="No parties found"
               description="Try adjusting your search, or add a new party to getting started."
               actionLabel="Add New Party"
-              onAction={() => navigation.navigate('CustomerForm')}
+              onAction={() => navigation.navigate('CustomerForm', {})}
             />
           )}
           {filteredCustomers.map(renderCustomerNode)}
@@ -335,7 +335,7 @@ const CustomersListScreen: React.FC = () => {
       <FAB
         label="Add New Party"
         icon={<Plus color="#fff" size={24} />}
-        onPress={() => navigation.navigate('CustomerForm')}
+        onPress={() => navigation.navigate('CustomerForm', {})}
       />
     </View>
   );
