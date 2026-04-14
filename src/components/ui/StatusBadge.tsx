@@ -3,12 +3,21 @@ import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 
-export type StatusType = 'success' | 'warning' | 'error' | 'info' | 'neutral';
+export type StatusType =
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info'
+  | 'neutral'
+  | 'default'
+  | 'secondary'
+  | 'outline'
+  | 'destructive';
 export type BadgeVariant = 'solid' | 'subtle';
 export type BadgeSize = 'sm' | 'md';
 
 interface StatusBadgeProps {
-  status: StatusType;
+  status?: StatusType;
   label: string;
   variant?: BadgeVariant;
   size?: BadgeSize;
@@ -17,7 +26,7 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({
-  status,
+  status = 'neutral',
   label,
   variant = 'subtle',
   size = 'md',
@@ -27,36 +36,50 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   const { tokens } = useThemeTokens();
   const styles = createStyles(tokens);
 
-  const getColors = () => {
+  const getColors = (): { bg: string; text: string; border?: string } => {
     switch (status) {
       case 'success':
+      case 'default':
         return {
-          bg: variant === 'solid' ? tokens.accent : 'rgba(34,197,94,0.2)',
-          text: variant === 'solid' ? '#FFFFFF' : tokens.accent, // '#16a34a' matches the green used in other screens
+          bg: variant === 'solid' ? tokens.success : tokens.success + '33',
+          text: variant === 'solid' ? tokens.successForeground : tokens.success,
         };
       case 'warning':
         return {
-          bg: variant === 'solid' ? tokens.warning : 'rgba(250,204,21,0.2)', // Yellowish
-          text: variant === 'solid' ? '#000000' : tokens.warning,
+          bg: variant === 'solid' ? tokens.warning : tokens.warning + '33',
+          text: variant === 'solid' ? tokens.warningForeground : tokens.warning,
         };
       case 'error':
+      case 'destructive':
         return {
-          bg: variant === 'solid' ? tokens.destructive : 'rgba(220,38,38,0.2)',
-          text: variant === 'solid' ? '#FFFFFF' : tokens.destructive,
+          bg: variant === 'solid' ? tokens.destructive : tokens.destructive + '33',
+          text:
+            variant === 'solid'
+              ? tokens.destructiveForeground
+              : tokens.destructive,
         };
       case 'info':
         return {
-          bg: variant === 'solid' ? tokens.primary : 'rgba(59, 130, 246, 0.2)',
-          text: variant === 'solid' ? tokens.primaryForeground : tokens.primary,
+          bg: variant === 'solid' ? tokens.info : tokens.info + '33',
+          text: variant === 'solid' ? tokens.infoForeground : tokens.info,
+        };
+      case 'secondary':
+        return {
+          bg: tokens.secondary,
+          text: tokens.secondaryForeground,
+          border: tokens.border,
+        };
+      case 'outline':
+        return {
+          bg: 'transparent',
+          text: tokens.mutedForeground,
+          border: tokens.border,
         };
       case 'neutral':
       default:
         return {
-          bg: variant === 'solid' ? tokens.muted : tokens.muted,
-          text:
-            variant === 'solid'
-              ? tokens.mutedForeground
-              : tokens.mutedForeground,
+          bg: tokens.muted,
+          text: tokens.mutedForeground,
         };
     }
   };
@@ -71,6 +94,8 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
           backgroundColor: colors.bg,
           paddingHorizontal: size === 'sm' ? 10 : 14,
           paddingVertical: size === 'sm' ? 4 : 6,
+          borderWidth: colors.border ? 1 : 0,
+          borderColor: colors.border ?? 'transparent',
         },
         containerStyle,
       ]}
@@ -91,7 +116,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   );
 };
 
-const createStyles = (tokens: ThemeTokens) =>
+const createStyles = (_tokens: ThemeTokens) =>
   StyleSheet.create({
     badge: {
       borderRadius: 999,

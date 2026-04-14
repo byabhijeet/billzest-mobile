@@ -9,8 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Switch,
-  TouchableOpacity,
 } from 'react-native';
+import Button from '../../components/ui/Button';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
@@ -193,13 +193,24 @@ const CustomerFormScreen = () => {
   return (
     <ScreenWrapper>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={styles.headerBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
           <ChevronLeft color={tokens.foreground} size={24} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.headerTitle}>{isEditMode ? 'Edit Party' : 'Add Party'}</Text>
-        <TouchableOpacity style={styles.headerBtn}>
+        <Pressable
+          style={styles.headerBtn}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="More options"
+          accessibilityRole="button"
+        >
           <MoreVertical color={tokens.foreground} size={20} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <KeyboardAvoidingView
@@ -282,12 +293,15 @@ const CustomerFormScreen = () => {
                   inputStyle={styles.hugeInput}
                 />
                 <View style={styles.toggleGroup}>
-                  <TouchableOpacity
+                  <Pressable
                     style={[
                       styles.toggleBtn,
                       formState.balanceType === 'RECEIVABLE' && styles.toggleBtnActive,
                     ]}
                     onPress={() => handleChange('balanceType', 'RECEIVABLE')}
+                    accessibilityRole="button"
+                    accessibilityLabel="You'll get"
+                    accessibilityState={{ selected: formState.balanceType === 'RECEIVABLE' }}
                   >
                     <Text
                       style={[
@@ -297,13 +311,16 @@ const CustomerFormScreen = () => {
                     >
                       YOU&apos;LL GET
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </Pressable>
+                  <Pressable
                     style={[
                       styles.toggleBtn,
                       formState.balanceType === 'PAYABLE' && [styles.toggleBtnActive, { backgroundColor: tokens.destructive }],
                     ]}
                     onPress={() => handleChange('balanceType', 'PAYABLE')}
+                    accessibilityRole="button"
+                    accessibilityLabel="You'll give"
+                    accessibilityState={{ selected: formState.balanceType === 'PAYABLE' }}
                   >
                     <Text
                       style={[
@@ -313,7 +330,7 @@ const CustomerFormScreen = () => {
                     >
                       YOU&apos;LL GIVE
                     </Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               </View>
             </View>
@@ -366,22 +383,24 @@ const CustomerFormScreen = () => {
         </ScrollView>
 
         <View style={styles.actionBar}>
-          <TouchableOpacity 
-            style={styles.discardBtn} 
+          <Button
+            label="Discard"
+            variant="ghost"
             onPress={() => navigation.goBack()}
-          >
-            <X size={20} color={tokens.mutedForeground} />
-            <Text style={styles.discardBtnText}>DISCARD</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.saveBtn, isSubmitting && { opacity: 0.7 }]} 
+            icon={<X size={18} color={tokens.mutedForeground} />}
+            style={styles.discardBtnNew}
+            accessibilityLabel="Discard changes"
+          />
+          <Button
+            label="Save Party"
+            variant="primary"
             onPress={handleSave}
+            loading={isSubmitting}
             disabled={isSubmitting}
-          >
-            <CheckCircle2 size={20} color="#fff" />
-            <Text style={styles.saveBtnText}>SAVE PARTY</Text>
-          </TouchableOpacity>
+            icon={<CheckCircle2 size={18} color={tokens.primaryForeground} />}
+            style={styles.saveBtnNew}
+            accessibilityLabel="Save party"
+          />
         </View>
       </KeyboardAvoidingView>
     </ScreenWrapper>
@@ -497,7 +516,7 @@ const createStyles = (tokens: ThemeTokens) =>
       color: tokens.mutedForeground,
     },
     toggleBtnTextActive: {
-      color: '#fff',
+      color: tokens.primaryForeground,
     },
     switchRow: {
       flexDirection: 'row',
@@ -524,49 +543,19 @@ const createStyles = (tokens: ThemeTokens) =>
       right: 0,
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      gap: 12,
       paddingHorizontal: 24,
-      paddingVertical: 20,
-      paddingBottom: Platform.OS === 'ios' ? 40 : 24,
-      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+      paddingVertical: 16,
+      paddingBottom: Platform.OS === 'ios' ? 36 : 16,
+      backgroundColor: tokens.card,
       borderTopWidth: 1,
-      borderTopColor: 'rgba(188, 203, 185, 0.15)',
+      borderTopColor: tokens.border,
     },
-    discardBtn: {
+    discardBtnNew: {
       flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
     },
-    discardBtnText: {
-      fontSize: 11,
-      fontWeight: '700',
-      color: tokens.mutedForeground,
-      marginLeft: 8,
-      letterSpacing: 1,
-    },
-    saveBtn: {
+    saveBtnNew: {
       flex: 1.5,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: tokens.primary,
-      borderRadius: 14,
-      paddingVertical: 14,
-      marginLeft: 12,
-      shadowColor: tokens.primary,
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.2,
-      shadowRadius: 16,
-      elevation: 6,
-    },
-    saveBtnText: {
-      fontSize: 11,
-      fontWeight: '700',
-      color: '#fff',
-      marginLeft: 8,
-      letterSpacing: 1,
     },
   });
 

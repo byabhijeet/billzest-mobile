@@ -6,9 +6,9 @@ import {
   StyleSheet,
   Pressable,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import Button from '../../components/ui/Button';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { useThemeTokens } from '../../theme/ThemeProvider';
@@ -155,10 +155,13 @@ const CreditBookScreen: React.FC = () => {
             <Text style={styles.headerTitle}>Credit Book</Text>
             <Text style={styles.headerSubtitle}>Manage your Khata</Text>
           </View>
-          <TouchableOpacity style={styles.addButton} onPress={handleAddParty}>
-            <Plus color="white" size={20} />
-            <Text style={styles.addButtonText}>Party</Text>
-          </TouchableOpacity>
+          <Button
+            label="+ Party"
+            variant="primary"
+            size="sm"
+            onPress={handleAddParty}
+            accessibilityLabel="Add party"
+          />
         </View>
 
         {/* SUMMARY CARDS */}
@@ -190,12 +193,12 @@ const CreditBookScreen: React.FC = () => {
             </Text>
           </View>
 
-          <View style={[styles.summaryCard, { borderColor: 'orange' }]}>
+          <View style={[styles.summaryCard, { borderColor: tokens.warning }]}>
             <View style={styles.summaryHeader}>
               <Text style={styles.summaryLabel}>Total Expenses</Text>
-              <Wallet size={16} color="orange" />
+              <Wallet size={16} color={tokens.warning} />
             </View>
-            <Text style={[styles.summaryValue, { color: 'orange' }]}>
+            <Text style={[styles.summaryValue, { color: tokens.warning }]}>
               ₹{totalExpenses.toLocaleString('en-IN')}
             </Text>
           </View>
@@ -328,9 +331,11 @@ const CreditBookScreen: React.FC = () => {
           ) : (
             filteredParties.map(party => (
               <View key={party.id} style={styles.partyCardWrapper}>
-                <TouchableOpacity
+                <Pressable
                   style={styles.partyCard}
                   onPress={() => handlePartyPress(party)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View ${party.name} credit details`}
                 >
                   <View style={styles.partyInfo}>
                     <View style={styles.avatar}>
@@ -367,15 +372,17 @@ const CreditBookScreen: React.FC = () => {
                         : 'Spent'}
                     </Text>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
                 {activeTab === 'customer' && party.balance > 0 && (
-                  <Pressable
-                    style={styles.paymentButton}
+                  <Button
+                    label="Pay"
+                    variant="primary"
+                    size="sm"
                     onPress={() => handleRecordPayment(party)}
-                  >
-                    <Banknote color={tokens.primaryForeground} size={16} />
-                    <Text style={styles.paymentButtonText}>Pay</Text>
-                  </Pressable>
+                    icon={<Banknote color={tokens.primaryForeground} size={14} />}
+                    style={styles.paymentButtonNew}
+                    accessibilityLabel={`Record payment for ${party.name}`}
+                  />
                 )}
               </View>
             ))
@@ -417,19 +424,6 @@ const createStyles = (tokens: ThemeTokens) =>
     headerSubtitle: {
       color: tokens.mutedForeground,
       fontSize: 14,
-    },
-    addButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: tokens.primary,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 20,
-      gap: 6,
-    },
-    addButtonText: {
-      color: tokens.primaryForeground,
-      fontWeight: '600',
     },
     summaryRow: {
       flexDirection: 'row',
@@ -541,21 +535,9 @@ const createStyles = (tokens: ThemeTokens) =>
       fontSize: 11,
       color: tokens.mutedForeground,
     },
-    paymentButton: {
+    paymentButtonNew: {
       marginTop: 8,
       alignSelf: 'flex-end',
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-      backgroundColor: tokens.primary,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 8,
-    },
-    paymentButtonText: {
-      color: tokens.primaryForeground,
-      fontSize: 12,
-      fontWeight: '600',
     },
     emptyState: {
       padding: 40,
@@ -573,27 +555,6 @@ const createStyles = (tokens: ThemeTokens) =>
       padding: 40,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    fabContainer: {
-      position: 'absolute',
-      bottom: 20,
-      right: 20,
-    },
-    fab: {
-      width: 56,
-      height: 56,
-      borderRadius: 28,
-      backgroundColor: tokens.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
-      elevation: 5,
     },
   });
 

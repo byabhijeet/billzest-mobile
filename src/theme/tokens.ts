@@ -15,6 +15,8 @@ export const lightTokens = {
   accentForeground: 'hsl(0, 0%, 100%)',
   success: 'hsl(141, 73%, 42%)',
   successForeground: 'hsl(0, 0%, 100%)',
+  info: 'hsl(217, 91%, 60%)',
+  infoForeground: 'hsl(0, 0%, 100%)',
   warning: 'hsl(38, 92%, 50%)',
   warningForeground: 'hsl(0, 0%, 100%)',
   destructive: 'hsl(0, 84%, 60%)',
@@ -39,6 +41,12 @@ export const lightTokens = {
   radiusXl: 24,
   radiusFull: 999,
   radius: 16,
+  spacingXs: 4,
+  spacingSm: 8,
+  spacingMd: 12,
+  spacingLg: 16,
+  spacingXl: 24,
+  spacingXxl: 32,
 } as const;
 
 export const darkTokens = {
@@ -58,6 +66,8 @@ export const darkTokens = {
   accentForeground: 'hsl(0, 0%, 100%)',
   success: 'hsl(141, 73%, 42%)',
   successForeground: 'hsl(0, 0%, 100%)',
+  info: 'hsl(217, 91%, 60%)',
+  infoForeground: 'hsl(0, 0%, 100%)',
   warning: 'hsl(38, 92%, 50%)',
   warningForeground: 'hsl(0, 0%, 100%)',
   destructive: 'hsl(0, 63%, 31%)',
@@ -82,6 +92,12 @@ export const darkTokens = {
   radiusXl: 24,
   radiusFull: 999,
   radius: 16,
+  spacingXs: 4,
+  spacingSm: 8,
+  spacingMd: 12,
+  spacingLg: 16,
+  spacingXl: 24,
+  spacingXxl: 32,
 } as const;
 
 // ThemeTokens should work for both light and dark schemes

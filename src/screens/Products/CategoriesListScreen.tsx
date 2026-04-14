@@ -130,10 +130,10 @@ const CategoriesListScreen = () => {
                       <Text style={styles.categoryName}>{category.name}</Text>
                       <View style={styles.badgesRow}>
                          {/* Fallback to 0 if product count missing in summary */}
-                        <Badge variant="secondary" textStyle={{ fontSize: 9 }}>
-                          {0} products
+                        <Badge variant="secondary">
+                          {`${0} products`}
                         </Badge>
-                        <Badge variant={category.is_active ? 'success' : 'outline'} textStyle={{ fontSize: 9 }}>
+                        <Badge variant={category.is_active ? 'success' : 'outline'}>
                           {category.is_active ? 'ACTIVE' : 'INACTIVE'}
                         </Badge>
                       </View>
@@ -145,9 +145,12 @@ const CategoriesListScreen = () => {
                       GST: <Text style={{ fontWeight: '700' }}>{category.gst_rate || 0}%</Text>
                     </Text>
                     <View style={styles.actions}>
-                       <Pressable
+                      <Pressable
                         style={styles.actionBtn}
                         onPress={() => toggleCategoryStatus(category)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        accessibilityRole="button"
+                        accessibilityLabel={category.is_active ? 'Deactivate category' : 'Activate category'}
                       >
                         <EyeOff color={tokens.mutedForeground} size={18} />
                       </Pressable>
@@ -159,12 +162,18 @@ const CategoriesListScreen = () => {
                             category,
                           })
                         }
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Edit ${category.name}`}
                       >
                         <Edit color={tokens.primary} size={18} />
                       </Pressable>
                       <Pressable
                         style={styles.actionBtn}
                         onPress={() => confirmDeleteCategory(category)}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Delete ${category.name}`}
                       >
                         <Trash2 color={tokens.destructive} size={18} />
                       </Pressable>
@@ -218,9 +227,7 @@ const createStyles = (tokens: ThemeTokens) =>
       width: 48,
       height: 48,
       borderRadius: 12,
-      backgroundColor: 'rgba(99, 102, 241, 0.1)',
-      borderWidth: 1,
-      borderColor: 'rgba(99, 102, 241, 0.2)',
+      backgroundColor: tokens.muted,
       alignItems: 'center',
       justifyContent: 'center',
       marginRight: 12,

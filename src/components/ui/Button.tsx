@@ -56,12 +56,14 @@ const Button: React.FC<ButtonProps> = ({
   const variantStyle = styles[variant] || styles.primary;
   const sizeStyle =
     styles[
-      size === 'default'
-        ? 'sizeDefault'
-        : size === 'icon'
+      size === 'icon'
         ? 'sizeIcon'
+        : size === 'sm'
+        ? 'sizeSm'
+        : size === 'lg'
+        ? 'sizeLg'
         : 'sizeDefault'
-    ]; // minimal implementation for now
+    ];
 
   const textColor =
     variant === 'secondary' || variant === 'outline' || variant === 'ghost'
@@ -112,6 +114,16 @@ const createStyles = (tokens: ThemeTokens) =>
       paddingHorizontal: 20,
       paddingVertical: 12,
       minHeight: 48,
+    },
+    sizeSm: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      minHeight: 36,
+    },
+    sizeLg: {
+      paddingHorizontal: 28,
+      paddingVertical: 16,
+      minHeight: 56,
     },
     sizeIcon: {
       padding: 8,

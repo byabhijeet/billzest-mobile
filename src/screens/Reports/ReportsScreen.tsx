@@ -32,9 +32,31 @@ import { reportsService } from '../../supabase/reportsService';
 import { reportsExportService } from '../../services/reportsExportService';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import Button from '../../components/ui/Button';
+import EmptyState from '../../components/EmptyState';
+
+const createBarStyles = (tokens: ThemeTokens) =>
+  StyleSheet.create({
+    barContainer: {
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      height: '100%',
+      width: 20,
+      gap: 8,
+    },
+    bar: {
+      width: 8,
+      borderRadius: 4,
+    },
+    barLabel: {
+      fontSize: 10,
+      color: tokens.mutedForeground,
+      fontWeight: '600',
+    },
+  });
 
 const BarItem = ({ height, index, tokens }: { height: number; index: number; tokens: ThemeTokens }) => {
   const animatedHeight = useSharedValue(0);
+  const barStyles = React.useMemo(() => createBarStyles(tokens), [tokens]);
 
   React.useEffect(() => {
     animatedHeight.value = withDelay(index * 100, withTiming(height, { duration: 1000 }));
@@ -60,25 +82,6 @@ const BarItem = ({ height, index, tokens }: { height: number; index: number; tok
   );
 };
 
-const barStyles = StyleSheet.create({
-  barContainer: {
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    height: '100%',
-    width: 20,
-    gap: 8,
-  },
-  bar: {
-    width: 8,
-    borderRadius: 4,
-  },
-  barLabel: {
-    fontSize: 10,
-    color: '#666', // Fallback or use tokens
-    fontWeight: '600',
-  },
-});
-
 const ReportsScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
   const styles = createStyles(tokens);
@@ -101,6 +104,7 @@ const ReportsScreen: React.FC = () => {
       enabled: !!organizationId,
     });
 
+  const hasKpiData = !!kpis;
   const displayKpis = kpis ?? { sales: 0, profit: 0, expenses: 0 };
 
   const handleExportPDF = useCallback(async () => {
@@ -213,19 +217,25 @@ const ReportsScreen: React.FC = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color={tokens.primary} />
             </View>
+          ) : !hasKpiData ? (
+            <EmptyState
+              icon={<TrendingUp size={28} color={tokens.mutedForeground} />}
+              title="No report data"
+              description="Data will appear once you have recorded sales."
+            />
           ) : (
             <>
               <View
                 style={[
                   styles.kpiCard,
-                  { backgroundColor: 'rgba(34, 197, 94, 0.1)' },
+                  { backgroundColor: tokens.success + '22' },
                 ]}
               >
                 <View style={styles.kpiHeader}>
                   <Text style={styles.kpiLabel}>Total Sales</Text>
-                  <DollarSign size={16} color={tokens.accent} />
+                  <DollarSign size={16} color={tokens.success} />
                 </View>
-                <Text style={[styles.kpiValue, { color: tokens.accent }]}>
+                <Text style={[styles.kpiValue, { color: tokens.success }]}>
                   ₹{displayKpis.sales.toLocaleString('en-IN')}
                 </Text>
               </View>
@@ -233,14 +243,14 @@ const ReportsScreen: React.FC = () => {
               <View
                 style={[
                   styles.kpiCard,
-                  { backgroundColor: 'rgba(59, 130, 246, 0.1)' },
+                  { backgroundColor: tokens.info + '22' },
                 ]}
               >
                 <View style={styles.kpiHeader}>
                   <Text style={styles.kpiLabel}>Profit</Text>
-                  <TrendingUp size={16} color="#3b82f6" />
+                  <TrendingUp size={16} color={tokens.info} />
                 </View>
-                <Text style={[styles.kpiValue, { color: '#3b82f6' }]}>
+                <Text style={[styles.kpiValue, { color: tokens.info }]}>
                   ₹{displayKpis.profit.toLocaleString('en-IN')}
                 </Text>
               </View>
@@ -248,7 +258,7 @@ const ReportsScreen: React.FC = () => {
               <View
                 style={[
                   styles.kpiCard,
-                  { backgroundColor: 'rgba(239, 68, 68, 0.1)' },
+                  { backgroundColor: tokens.destructive + '22' },
                 ]}
               >
                 <View style={styles.kpiHeader}>
@@ -347,7 +357,7 @@ const createStyles = (tokens: ThemeTokens) =>
       color: tokens.mutedForeground,
     },
     activeFilterText: {
-      color: '#fff',
+      color: tokens.primaryForeground,
     },
     kpiContainer: {
       flexDirection: 'row',

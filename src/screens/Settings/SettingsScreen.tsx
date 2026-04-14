@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  Switch,
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -75,7 +74,6 @@ const SettingsScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
   const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
-  const [darkMode, setDarkMode] = React.useState(false);
   const { user } = useSupabase();
   const [signingOut, setSigningOut] = React.useState(false);
 
@@ -249,20 +247,6 @@ const createStyles = (tokens: ThemeTokens) =>
     profileCopy: { flex: 1 },
     profileEmail: { color: tokens.foreground, fontWeight: '700' },
     profileMeta: { color: tokens.mutedForeground, marginTop: 4 },
-    themeRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    themeTitle: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: tokens.foreground,
-    },
-    themeMeta: {
-      color: tokens.mutedForeground,
-      marginTop: 6,
-    },
     sectionTitle: {
       fontSize: 15,
       fontWeight: '700',

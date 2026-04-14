@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput } from 'react-native';
+import Button from '../ui/Button';
 import {
   ImagePlus,
   Tag,
@@ -50,12 +51,18 @@ const AddProductSheet: React.FC<AddProductSheetProps> = ({ visible, onClose }) =
       subtitle="Upload an image, price, and inventory so it is ready to bill or sync to store."
       footer={
         <View style={styles.footerButtons}>
-          <Pressable style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>Save Draft</Text>
-          </Pressable>
-          <Pressable style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Add Item</Text>
-          </Pressable>
+          <Button
+            label="Save Draft"
+            variant="outline"
+            style={styles.footerBtn}
+            accessibilityLabel="Save as draft"
+          />
+          <Button
+            label="Add Item"
+            variant="primary"
+            style={styles.footerBtn}
+            accessibilityLabel="Add item"
+          />
         </View>
       }
     >
@@ -278,30 +285,10 @@ const createStyles = (tokens: ThemeTokens) =>
     footerButtons: {
       flexDirection: 'row',
       alignItems: 'center',
+      gap: 12,
     },
-    secondaryButton: {
+    footerBtn: {
       flex: 1,
-      borderRadius: 999,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      paddingVertical: 12,
-      marginRight: 12,
-      alignItems: 'center',
-    },
-    secondaryButtonText: {
-      color: tokens.foreground,
-      fontWeight: '600',
-    },
-    primaryButton: {
-      flex: 1,
-      borderRadius: 999,
-      backgroundColor: tokens.primary,
-      paddingVertical: 12,
-      alignItems: 'center',
-    },
-    primaryButtonText: {
-      color: tokens.primaryForeground,
-      fontWeight: '700',
     },
   });
 
