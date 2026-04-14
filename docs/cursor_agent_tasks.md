@@ -7,6 +7,10 @@
 - Stop and ask for review after completing each task.
 - Each task corresponds to exactly one finding from the audit and is designed to fit a 15-30 minute session.
 - When you pick task to work on move them to inprogress mode by [] => [/] before proceeding.
+- When marking a task `[/]`, simultaneously add `locked-by: <session-id> | <timestamp>`
+  on the same line before doing any code work.
+- Before picking a task, if `[/]` is present, check the timestamp.
+  If under 30 min, skip it. If over 30 min, it is stale — you may claim it.
 *Note: The tasks are strictly ordered by Priority (Critical -> High -> Medium -> Low), and then grouped by file to minimize context switching. If a High priority task has dependencies on a lower priority task (e.g., calling an SQL RPC that must be created first), take care of the dependency first if possible.*
 
 ---
@@ -32,8 +36,8 @@
 - [x] **Task 47** (Audit): Implement or adequately stub `onPress` actions for the Header buttons (Share, Print, More) which are currently empty `() => {}` voids.
 
 ### `src/screens/Products/ProductFormScreen.tsx`
-- [ ] **Task 48** (Audit): Completely refactor the hardcoded `DS` mappings and wire all UI components to `useThemeTokens()` to guarantee dynamic application of the Stitch Design system.
-- [ ] **Task 49** (Audit): Wire up a true "Delete Item" interface calling the `deleteProduct` mutation (which correctly sets `deleted_at`), bridging the gap where only a superficial "Archive" button exists.
+- [x] **Task 48** (Audit): Completely refactor the hardcoded `DS` mappings and wire all UI components to `useThemeTokens()` to guarantee dynamic application of the Stitch Design system.
+- [x] **Task 49** (Audit): Wire up a true "Delete Item" interface calling the `deleteProduct` mutation (which correctly sets `deleted_at`), bridging the gap where only a superficial "Archive" button exists.
 
 ### `src/supabase/ordersService.ts` (Invoices)
 - [ ] **Task 68** (Audit Invoices): Modify `createOrder` (L234–L247). Intercept the offline state, generate a temporary UUID, attach it to the `mutation_queue` with a pending flag, and resolve the mock order instead of throwing an error to the UI.
@@ -103,7 +107,7 @@
 ### `src/screens/Invoices/AddItemsScreen.tsx`
 - [ ] **Task 21** (Audit 6.3): Wrap content in `KeyboardAvoidingView` (same pattern as 6.2).
 - [x] **Task 22** (Audit 7.3): Replace local `formatCurrency` (L83) and `getInitials` (L52) with imports from `utils/formatting`.
-- [ ] **Task 23** (Audit 8.3): Replace `'#fff'` with `tokens.white` (or `tokens.primaryForeground`) and `'#1a1a2e'` with `tokens.shadowColor`.
+- [x] **Task 23** (Audit 8.3): Replace `'#fff'` with `tokens.white` (or `tokens.primaryForeground`) and `'#1a1a2e'` with `tokens.shadowColor`.
 - [ ] **Task 24** (Audit 8.5): Add `accessibilityLabel` to: stepper `−` buttons, stepper `+` buttons, back button, "Add to Invoice" button, mic button.
 - [ ] **Task 25** (Audit 8.8): Add `hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}` to all stepper buttons (L215, L240).
 
@@ -152,6 +156,7 @@
 - [ ] **Task 74** (Audit Invoices): Remove all occurrences of `borderWidth: 1` inside `InvoicesListScreen.tsx` and `InvoiceDetailScreen.tsx` to align strictly with the Stitch "No-Line Rule", substituting with tonal surface layers.
 - [ ] **Task 75** (Audit Invoices): Strip hardcoded color properties such as `#fff` or `rgba(0,0,0,0.15)` inside `InvoicesListScreen.tsx` and `InvoiceDetailScreen.tsx`, replacing them with exact `tokens.*` maps.
 - [ ] **Task 76** (Audit Invoices): Add native `hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}` padding to standalone functional action icons (Filter, Search, Scan, etc.) inside `InvoicesListScreen.tsx` and `InvoiceDetailScreen.tsx`.
+- [ ] **Task 77** (Audit Invoices): `src/supabase/ordersService.ts` `createOrder` (L140, L168). Replace split `orders` + `order_items` writes with a single `create_order` RPC-backed transactional write so header/item insertion is atomic and cannot orphan records. *(Note: dependency on DB/RPC implementation; keep service-side fallback guard until RPC is available)*
 
 ---
 

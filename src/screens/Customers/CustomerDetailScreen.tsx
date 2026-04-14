@@ -5,9 +5,12 @@ import {
   Text,
   StyleSheet,
   Pressable,
+  Pressable,
   Alert,
+  Share,
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import DetailHeader from '../../components/DetailHeader';
@@ -18,10 +21,15 @@ import {
   Bell,
   MapPin,
   ReceiptText,
+  Edit2,
+  Trash2,
 } from 'lucide-react-native';
 import DetailRow from '../../components/ui/DetailRow';
 import Button from '../../components/ui/Button';
-import { useCustomerFinancialSummary } from '../../logic/partyLogic';
+import { useCustomerFinancialSummary, useClientMutations } from '../../logic/partyLogic';
+import { CustomersStackParamList } from '../../navigation/types';
+import { useQuery } from '@tanstack/react-query';
+import { partiesService } from '../../supabase/partiesService';
 
 type CustomerProfile = {
   id: string;
@@ -35,11 +43,7 @@ type CustomerProfile = {
 };
 
 type CustomerDetailRoute = RouteProp<
-  {
-    CustomerDetail: {
-      customer?: CustomerProfile;
-    };
-  },
+  CustomersStackParamList,
   'CustomerDetail'
 >;
 
@@ -87,27 +91,67 @@ const RECENT_INVOICES: {
 const CustomerDetailScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NativeStackNavigationProp<CustomersStackParamList>>();
   const route = useRoute<CustomerDetailRoute>();
-  const customer = route.params?.customer ?? EMPTY_CUSTOMER;
+  const customerId = route.params?.customerId || (route.params?.customer as any)?.id;
+
+  const { data: fetchedCustomer } = useQuery({
+    queryKey: ['party', customerId],
+    queryFn: () => partiesService.getPartyById(customerId!),
+    enabled: !!customerId && !route.params?.customer,
+  });
+
+  const customerData = route.params?.customer || fetchedCustomer;
+
+  const customer: CustomerProfile = customerData ? {
+    id: customerData.id,
+    name: customerData.name ?? 'Unknown',
+    businessType: customerData.party_type === 'vendor' ? 'Supplier' : (customerData.businessType || 'Customer'),
+    location: customerData.address || customerData.location || '—',
+    phone: customerData.phone || customerData.mobile || '—',
+    dueAmount: customerData.balance || (route.params?.customer as any)?.dueAmount || 0,
+    totalSale: (route.params?.customer as any)?.totalSale || 0,
+    lastInvoice: (route.params?.customer as any)?.lastInvoice || '—',
+  } : EMPTY_CUSTOMER;
 
   const { data: summary, isLoading: summaryLoading } =
-    useCustomerFinancialSummary(customer?.id);
+    useCustomerFinancialSummary(customerId);
+
+  const { deleteClient } = useClientMutations();
 
   const jumpToInvoices = React.useCallback(() => {
-    navigation.getParent()?.navigate?.('InvoicesTab');
+    (navigation.getParent() as any)?.navigate?.('InvoicesTab');
   }, [navigation]);
 
   const handleRecordPayment = React.useCallback(() => {
-    Alert.alert(
-      'Record payment',
-      'Payment logging will open a dedicated flow soon. For now, update the invoice inside Invoices.',
-      [
-        { text: 'Go to Invoices', onPress: jumpToInvoices },
-        { text: 'Close', style: 'cancel' },
-      ],
-    );
-  }, [jumpToInvoices]);
+    if (!customerId) return;
+    (navigation as any).navigate('CreditBook', {
+      screen: 'PartyLedgerScreen',
+      params: { partyId: customerId, partyName: customer.name },
+    });
+  }, [navigation, customerId, customer.name]);
+
+  const handleEdit = React.useCallback(() => {
+    if (customerId) {
+      navigation.navigate('CustomerForm', { customerId });
+    }
+  }, [navigation, customerId]);
+
+  const handleDelete = React.useCallback(() => {
+    Alert.alert('Delete Party', 'Are you sure you want to delete this party?', [
+      { text: 'Cancel', style: 'cancel' },
+      { 
+        text: 'Delete', 
+        style: 'destructive', 
+        onPress: async () => {
+          if (customerId) {
+            await deleteClient.mutateAsync(customerId);
+            navigation.goBack();
+          }
+        }
+      }
+    ]);
+  }, [deleteClient, customerId, navigation]);
 
   return (
     <View style={styles.screen}>
@@ -116,13 +160,22 @@ const CustomerDetailScreen: React.FC = () => {
         actions={[
           {
             icon: <Share2 size={18} color={tokens.foreground} />,
-            onPress: () => {},
+            onPress: () => {
+               Share.share({
+                  message: `Customer Details:\nName: ${customer.name}\nPhone: ${customer.phone}\nDue: ₹${summary?.outstanding || customer.dueAmount}`,
+               });
+            },
             accessibilityLabel: 'Share party',
           },
           {
-            icon: <Bell size={18} color={tokens.foreground} />,
-            onPress: () => {},
-            accessibilityLabel: 'Notifications',
+            icon: <Edit2 size={18} color={tokens.foreground} />,
+            onPress: handleEdit,
+            accessibilityLabel: 'Edit',
+          },
+          {
+            icon: <Trash2 size={18} color={tokens.destructive} />,
+            onPress: handleDelete,
+            accessibilityLabel: 'Delete',
           },
         ]}
       />

@@ -20,26 +20,7 @@ import { useProductMutations } from '../../logic/productLogic';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { Save, Trash2, Tag, CircleDollarSign, Package, Info } from 'lucide-react-native';
 
-// ─── Design Tokens (Stitch-aligned) ────────────────────────────────────────
-const DS = {
-  green: '#006e2d',
-  greenContainer: '#1db954',
-  greenContainerBg: 'rgba(29,185,84,0.12)',
-  greenBorder: 'rgba(29,185,84,0.2)',
-  surface: '#f8f9fa',
-  surfaceCard: '#ffffff',
-  surfaceContainerLow: '#f3f4f5',
-  surfaceContainerHigh: '#e7e8e9',
-  surfaceContainerHighest: '#e1e3e4',
-  onSurface: '#191c1d',
-  onSurfaceVariant: '#3d4a3d',
-  outlineVariant: 'rgba(188,203,185,0.25)',
-  secondary: '#645d5c',
-  tertiary: '#a8353e',
-  radius24: 24,
-  radius16: 16,
-  radius12: 12,
-};
+// ─── Note: All colors now use theme tokens from useThemeTokens() ────────────────────────────────────────
 
 const GST_RATES = ['0', '5', '12', '18', '28'];
 
@@ -147,7 +128,7 @@ const Field = React.memo(function Field({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={DS.secondary}
+          placeholderTextColor={s.tokens.mutedForeground}
           keyboardType={keyboardType ?? 'default'}
           multiline={multiline}
           numberOfLines={numberOfLines}
@@ -169,7 +150,7 @@ const ProductFormScreen: React.FC = () => {
   const route = useRoute<ProductFormRoute>();
   const mode = route.params?.mode ?? 'create';
   const product = route.params?.product;
-  const { createProduct, updateProduct } = useProductMutations();
+  const { createProduct, updateProduct, deleteProduct } = useProductMutations();
 
   const [form, setForm] = React.useState<FormState>(() => ({
     name: product?.name ?? DEFAULT_FORM.name,
@@ -301,35 +282,34 @@ const ProductFormScreen: React.FC = () => {
     }
   }, [validate, form, isActive, mode, product, createProduct, updateProduct, navigation]);
 
-  const handleArchive = React.useCallback(() => {
-    Alert.alert('Archive item', 'This will mark the item inactive. Continue?', [
+  const handleDelete = React.useCallback(() => {
+    if (!product?.id) return;
+
+    Alert.alert('Delete item', 'This will remove the item from active inventory. Continue?', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Archive',
+        text: 'Delete',
         style: 'destructive',
         onPress: async () => {
           try {
             setSubmitting(true);
-            await updateProduct.mutateAsync({
-              id: product!.id,
-              updates: { is_active: false },
-            });
-            Alert.alert('Archived', 'Item has been archived.', [
+            await deleteProduct.mutateAsync(product.id);
+            Alert.alert('Deleted', 'Item has been deleted.', [
               { text: 'OK', onPress: () => navigation.goBack() },
             ]);
           } catch (err: unknown) {
             const { logger } = await import('../../utils/logger');
-            logger.error('[ProductForm] Archive failed', err);
+            logger.error('[ProductForm] Delete failed', err);
             const errorMessage =
-              err instanceof Error ? err.message : 'Unable to archive item.';
-            Alert.alert('Archive failed', errorMessage);
+              err instanceof Error ? err.message : 'Unable to delete item.';
+            Alert.alert('Delete failed', errorMessage);
           } finally {
             setSubmitting(false);
           }
         },
       },
     ]);
-  }, [product, updateProduct, navigation]);
+  }, [product, deleteProduct, navigation]);
 
   const headerTitle = mode === 'create' ? 'Add Item' : 'Edit Item';
 
@@ -339,7 +319,7 @@ const ProductFormScreen: React.FC = () => {
         title={headerTitle}
         actions={[
           {
-            icon: <Save size={18} color={DS.green} />,
+            icon: <Save size={18} color={tokens.primary} />,
             onPress: handleSubmit,
             accessibilityLabel: 'Save item',
           },
@@ -359,7 +339,7 @@ const ProductFormScreen: React.FC = () => {
           {/* ── Section 1: Basic Info ── */}
           <Section
             title="BASIC INFO"
-            icon={<Tag size={16} color={DS.green} />}
+            icon={<Tag size={16} color={tokens.primary} />}
             styles={styles}
           >
             <Field
@@ -405,7 +385,7 @@ const ProductFormScreen: React.FC = () => {
           {/* ── Section 2: Pricing ── */}
           <Section
             title="PRICING"
-            icon={<CircleDollarSign size={16} color={DS.green} />}
+            icon={<CircleDollarSign size={16} color={tokens.primary} />}
             styles={styles}
           >
             <View style={styles.pricingRow}>
@@ -481,7 +461,7 @@ const ProductFormScreen: React.FC = () => {
           {/* ── Section 3: Inventory ── */}
           <Section
             title="INVENTORY"
-            icon={<Package size={16} color={DS.green} />}
+            icon={<Package size={16} color={tokens.primary} />}
             styles={styles}
           >
             <View style={styles.pricingRow}>
@@ -513,7 +493,7 @@ const ProductFormScreen: React.FC = () => {
           {/* ── Section 4: Additional Details ── */}
           <Section
             title="ADDITIONAL DETAILS"
-            icon={<Info size={16} color={DS.green} />}
+            icon={<Info size={16} color={tokens.primary} />}
             styles={styles}
           >
             <Field
@@ -544,8 +524,8 @@ const ProductFormScreen: React.FC = () => {
               <Switch
                 value={isActive}
                 onValueChange={setIsActive}
-                thumbColor="#fff"
-                trackColor={{ false: DS.surfaceContainerHighest, true: DS.greenContainer }}
+                thumbColor={tokens.white || '#fff'}
+                trackColor={{ false: tokens.muted, true: tokens.primary }}
               />
             </View>
           </Section>
@@ -558,7 +538,7 @@ const ProductFormScreen: React.FC = () => {
               disabled={isSubmitting}
               activeOpacity={0.8}
             >
-              <Save size={16} color="#fff" />
+              <Save size={16} color={tokens.primaryForeground} />
               <Text style={styles.saveBtnText}>
                 {isSubmitting ? 'Saving…' : mode === 'create' ? 'Save Item' : 'Update Item'}
               </Text>
@@ -567,12 +547,12 @@ const ProductFormScreen: React.FC = () => {
             {mode === 'edit' && product?.id && (
               <TouchableOpacity
                 style={styles.archiveBtn}
-                onPress={handleArchive}
+                onPress={handleDelete}
                 disabled={isSubmitting}
                 activeOpacity={0.8}
               >
-                <Trash2 size={16} color={DS.tertiary} />
-                <Text style={styles.archiveBtnText}>Archive Item</Text>
+                <Trash2 size={16} color={tokens.destructive} />
+                <Text style={styles.archiveBtnText}>Delete Item</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -587,8 +567,9 @@ const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
     screen: {
       flex: 1,
-      backgroundColor: DS.surface,
+      backgroundColor: tokens.background,
     },
+    tokens,
     flex: {
       flex: 1,
     },
@@ -603,10 +584,10 @@ const createStyles = (tokens: ThemeTokens) =>
 
     // ── Section Card ──
     sectionCard: {
-      backgroundColor: DS.surfaceCard,
-      borderRadius: DS.radius24,
+      backgroundColor: tokens.card,
+      borderRadius: 24,
       borderWidth: 1,
-      borderColor: DS.outlineVariant,
+      borderColor: tokens.border,
       overflow: 'hidden',
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },
@@ -622,26 +603,26 @@ const createStyles = (tokens: ThemeTokens) =>
       paddingTop: 18,
       paddingBottom: 16,
       borderBottomWidth: 1,
-      borderBottomColor: DS.outlineVariant,
+      borderBottomColor: tokens.border,
     },
     sectionAccentBar: {
       width: 3,
       height: 20,
       borderRadius: 4,
-      backgroundColor: DS.greenContainer,
+      backgroundColor: tokens.primary,
     },
     sectionIconWrap: {
       width: 30,
       height: 30,
       borderRadius: 8,
-      backgroundColor: DS.greenContainerBg,
+      backgroundColor: tokens.primary + '20',
       alignItems: 'center',
       justifyContent: 'center',
     },
     sectionTitle: {
       fontSize: 11,
       fontWeight: '800',
-      color: DS.secondary,
+      color: tokens.mutedForeground,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
@@ -657,27 +638,27 @@ const createStyles = (tokens: ThemeTokens) =>
     fieldLabel: {
       fontSize: 10,
       fontWeight: '800',
-      color: DS.onSurfaceVariant,
+      color: tokens.mutedForeground,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
     fieldInputWrap: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: DS.surfaceContainerHighest,
-      borderRadius: DS.radius12,
+      backgroundColor: tokens.muted,
+      borderRadius: 12,
       overflow: 'hidden',
       borderWidth: 1.5,
       borderColor: 'transparent',
     },
     fieldInputError: {
-      borderColor: DS.tertiary,
+      borderColor: tokens.destructive,
     },
     fieldPrefix: {
       paddingLeft: 14,
       fontSize: 15,
       fontWeight: '600',
-      color: DS.secondary,
+      color: tokens.mutedForeground,
     },
     fieldInput: {
       flex: 1,
@@ -685,7 +666,7 @@ const createStyles = (tokens: ThemeTokens) =>
       paddingVertical: 13,
       fontSize: 15,
       fontWeight: '600',
-      color: DS.onSurface,
+      color: tokens.foreground,
     },
     fieldInputWithPrefix: {
       paddingLeft: 4,
@@ -699,7 +680,7 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     fieldError: {
       fontSize: 11,
-      color: DS.tertiary,
+      color: tokens.destructive,
       fontWeight: '600',
     },
 
@@ -725,11 +706,11 @@ const createStyles = (tokens: ThemeTokens) =>
       paddingHorizontal: 18,
       paddingVertical: 9,
       borderRadius: 999,
-      backgroundColor: DS.surfaceContainerHighest,
+      backgroundColor: tokens.muted,
     },
     gstPillActive: {
-      backgroundColor: DS.greenContainer,
-      shadowColor: DS.greenContainer,
+      backgroundColor: tokens.primary,
+      shadowColor: tokens.primary,
       shadowOffset: { width: 0, height: 3 },
       shadowOpacity: 0.3,
       shadowRadius: 6,
@@ -738,10 +719,10 @@ const createStyles = (tokens: ThemeTokens) =>
     gstPillText: {
       fontSize: 13,
       fontWeight: '700',
-      color: DS.onSurfaceVariant,
+      color: tokens.mutedForeground,
     },
     gstPillTextActive: {
-      color: '#fff',
+      color: tokens.primaryForeground,
     },
 
     // ── Active toggle ──
@@ -749,19 +730,19 @@ const createStyles = (tokens: ThemeTokens) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      backgroundColor: DS.surfaceContainerLow,
+      backgroundColor: tokens.secondary,
       paddingHorizontal: 16,
       paddingVertical: 14,
-      borderRadius: DS.radius12,
+      borderRadius: 12,
     },
     toggleTitle: {
       fontSize: 14,
       fontWeight: '700',
-      color: DS.onSurface,
+      color: tokens.foreground,
     },
     toggleSubtext: {
       fontSize: 11,
-      color: DS.onSurfaceVariant,
+      color: tokens.mutedForeground,
       marginTop: 2,
     },
 
@@ -775,10 +756,10 @@ const createStyles = (tokens: ThemeTokens) =>
       alignItems: 'center',
       justifyContent: 'center',
       gap: 8,
-      backgroundColor: DS.green,
+      backgroundColor: tokens.primary,
       paddingVertical: 16,
-      borderRadius: DS.radius16,
-      shadowColor: DS.green,
+      borderRadius: 16,
+      shadowColor: tokens.primary,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
@@ -788,7 +769,7 @@ const createStyles = (tokens: ThemeTokens) =>
       opacity: 0.6,
     },
     saveBtnText: {
-      color: '#fff',
+      color: tokens.primaryForeground,
       fontSize: 15,
       fontWeight: '800',
       letterSpacing: 0.2,
@@ -800,12 +781,12 @@ const createStyles = (tokens: ThemeTokens) =>
       gap: 8,
       backgroundColor: 'transparent',
       paddingVertical: 14,
-      borderRadius: DS.radius16,
+      borderRadius: 16,
       borderWidth: 1.5,
-      borderColor: `rgba(168,53,62,0.3)`,
+      borderColor: tokens.destructive + '30',
     },
     archiveBtnText: {
-      color: DS.tertiary,
+      color: tokens.destructive,
       fontSize: 14,
       fontWeight: '700',
     },
