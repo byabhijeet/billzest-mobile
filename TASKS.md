@@ -92,7 +92,7 @@ Only after both pass, mark `[x]` and ask for review.
 - [x] **Task 52** (Audit): Remove or functionally replace the dead "Units" and "Categories" placeholder alerts so the UI reflects shipping-readiness. locked-by: codex-session | 2026-04-14 22:01:41 +05:30
 - [x] **Task 60** (Audit 2.1): `src/logic/partyLogic.ts` implement missing customer helper hooks such as `useCustomerDetail`, `calculateCustomerBalance`, and `recordCustomerPayment` to support customer/party flows consistently.
 - [x] **Task 61** [REMOVED - Offline Removed]: Offline party operations logic.
-- [/] **Task 62** (Audit 2.3): `src/hooks/useParties.ts` fix party mutation invalidation so `queryClient.invalidateQueries` refreshes the filtered `['parties', orgId, 'customers']` and `['parties', orgId, 'suppliers']` query caches. locked-by: antigravity-session | 2026-04-14 23:25:00 +05:30
+- [x] **Task 62** (Audit 2.3): `src/hooks/useParties.ts` fix party mutation invalidation so `queryClient.invalidateQueries` refreshes the filtered `['parties', orgId, 'customers']` and `['parties', orgId, 'suppliers']` query caches. locked-by: antigravity-session | 2026-04-15 01:21:00 +05:30
 - [x] **Task 63** (Audit 2.4): `src/supabase/partyBalanceService.ts` extend `getCustomerFinancialSummary` to include `credit_transactions` data so outstanding balance matches the party ledger.
 - [x] **Task 64** [REMOVED - Offline Removed]: Sync engine support for credit transactions.
 
