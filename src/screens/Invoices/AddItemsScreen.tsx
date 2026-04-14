@@ -26,6 +26,7 @@ import { useThemeTokens } from "../../theme/ThemeProvider";
 import { ThemeTokens } from "../../theme/tokens";
 import { useProducts } from "../../logic/productLogic";
 import { useInvoiceStore } from "../../stores/invoiceStore";
+import { formatCurrency, getInitials } from "../../utils/formatting";
 import {
   ArrowLeft,
   Search,
@@ -52,14 +53,6 @@ function avatarColor(name: string) {
   return AVATAR_COLORS[sum % AVATAR_COLORS.length];
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .slice(0, 1)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join("");
-}
-
 const AddItemsScreen = () => {
   const { tokens } = useThemeTokens();
   const styles = useMemo(() => createStyles(tokens), [tokens]);
@@ -82,13 +75,6 @@ const AddItemsScreen = () => {
         (p.barcode ?? "").toLowerCase().includes(q),
     );
   }, [products, query]);
-
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(val);
 
   const totalSelectedItems = lineItems.reduce((s, i) => s + i.quantity, 0);
   const totalSelectedAmount = lineItems.reduce((s, i) => s + i.total, 0);
