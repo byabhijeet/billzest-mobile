@@ -524,7 +524,7 @@ const ProductFormScreen: React.FC = () => {
               <Switch
                 value={isActive}
                 onValueChange={setIsActive}
-                thumbColor={tokens.white || '#fff'}
+                thumbColor={tokens.primaryForeground}
                 trackColor={{ false: tokens.muted, true: tokens.primary }}
               />
             </View>
@@ -563,13 +563,12 @@ const ProductFormScreen: React.FC = () => {
 };
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
-const createStyles = (tokens: ThemeTokens) =>
-  StyleSheet.create({
+const createStyles = (tokens: ThemeTokens) => {
+  const styles = StyleSheet.create({
     screen: {
       flex: 1,
       backgroundColor: tokens.background,
     },
-    tokens,
     flex: {
       flex: 1,
     },
@@ -791,5 +790,7 @@ const createStyles = (tokens: ThemeTokens) =>
       fontWeight: '700',
     },
   });
+  return { ...styles, tokens };
+};
 
 export default ProductFormScreen;
