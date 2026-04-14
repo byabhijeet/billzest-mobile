@@ -82,7 +82,7 @@ const StockSummaryScreen: React.FC = () => {
                   { text: 'Cancel', onPress: () => setShowAsOfDate(false), style: 'cancel' },
                   {
                     text: 'OK',
-                    onPress: (date) => {
+                    onPress: (date: string | undefined) => {
                       if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
                         setSelectedDate(date);
                       } else {
