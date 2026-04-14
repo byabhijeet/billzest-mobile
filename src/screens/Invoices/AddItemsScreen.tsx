@@ -265,7 +265,7 @@ const AddItemsScreen = () => {
           </View>
           <Pressable style={styles.doneBtn} onPress={handleDone}>
             <Text style={styles.doneBtnText}>Add to Invoice</Text>
-            <ArrowRight size={18} color="#fff" strokeWidth={2.5} />
+            <ArrowRight size={18} color={tokens.primaryForeground} strokeWidth={2.5} />
           </Pressable>
         </View>
       )}
@@ -375,7 +375,7 @@ const createStyles = (tokens: ThemeTokens) =>
       gap: 12,
       borderWidth: 1,
       borderColor: tokens.border + "15",
-      shadowColor: "#1a1a2e",
+      shadowColor: tokens.foreground,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
       shadowRadius: 8,
@@ -478,7 +478,7 @@ const createStyles = (tokens: ThemeTokens) =>
       shadowRadius: 12,
       elevation: 6,
     },
-    doneBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
+    doneBtnText: { fontSize: 14, fontWeight: "700", color: tokens.primaryForeground },
   });
 
 export default AddItemsScreen;
