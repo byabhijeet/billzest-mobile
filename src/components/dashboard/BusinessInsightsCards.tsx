@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { Package, Wallet } from 'lucide-react-native';
+import type { AppNavigationParamList } from '../../navigation/types';
 
 interface BusinessInsightsCardsProps {
   inventoryValue: number;
@@ -18,7 +20,7 @@ const BusinessInsightsCards: React.FC<BusinessInsightsCardsProps> = ({
 }) => {
   const { tokens } = useThemeTokens();
   const styles = createStyles(tokens);
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
 
   return (
     <View style={styles.insightsRow}>
@@ -27,7 +29,7 @@ const BusinessInsightsCards: React.FC<BusinessInsightsCardsProps> = ({
           styles.insightCard,
           pressed && { opacity: 0.7 },
         ]}
-        onPress={() => navigation.navigate('ProductsTab', { screen: 'ProductsList' })}
+        onPress={() => navigation.navigate('ProductsTab' as any, { screen: 'ProductsList' } as any)}
       >
         <View style={styles.insightHeader}>
           <Package size={18} color={tokens.mutedForeground} />
@@ -44,7 +46,7 @@ const BusinessInsightsCards: React.FC<BusinessInsightsCardsProps> = ({
           styles.insightCard,
           pressed && { opacity: 0.7 },
         ]}
-        onPress={() => navigation.navigate('Expenses', { screen: 'ExpensesMain' })}
+        onPress={() => navigation.navigate('Expenses' as any, { screen: 'ExpensesMain' } as any)}
       >
         <View style={styles.insightHeader}>
           <Wallet size={18} color={tokens.mutedForeground} />

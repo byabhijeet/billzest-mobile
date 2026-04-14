@@ -290,4 +290,37 @@ export const partyBalanceService = {
       transactions: transactions.reverse(),
     };
   },
+
+  /**
+   * Record a credit transaction (e.g., unpaid portion of an invoice or a payment).
+   */
+  async recordCreditTransaction(
+    orgId: string,
+    payload: {
+      party_id: string;
+      amount: number;
+      type: 'given' | 'received'; // 'given' for credit to customer (receivable), 'received' for payment from customer
+      description: string;
+      reference_number?: string;
+    }
+  ): Promise<void> {
+    const { error } = await supabase.from('credit_transactions').insert({
+      organization_id: orgId,
+      party_id: payload.party_id,
+      amount: payload.amount,
+      type: payload.type,
+      description: payload.description,
+      date: new Date().toISOString(),
+      reference_number: payload.reference_number,
+    });
+
+    if (error) {
+      logger.error('[PartyBalance] Failed to record credit transaction', error);
+      throw toAppError(
+        'partyBalance.recordTransaction',
+        error,
+        'Unable to record credit transaction.'
+      );
+    }
+  },
 };

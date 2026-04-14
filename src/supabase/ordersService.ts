@@ -3,6 +3,7 @@ import type { Order, OrderItem } from '../types/domain';
 import { offlineStorage } from '../offline/storage';
 import { AppError, toAppError } from '../utils/appError';
 import { logger } from '../utils/logger';
+import { partyBalanceService } from './partyBalanceService';
 
 // ── Composite types ─────────────────────────────────────────────────────
 
@@ -284,6 +285,26 @@ export const ordersService = {
       } catch (stockErr) {
         logger.error('[Orders] Stock adjustment failed', stockErr);
         // Order is already created, stock will be reconciled later
+      }
+
+      // 4.5. Update party balance ledger if there is an unpaid amount
+      try {
+        const partyId = order.party_id ?? order.customer_id;
+        const totalAmount = order.total_amount ?? 0;
+        const receivedAmount = order.received_amount ?? 0;
+        const unpaidAmount = totalAmount - receivedAmount;
+
+        if (partyId && unpaidAmount > 0) {
+          await partyBalanceService.recordCreditTransaction(orgId, {
+            party_id: partyId,
+            amount: unpaidAmount,
+            type: 'given',
+            description: `Unpaid invoice amount for Order #${order.invoice_number}`,
+            reference_number: orderId,
+          });
+        }
+      } catch (ledgerErr) {
+        logger.error('[Orders] Party ledger update failed', ledgerErr);
       }
 
       // 5. Return the created order with items
