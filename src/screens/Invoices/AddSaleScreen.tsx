@@ -34,6 +34,7 @@ import BillToCard from "./components/BillToCard";
 import InvoiceTotalsCard from "./components/InvoiceTotalsCard";
 import InvoiceBottomBar from "./components/InvoiceBottomBar";
 import Button from "../../components/ui/Button";
+import { formatCurrency } from "../../utils/formatting";
 import {
   ArrowLeft,
   Settings,
@@ -207,19 +208,6 @@ const AddSaleScreen = () => {
     setScannerVisible,
     existingInvoice,
   });
-
-  const formatCurrency = (val: number) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(val);
-
-
-
-
-
-
 
   return (
     <View style={styles.container}>
