@@ -92,6 +92,8 @@ const createStyles = (tokens: ThemeTokens) =>
       color: tokens.mutedForeground,
       marginBottom: 6,
       fontSize: 12,
+      fontWeight: '500',
+      letterSpacing: 0.3,
     },
     valueRow: {
       flexDirection: 'row',

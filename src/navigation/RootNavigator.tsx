@@ -338,7 +338,14 @@ const MainTabs = () => {
           paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 8),
           backgroundColor: tokens.background,
+          borderTopWidth: 1,
           borderTopColor: tokens.border,
+          elevation: 8,
+          shadowColor: tokens.shadowColor,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          zIndex: 100,
         },
       })}
     >

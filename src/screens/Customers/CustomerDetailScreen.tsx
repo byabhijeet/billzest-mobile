@@ -41,7 +41,8 @@ type CustomerProfile = {
   phone: string;
   dueAmount: number;
   totalSale: number;
-  lastInvoice: string;
+  lastInvoice: string | null;
+  dueDate?: string | null;
 };
 
 type CustomerDetailRoute = RouteProp<CustomersStackParamList, "CustomerDetail">;
@@ -54,7 +55,7 @@ const EMPTY_CUSTOMER: CustomerProfile = {
   phone: "",
   dueAmount: 0,
   totalSale: 0,
-  lastInvoice: "",
+  lastInvoice: null,
 };
 
 const ACTIVITY_LOG: {
@@ -119,7 +120,8 @@ const CustomerDetailScreen: React.FC = () => {
           (route.params?.customer as any)?.dueAmount ||
           0,
         totalSale: (route.params?.customer as any)?.totalSale || 0,
-        lastInvoice: (route.params?.customer as any)?.lastInvoice || "—",
+        lastInvoice: (route.params?.customer as any)?.lastInvoice || null,
+        dueDate: customerData.due_date || (route.params?.customer as any)?.dueDate || null,
       }
     : EMPTY_CUSTOMER;
 
@@ -202,7 +204,11 @@ const CustomerDetailScreen: React.FC = () => {
             <Text style={styles.heroAmount}>
               {formatCurrency(summary?.outstanding ?? customer.dueAmount)}
             </Text>
-            <Text style={styles.heroHint}>Expected in 3 days</Text>
+            {(summary?.outstanding ?? customer.dueAmount) > 0 && customer.dueDate && (
+              <Text style={styles.heroHint}>
+                Expected {customer.dueDate ? `by ${new Date(customer.dueDate).toLocaleDateString()}` : 'soon'}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -215,26 +221,28 @@ const CustomerDetailScreen: React.FC = () => {
           </Pressable>
         </View>
 
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Lifetime Sale</Text>
-            <Text style={styles.summaryValue}>
-              {formatCurrency(summary?.totalBilled ?? customer.totalSale)}
-            </Text>
-            <Text style={styles.summaryHint}>
-              {summaryLoading
-                ? "Loading invoices…"
-                : `${summary?.orderCount ?? 0} invoices`}
-            </Text>
+        {(summary?.orderCount ?? 0) > 0 || customer.totalSale > 0 || summary?.lastOrderDate || customer.lastInvoice !== "—" ? (
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>Lifetime Sale</Text>
+              <Text style={styles.summaryValue}>
+                {formatCurrency(summary?.totalBilled ?? customer.totalSale)}
+              </Text>
+              <Text style={styles.summaryHint}>
+                {summaryLoading
+                  ? "Loading invoices…"
+                  : `${summary?.orderCount ?? 0} invoices`}
+              </Text>
+            </View>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>Last Invoice</Text>
+              <Text style={styles.summaryValue}>
+                {summary?.lastOrderDate ?? customer.lastInvoice ?? "No invoices yet"}
+              </Text>
+              <Text style={styles.summaryHint}>Most recent activity</Text>
+            </View>
           </View>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Last Invoice</Text>
-            <Text style={styles.summaryValue}>
-              {summary?.lastOrderDate ?? customer.lastInvoice}
-            </Text>
-            <Text style={styles.summaryHint}>Most recent activity</Text>
-          </View>
-        </View>
+        ) : null}
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
@@ -302,7 +310,8 @@ const CustomerDetailScreen: React.FC = () => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>CreditBook</Text>
             <Text style={styles.sectionHint}>
-              ₹12,850 outstanding · next due in 3 days
+              {formatCurrency(summary?.outstanding ?? customer.dueAmount)} outstanding
+              {customer.dueDate ? ` · due ${new Date(customer.dueDate).toLocaleDateString()}` : ''}
             </Text>
           </View>
           {CREDIT_ENTRIES.map((entry) => {
@@ -334,7 +343,11 @@ const CustomerDetailScreen: React.FC = () => {
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Invoices</Text>
-            <Pressable onPress={jumpToInvoices}>
+            <Pressable
+              onPress={jumpToInvoices}
+              hitSlop={{ top: 10, bottom: 10, left: 12, right: 12 }}
+              style={styles.sectionLinkPressable}
+            >
               <Text style={styles.sectionLink}>View all</Text>
             </Pressable>
           </View>
@@ -514,9 +527,15 @@ const createStyles = (tokens: ThemeTokens) =>
       color: tokens.mutedForeground,
       fontSize: 12,
     },
+    sectionLinkPressable: {
+      paddingVertical: 6,
+      paddingHorizontal: 4,
+      marginRight: -4, // compensate for padding to maintain visual alignment
+    },
     sectionLink: {
       color: tokens.primary,
       fontWeight: "600",
+      fontSize: 14,
     },
     sectionActions: {
       flexDirection: "row",

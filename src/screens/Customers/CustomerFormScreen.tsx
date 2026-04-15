@@ -138,6 +138,14 @@ const CustomerFormScreen = () => {
       newErrors.phone = 'Enter a valid 10-digit number';
     }
 
+    // GSTIN validation: 15 characters, alphanumeric format [0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]
+    if (formState.gstin.trim()) {
+      const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+      if (!gstinRegex.test(formState.gstin.trim().toUpperCase())) {
+        newErrors.gstin = 'Enter a valid 15-character GSTIN';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -160,21 +168,23 @@ const CustomerFormScreen = () => {
         }
       }
 
-      const balanceValue = parseFloat(formState.openingBalance) || 0;
-      const finalBalance = formState.balanceType === 'RECEIVABLE' ? balanceValue : -balanceValue;
-
       const payload: Partial<Party> = {
         name: formState.businessName.trim(),
         mobile: phoneNormalized,
         phone: phoneNormalized,
         email: formState.email.trim() || null,
         gst_number: formState.gstin.trim() || null,
-        balance: finalBalance,
         credit_limit: parseFloat(formState.creditLimit) || 0,
         credit_limit_enabled: formState.isCreditEnabled,
         address: formState.address.trim() || null,
         type: formState.type,
       };
+
+      // Opening balance is immutable once record is created
+      if (!isEditMode) {
+        const balanceValue = parseFloat(formState.openingBalance) || 0;
+        payload.balance = formState.balanceType === 'RECEIVABLE' ? balanceValue : -balanceValue;
+      }
 
       if (isEditMode && customerId) {
         await updateClient.mutateAsync({ id: customerId, updates: payload });
@@ -183,8 +193,24 @@ const CustomerFormScreen = () => {
       }
 
       navigation.goBack();
-    } catch (err) {
-      Alert.alert('Save failed', 'Unable to save party.');
+    } catch (err: any) {
+      if (err.code === 'conflict' && err.details?.existingId) {
+        Alert.alert(
+          'Party Already Exists',
+          err.message,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'View Existing', 
+              onPress: () => {
+                navigation.replace('CustomerDetail', { customerId: err.details.existingId });
+              } 
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Save failed', err?.message || 'Unable to save party.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -227,9 +253,8 @@ const CustomerFormScreen = () => {
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitleRow}>
                 <Text style={styles.sectionTitle}>BASIC INFO</Text>
-                <View style={[styles.sectionIndicator, { backgroundColor: tokens.primary }]} />
+                <Info size={14} color={tokens.mutedForeground} style={{ marginLeft: 8 }} />
               </View>
-              <Info size={14} color={tokens.mutedForeground} />
             </View>
 
             <TonalInput
@@ -264,8 +289,10 @@ const CustomerFormScreen = () => {
                 label="GSTIN"
                 placeholder="22AAAAA0000A1Z5"
                 autoCapitalize="characters"
+                maxLength={15}
                 value={formState.gstin}
-                onChangeText={val => handleChange('gstin', val)}
+                onChangeText={val => handleChange('gstin', val.toUpperCase())}
+                error={errors.gstin}
                 containerStyle={{ flex: 1 }}
               />
             </View>
@@ -281,7 +308,9 @@ const CustomerFormScreen = () => {
             </View>
 
             <View style={styles.balanceContainer}>
-              <Text style={styles.inputLabel}>Opening Balance</Text>
+              <Text style={styles.inputLabel}>
+                Opening Balance {isEditMode && <Text style={{ color: tokens.mutedForeground }}>(Locked)</Text>}
+              </Text>
               <View style={styles.balanceInputRow}>
                 <TonalInput
                   label=""
@@ -289,19 +318,22 @@ const CustomerFormScreen = () => {
                   keyboardType="numeric"
                   value={formState.openingBalance}
                   onChangeText={val => handleChange('openingBalance', val)}
+                  editable={!isEditMode}
                   containerStyle={{ flex: 1, marginBottom: 0 }}
-                  inputStyle={styles.hugeInput}
+                  inputStyle={isEditMode ? { ...styles.hugeInput, opacity: 0.6 } : styles.hugeInput}
                 />
                 <View style={styles.toggleGroup}>
                   <Pressable
                     style={[
                       styles.toggleBtn,
                       formState.balanceType === 'RECEIVABLE' && styles.toggleBtnActive,
+                      isEditMode && { opacity: 0.6 },
                     ]}
-                    onPress={() => handleChange('balanceType', 'RECEIVABLE')}
+                    onPress={() => !isEditMode && handleChange('balanceType', 'RECEIVABLE')}
+                    disabled={isEditMode}
                     accessibilityRole="button"
                     accessibilityLabel="You'll get"
-                    accessibilityState={{ selected: formState.balanceType === 'RECEIVABLE' }}
+                    accessibilityState={{ selected: formState.balanceType === 'RECEIVABLE', disabled: isEditMode }}
                   >
                     <Text
                       style={[
@@ -316,11 +348,13 @@ const CustomerFormScreen = () => {
                     style={[
                       styles.toggleBtn,
                       formState.balanceType === 'PAYABLE' && [styles.toggleBtnActive, { backgroundColor: tokens.destructive }],
+                      isEditMode && { opacity: 0.6 },
                     ]}
-                    onPress={() => handleChange('balanceType', 'PAYABLE')}
+                    onPress={() => !isEditMode && handleChange('balanceType', 'PAYABLE')}
+                    disabled={isEditMode}
                     accessibilityRole="button"
                     accessibilityLabel="You'll give"
-                    accessibilityState={{ selected: formState.balanceType === 'PAYABLE' }}
+                    accessibilityState={{ selected: formState.balanceType === 'PAYABLE', disabled: isEditMode }}
                   >
                     <Text
                       style={[
@@ -448,12 +482,6 @@ const createStyles = (tokens: ThemeTokens) =>
       fontWeight: '800',
       color: tokens.secondary,
       letterSpacing: 1.5,
-    },
-    sectionIndicator: {
-      height: 4,
-      width: 48,
-      borderRadius: 2,
-      marginLeft: 12,
     },
     row: {
       flexDirection: 'row',
