@@ -232,10 +232,11 @@ const CustomersListScreen: React.FC = () => {
               onAction={() => navigation.navigate("CustomerForm", {})}
             />
           )}
-          {filteredParties.map((party) => (
+          {filteredParties.map((party, index) => (
             <PartyCard
               key={party.id}
               party={party}
+              alternate={index % 2 !== 0}
               onPress={() =>
                 navigation.navigate("CustomerDetail", { customerId: party.id })
               }

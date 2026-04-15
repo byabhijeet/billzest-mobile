@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  ScrollView,
   FlatList,
   View,
   Text,
@@ -32,6 +31,8 @@ import {
   Plus,
   FileText,
   BarChart3,
+  ArrowUpCircle,
+  ArrowDownCircle,
 } from 'lucide-react-native';
 import type { InvoicesStackParamList } from '../../navigation/types';
 
@@ -67,21 +68,13 @@ const InvoicesListScreen: React.FC = () => {
   }, [data]);
 
   const kpis = useMemo(() => {
-    const paid = (invoices as Order[])
+    const received = (invoices as Order[])
       .filter(inv => inv.status === 'paid')
       .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
-    const pending = (invoices as Order[])
-      .filter(inv => inv.status !== 'paid')
+    const outstanding = (invoices as Order[])
+      .filter(inv => inv.status !== 'paid' && inv.status !== 'cancelled')
       .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
-    return [
-      {
-        id: 'due',
-        label: 'Pending Amount',
-        value: `₹${pending.toLocaleString('en-IN')}`,
-      },
-      { id: 'paid', label: 'Paid', value: `₹${paid.toLocaleString('en-IN')}` },
-      { id: 'counts', label: 'Invoices', value: `${invoices.length} Total` },
-    ];
+    return { outstanding, received };
   }, [invoices]);
 
   const handleLoadMore = useCallback(() => {
@@ -184,12 +177,25 @@ const InvoicesListScreen: React.FC = () => {
             </View>
 
             <View style={styles.summaryRow}>
-              {kpis.map(card => (
-                <View key={card.id} style={styles.summaryCard}>
-                  <Text style={styles.summaryLabel}>{card.label}</Text>
-                  <Text style={styles.summaryValue}>{card.value}</Text>
+              <View style={styles.summaryStatItem}>
+                <View style={[styles.summaryIconCircle, styles.summaryIconCircleOutstanding]}>
+                  <ArrowUpCircle color={tokens.destructive} size={18} />
                 </View>
-              ))}
+                <View style={styles.summaryStatText}>
+                  <Text style={styles.summaryStatLabel}>OUTSTANDING</Text>
+                  <Text style={styles.summaryStatValue}>₹{kpis.outstanding.toLocaleString('en-IN')}</Text>
+                </View>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryStatItem}>
+                <View style={[styles.summaryIconCircle, styles.summaryIconCircleReceived]}>
+                  <ArrowDownCircle color={tokens.primary} size={18} />
+                </View>
+                <View style={styles.summaryStatText}>
+                  <Text style={styles.summaryStatLabel}>RECEIVED</Text>
+                  <Text style={styles.summaryStatValue}>₹{kpis.received.toLocaleString('en-IN')}</Text>
+                </View>
+              </View>
             </View>
 
             <SearchBar
@@ -209,32 +215,10 @@ const InvoicesListScreen: React.FC = () => {
               }
             />
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.filterScroll}
-              contentContainerStyle={styles.filtersContent}
-            >
-              {STATUS_FILTERS.map(status => {
-                const active = status === selectedStatus;
-                return (
-                  <Pressable
-                    key={status}
-                    style={[styles.filterChip, active && styles.filterChipActive]}
-                    onPress={() => setSelectedStatus(status)}
-                  >
-                    <Text
-                      style={[
-                        styles.filterChipText,
-                        active && styles.filterChipTextActive,
-                      ]}
-                    >
-                      {status}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
+            <View style={styles.recentActivityHeader}>
+              <Text style={styles.recentActivityLabel}>RECENT ACTIVITY</Text>
+              <Text style={styles.recentActivityCount}>Showing {invoices.length} items</Text>
+            </View>
           </>
         }
         ListEmptyComponent={
@@ -325,8 +309,71 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     summaryRow: {
       flexDirection: 'row',
-      marginHorizontal: -6,
-      marginBottom: 18,
+      alignItems: 'center',
+      paddingVertical: 8,
+      paddingHorizontal: 4,
+      marginBottom: 20,
+      gap: 0,
+    },
+    summaryStatItem: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    summaryIconCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    summaryIconCircleOutstanding: {
+      backgroundColor: 'rgba(239,68,68,0.1)',
+    },
+    summaryIconCircleReceived: {
+      backgroundColor: 'rgba(34,197,94,0.1)',
+    },
+    summaryStatText: {
+      gap: 2,
+    },
+    summaryStatLabel: {
+      fontSize: 10,
+      fontWeight: '700',
+      letterSpacing: 0.8,
+      color: tokens.mutedForeground,
+      textTransform: 'uppercase',
+    },
+    summaryStatValue: {
+      fontSize: 16,
+      fontWeight: '800',
+      color: tokens.foreground,
+    },
+    summaryDivider: {
+      width: 1,
+      height: 36,
+      backgroundColor: tokens.border,
+      marginHorizontal: 16,
+      opacity: 0.4,
+    },
+    recentActivityHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+      marginTop: 4,
+    },
+    recentActivityLabel: {
+      fontSize: 10,
+      fontWeight: '700',
+      letterSpacing: 0.8,
+      color: tokens.mutedForeground,
+      textTransform: 'uppercase',
+    },
+    recentActivityCount: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: tokens.mutedForeground,
     },
     headerRow: {
       flexDirection: 'row',
@@ -357,27 +404,6 @@ const createStyles = (tokens: ThemeTokens) =>
       color: tokens.primary,
       fontWeight: '600',
       fontSize: 13,
-    },
-    summaryCard: {
-      flex: 1,
-      backgroundColor: tokens.card,
-      borderRadius: 16,
-      padding: 12,
-      marginHorizontal: 6,
-      shadowColor: tokens.shadowColor,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    summaryLabel: {
-      color: tokens.mutedForeground,
-      marginBottom: 8,
-    },
-    summaryValue: {
-      color: tokens.foreground,
-      fontWeight: '700',
-      fontSize: 18,
     },
     searchRow: {
       flexDirection: 'row',

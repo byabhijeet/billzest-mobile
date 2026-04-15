@@ -69,12 +69,20 @@ const PartyFilterSheet: React.FC<PartyFilterSheetProps> = ({
       onClose={onClose}
       title="Filter Parties"
       footer={
-        <Button
-          label="Apply Filters"
-          onPress={handleApply}
-          variant="primary"
-          style={styles.applyButton}
-        />
+        <View style={styles.footerRow}>
+          <Button
+            label="Cancel"
+            onPress={onClose}
+            variant="ghost"
+            style={styles.cancelButton}
+          />
+          <Button
+            label="Apply Filters"
+            onPress={handleApply}
+            variant="primary"
+            style={styles.applyButton}
+          />
+        </View>
       }
     >
       <View style={styles.headerRow}>
@@ -202,10 +210,19 @@ const createStyles = (tokens: ThemeTokens) =>
         backgroundColor: tokens.primary,
         borderColor: tokens.primary,
     },
+    footerRow: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    cancelButton: {
+      flex: 1,
+      borderRadius: 16,
+      height: 52,
+    },
     applyButton: {
-        width: '100%',
-        borderRadius: 16,
-        height: 52,
+      flex: 1,
+      borderRadius: 16,
+      height: 52,
     },
   });
 

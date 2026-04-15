@@ -2,8 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useThemeTokens } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
-import StatusBadge from './ui/StatusBadge';
-import { Share2, CreditCard } from 'lucide-react-native';
+import { MoreVertical } from 'lucide-react-native';
 
 export type InvoiceStatus =
   | 'paid'
@@ -20,7 +19,7 @@ export interface InvoiceProp {
   dueDate?: string;
   amount: number;
   balance?: number;
-  status: string; // loose typing to allow varied backend strings, mapped internally
+  status: string;
   currency?: string;
 }
 
@@ -35,28 +34,17 @@ interface InvoiceCardProps {
 
 const formatCurrency = (value: number) => `₹${value.toLocaleString('en-IN')}`;
 
-// Helper function to safely format dates
 const formatDateSafe = (dateString: string | null | undefined): string => {
-  if (!dateString) {
-    return new Date().toLocaleDateString('en-IN');
-  }
-  
-  // Handle date strings in YYYY-MM-DD format
-  const date = dateString.includes('T') 
-    ? new Date(dateString) 
+  if (!dateString) return new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const date = dateString.includes('T')
+    ? new Date(dateString)
     : new Date(dateString + 'T00:00:00');
-  
-  // Check if date is valid
   if (isNaN(date.getTime())) {
-    // Fallback: try parsing as-is
-    const fallbackDate = new Date(dateString);
-    if (isNaN(fallbackDate.getTime())) {
-      return new Date().toLocaleDateString('en-IN');
-    }
-    return fallbackDate.toLocaleDateString('en-IN');
+    const fallback = new Date(dateString);
+    if (isNaN(fallback.getTime())) return new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    return fallback.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
-  
-  return date.toLocaleDateString('en-IN');
+  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
 const InvoiceCard: React.FC<InvoiceCardProps> = ({
@@ -70,195 +58,152 @@ const InvoiceCard: React.FC<InvoiceCardProps> = ({
   const { tokens } = useThemeTokens();
   const styles = useMemo(() => createStyles(tokens), [tokens]);
 
-  const mapStatus = (status: string | null | undefined) => {
-    if (!status) return 'warning'; // default to 'pending' style if status is undefined/null
-    const s = status.toLowerCase();
-    if (s === 'paid') return 'success';
-    if (s === 'overdue') return 'error';
-    if (s === 'pending') return 'warning';
-    if (s === 'draft') return 'neutral';
-    return 'info';
-  };
-
-  const statusType = mapStatus(invoice.status);
-  const safeStatus = invoice.status ?? 'pending';
-  const statusLabel =
-    safeStatus === 'draft' ? 'DRAFT' : safeStatus.toUpperCase();
+  if (variant === 'compact') {
+    return (
+      <Pressable
+        style={({ pressed }) => [styles.compactRow, pressed && styles.pressed]}
+        onPress={onPress}
+        accessibilityRole="button"
+      >
+        <View style={styles.compactLeft}>
+          <Text style={styles.compactClientName} numberOfLines={1}>{invoice.clientName}</Text>
+          <View style={styles.compactMeta}>
+            <Text style={styles.compactInvoiceChip}>#{invoice.invoiceNumber}</Text>
+            <Text style={styles.compactDate}>{formatDateSafe(invoice.date)}</Text>
+          </View>
+        </View>
+        <Text style={styles.compactAmount}>{formatCurrency(invoice.amount)}</Text>
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.container,
-        variant === 'compact' && styles.compactContainer,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       onPress={onPress}
       accessibilityRole="button"
     >
-      <View style={styles.header}>
-        <View style={styles.titleBlock}>
-          <Text style={styles.clientName}>{invoice.clientName}</Text>
-          <Text style={styles.meta}>
-            #{invoice.invoiceNumber}
-            {variant === 'default' &&
-              ` · Issued ${formatDateSafe(invoice.date)}`}
-            {variant === 'compact' &&
-              ` · ${formatDateSafe(invoice.date)}`}
-          </Text>
+      <View style={styles.left}>
+        <Text style={styles.clientName} numberOfLines={1}>{invoice.clientName}</Text>
+        <View style={styles.metaRow}>
+          <Text style={styles.invoiceChip}>#{invoice.invoiceNumber}</Text>
+          <Text style={styles.date}>{formatDateSafe(invoice.date)}</Text>
         </View>
-        <StatusBadge status={statusType} label={statusLabel} size="sm" />
       </View>
-
-      <View style={styles.valuesRow}>
-        <View>
-          <Text style={styles.label}>Total</Text>
-          <Text style={styles.amount}>{formatCurrency(invoice.amount)}</Text>
-        </View>
-
-        {variant === 'default' && invoice.dueDate && (
-          <View>
-            <Text style={styles.label}>Due Date</Text>
-            <Text style={styles.value}>
-              {formatDateSafe(invoice.dueDate)}
-            </Text>
-          </View>
-        )}
-
-        {variant === 'compact' && (
-          <View>
-            <Text style={styles.label}>Balance</Text>
-            <Text style={styles.value}>
-              {invoice.balance !== undefined
-                ? formatCurrency(invoice.balance)
-                : statusType === 'success'
-                ? '₹0'
-                : formatCurrency(invoice.amount)}
-            </Text>
-          </View>
-        )}
-
-        {variant === 'default' && (
-          <View>
-            <Text style={styles.label}>Status</Text>
-            <Text
-              style={[
-                styles.value,
-                {
-                  color:
-                    tokens[
-                      statusType === 'success'
-                        ? 'accent'
-                        : statusType === 'error'
-                        ? 'destructive'
-                        : 'warning'
-                    ],
-                },
-              ]}
-            >
-              {statusLabel}
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {variant === 'default' && showActions && (
-        <View style={styles.footer}>
+      <View style={styles.right}>
+        <Text style={styles.amount}>{formatCurrency(invoice.amount)}</Text>
+        {showActions && (
           <Pressable
-            style={styles.iconButton}
-            onPress={onShare}
-            accessibilityRole="button"
-            accessibilityLabel="Share Invoice"
-          >
-            <Share2 color={tokens.foreground} size={16} />
-          </Pressable>
-          <Pressable
-            style={styles.iconButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             onPress={onPayment}
-            accessibilityRole="button"
-            accessibilityLabel="Collect Payment"
+            accessibilityLabel="Invoice options"
           >
-            <CreditCard color={tokens.foreground} size={16} />
+            <MoreVertical color={tokens.mutedForeground} size={20} />
           </Pressable>
-        </View>
-      )}
+        )}
+      </View>
     </Pressable>
   );
 };
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
-    container: {
-      backgroundColor: tokens.card,
-      borderRadius: 20,
-      padding: 16,
-      marginBottom: 16,
-      shadowColor: tokens.shadowColor,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
-      elevation: 2,
+    row: {
+      backgroundColor: tokens.surface_container_lowest,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderRadius: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 4,
     },
-    compactContainer: {
-      padding: 14,
-      borderRadius: 16,
-      marginBottom: 12,
+    compactRow: {
+      backgroundColor: tokens.surface_container_lowest,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderRadius: 10,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 4,
     },
     pressed: {
-      opacity: 0.95,
-      transform: [{ scale: 0.99 }],
+      backgroundColor: tokens.muted,
     },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    titleBlock: {
+    left: {
       flex: 1,
       paddingRight: 12,
+      gap: 4,
     },
     clientName: {
       color: tokens.foreground,
       fontWeight: '700',
-      fontSize: 16,
+      fontSize: 14,
+      letterSpacing: -0.2,
     },
-    meta: {
-      color: tokens.mutedForeground,
-      marginTop: 4,
-      fontSize: 12,
-    },
-    valuesRow: {
+    metaRow: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 10,
+      alignItems: 'center',
+      gap: 8,
     },
-    label: {
+    invoiceChip: {
+      fontSize: 10,
+      fontFamily: 'monospace',
       color: tokens.mutedForeground,
-      fontSize: 12,
-      marginBottom: 4,
+      backgroundColor: tokens.muted,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+      overflow: 'hidden',
+    },
+    date: {
+      fontSize: 11,
+      color: tokens.mutedForeground,
+    },
+    right: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
     },
     amount: {
       color: tokens.foreground,
-      fontWeight: '700',
-      fontSize: 18,
+      fontWeight: '800',
+      fontSize: 14,
     },
-    value: {
+    compactLeft: {
+      flex: 1,
+      paddingRight: 12,
+      gap: 4,
+    },
+    compactClientName: {
       color: tokens.foreground,
-      fontWeight: '600',
+      fontWeight: '700',
+      fontSize: 13,
     },
-    footer: {
+    compactMeta: {
       flexDirection: 'row',
-      justifyContent: 'flex-end',
-      marginLeft: -8,
-      marginTop: 4,
+      alignItems: 'center',
+      gap: 8,
     },
-    iconButton: {
-      borderRadius: 999,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      paddingHorizontal: 14,
-      paddingVertical: 6,
-      marginLeft: 8,
+    compactInvoiceChip: {
+      fontSize: 10,
+      fontFamily: 'monospace',
+      color: tokens.mutedForeground,
+      backgroundColor: tokens.muted,
+      paddingHorizontal: 5,
+      paddingVertical: 1,
+      borderRadius: 3,
+      overflow: 'hidden',
+    },
+    compactDate: {
+      fontSize: 11,
+      color: tokens.mutedForeground,
+    },
+    compactAmount: {
+      color: tokens.foreground,
+      fontWeight: '800',
+      fontSize: 13,
     },
   });
 

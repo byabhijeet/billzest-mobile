@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import {
-  ScrollView,
   FlatList,
   View,
   Text,
@@ -10,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
   Share,
-  TextInput,
   Modal,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -22,7 +20,6 @@ import { ThemeTokens } from '../../theme/tokens';
 import { logger } from '../../utils/logger';
 import { useProducts, useProductMutations } from '../../logic/productLogic';
 import { Product } from '../../types/domain';
-import QuickLinksCard from '../../components/QuickLinksCard';
 import EmptyState from '../../components/EmptyState';
 import ScreenWrapper from '../../components/ScreenWrapper';
 import FAB from '../../components/ui/FAB';
@@ -33,14 +30,12 @@ import BarcodeScanner from '../../components/Scanner/BarcodeScanner';
 import SearchBar from '../../components/SearchBar';
 import { useScreenContentPadding } from '../../components/layout/ScreenContent';
 import {
-  MoreHorizontal,
   Plus,
-  Package,
   AlertTriangle,
   Scan,
   MoreVertical,
-  Printer,
 } from 'lucide-react-native';
+
 
 const formatCurrency = (amount: number) => {
   return `₹${amount.toLocaleString('en-IN')}`;
@@ -252,23 +247,6 @@ const ProductsListScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <>
-              <QuickLinksCard
-                items={[
-                  {
-                    id: 'stock',
-                    icon: <Package color={tokens.primary} size={24} />,
-                    label: 'Stock Summary',
-                    onPress: () => navigation.navigate('StockSummary'),
-                  },
-                  {
-                    id: 'barcodes',
-                    icon: <Printer color={tokens.primary} size={24} />,
-                    label: 'Barcodes',
-                    onPress: () => navigation.navigate('BarcodeGenerator', {}),
-                  },
-                ]}
-              />
-
               <SearchBar
                 value={searchTerm}
                 onChangeText={setSearchTerm}
@@ -303,6 +281,13 @@ const ProductsListScreen: React.FC = () => {
                   style={{ marginTop: 20, marginBottom: 20 }}
                 />
               )}
+
+              {!isLoading && (
+                <View style={styles.listColumnHeader}>
+                  <Text style={styles.listColumnLabel}>DESCRIPTION &amp; SKU</Text>
+                  <Text style={styles.listColumnLabel}>INVENTORY STATUS</Text>
+                </View>
+              )}
             </>
           }
           ListEmptyComponent={
@@ -319,7 +304,7 @@ const ProductsListScreen: React.FC = () => {
 
               {!isLoading && !error && filteredProducts.length === 0 && (
                 <EmptyState
-                  icon={<Package color={tokens.primary} size={32} />}
+                  icon={<Plus color={tokens.primary} size={32} />}
                   title="No products found"
                   description="Try adjusting your search or filters, or add a new item to getting started."
                   actionLabel="Add New Item"
@@ -330,48 +315,14 @@ const ProductsListScreen: React.FC = () => {
               )}
             </>
           }
-          renderItem={({ item: product }) => {
-            const status = getProductStatus(product);
-            const isExpired =
-              product.expiry_date &&
-              new Date(product.expiry_date) < new Date();
-            const isNearExpiry = status === 'near-expiry';
-
-            return (
-              <View
-                style={[
-                  styles.productCardWrapper,
-                  (isExpired || isNearExpiry) && styles.productCardWarning,
-                ]}
-              >
-                {(isExpired || isNearExpiry) && (
-                  <View
-                    style={[
-                      styles.expiryWarningBadge,
-                      isExpired && styles.expiryWarningBadgeExpired,
-                    ]}
-                  >
-                    <AlertTriangle
-                      size={16}
-                      color={
-                        isExpired
-                          ? tokens.destructiveForeground
-                          : tokens.warningForeground
-                      }
-                    />
-                  </View>
-                )}
-                <ProductCard
-                  product={product}
-                  onPress={() => {
-                    navigation.navigate('ProductDetail', { product });
-                  }}
-                  onShare={() => handleShareProduct(product)}
-                  onPrint={() => handlePrintProduct(product)}
-                />
-              </View>
-            );
-          }}
+          renderItem={({ item: product }) => (
+            <ProductCard
+              product={product}
+              onPress={() => navigation.navigate('ProductDetail', { product })}
+              onShare={() => handleShareProduct(product)}
+              onPrint={() => handlePrintProduct(product)}
+            />
+          )}
           ListFooterComponent={<View style={styles.listSpacer} />}
         />
 
@@ -492,87 +443,19 @@ const createStyles = (tokens: ThemeTokens) =>
     filterChipTextActive: {
       color: tokens.primaryForeground,
     },
-    productList: {
-      marginBottom: 4,
-    },
-    productCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 20,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      marginBottom: 16,
-    },
-    cardPressed: {
-      opacity: 0.95,
-      transform: [{ scale: 0.99 }],
-    },
-    productCardHeader: {
+    listColumnHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 14,
+      paddingHorizontal: 20,
+      paddingVertical: 8,
+      backgroundColor: tokens.muted,
     },
-    productTitleBlock: {
-      flex: 1,
-      paddingRight: 12,
-    },
-    productName: {
-      fontSize: 16,
-      color: tokens.foreground,
-      fontWeight: '700',
-    },
-    productMeta: {
-      fontSize: 12,
+    listColumnLabel: {
+      fontSize: 10,
+      fontWeight: '800',
       color: tokens.mutedForeground,
-      marginTop: 4,
-    },
-    productDetailsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 14,
-    },
-    detailBlock: {
-      flex: 1,
-      paddingRight: 10,
-    },
-    detailLabel: {
-      fontSize: 12,
-      color: tokens.mutedForeground,
-      marginBottom: 4,
-    },
-    detailValue: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: tokens.foreground,
-    },
-    productFooter: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-    },
-    footerLabel: {
-      fontSize: 12,
-      color: tokens.mutedForeground,
-      marginBottom: 4,
-    },
-    footerValue: {
-      fontSize: 13,
-      color: tokens.foreground,
-      fontWeight: '600',
-    },
-    footerActions: {
-      flexDirection: 'row',
-      marginLeft: -8,
-    },
-    cardIconButton: {
-      borderRadius: 999,
-      paddingHorizontal: 14,
-      paddingVertical: 6,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      marginLeft: 8,
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
     },
     cardIconButtonText: {
       color: tokens.foreground,
@@ -581,29 +464,6 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     listSpacer: {
       height: 20,
-    },
-    productCardWrapper: {
-      position: 'relative',
-      marginBottom: 16,
-    },
-    productCardWarning: {
-      borderLeftWidth: 4,
-      borderLeftColor: tokens.warning,
-    },
-    expiryWarningBadge: {
-      position: 'absolute',
-      top: 12,
-      left: 12,
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: 'rgba(250,204,21,0.9)',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 10,
-    },
-    expiryWarningBadgeExpired: {
-      backgroundColor: 'rgba(220,76,70,0.9)',
     },
   });
 

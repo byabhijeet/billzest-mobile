@@ -17,16 +17,8 @@ export interface PartyModel {
 interface PartyCardProps {
   party: PartyModel;
   onPress: () => void;
+  alternate?: boolean;
 }
-
-const getInitials = (name: string) => {
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-};
 
 const formatCurrency = (value: number) => {
   const absoluteValue = Math.abs(value);
@@ -36,51 +28,57 @@ const formatCurrency = (value: number) => {
   })}`;
 };
 
-const PartyCard: React.FC<PartyCardProps> = ({ party, onPress }) => {
+const STATUS_LABELS: Record<PartyStatus, string> = {
+  RECEIVABLE: 'Receivable',
+  PAYABLE: 'Payable',
+  SETTLED: 'Settled',
+  OVERDUE: 'Overdue',
+};
+
+const PartyCard: React.FC<PartyCardProps> = ({ party, onPress, alternate = false }) => {
   const { tokens } = useThemeTokens();
   const styles = useMemo(() => createStyles(tokens), [tokens]);
 
-  const initials = getInitials(party.name);
   const isPayable = party.status === 'PAYABLE' || party.balance < 0;
   const isSettled = party.status === 'SETTLED' || party.balance === 0;
   const isOverdue = party.status === 'OVERDUE';
 
-  const balanceColor = isPayable
+  const balanceColor = isOverdue
+    ? tokens.destructive
+    : isPayable
     ? tokens.destructive
     : isSettled
     ? tokens.mutedForeground
     : tokens.primary;
 
-  const statusLabel = party.status;
+  const displayBalance = isPayable
+    ? `-${formatCurrency(party.balance)}`
+    : formatCurrency(party.balance);
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.container,
+        alternate && styles.containerAlternate,
+        pressed && styles.pressed,
+      ]}
       onPress={onPress}
+      accessibilityLabel={`${party.name}, balance ${displayBalance}`}
     >
-      <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>{initials}</Text>
+      <View style={styles.info}>
+        <Text style={styles.name} numberOfLines={1}>{party.name}</Text>
+        <Text style={styles.phone}>{party.phone}</Text>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.info}>
-          <Text style={styles.name} numberOfLines={1}>
-            {party.name}
+      <View style={styles.balanceContainer}>
+        <Text style={[styles.balanceText, { color: balanceColor }]}>
+          {displayBalance}
+        </Text>
+        <View style={styles.statusRow}>
+          <View style={[styles.statusDot, { backgroundColor: balanceColor }]} />
+          <Text style={[styles.statusLabel, { color: balanceColor }]}>
+            {STATUS_LABELS[party.status]}
           </Text>
-          <Text style={styles.phone}>{party.phone}</Text>
-        </View>
-
-        <View style={styles.balanceContainer}>
-          <Text style={[styles.balanceText, { color: balanceColor }]}>
-            {isPayable ? `-${formatCurrency(party.balance)}` : formatCurrency(party.balance)}
-          </Text>
-
-          <View style={styles.statusRow}>
-              <View style={[styles.statusDot, { backgroundColor: balanceColor }]} />
-              <Text style={[styles.statusLabel, { color: balanceColor }]}>
-                  {statusLabel}
-              </Text>
-          </View>
         </View>
       </View>
     </Pressable>
@@ -92,40 +90,16 @@ const createStyles = (tokens: ThemeTokens) =>
     container: {
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       backgroundColor: tokens.surface_container_lowest,
-      paddingVertical: 14,
-      paddingHorizontal: 16,
-      marginBottom: 0, // Design shows them touching/stacked or with minimal gap
-      // Using shadow for elevation instead of borders
-      shadowColor: tokens.shadowColor,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 10,
-      elevation: 2,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
     },
-    pressed: {
-      opacity: 0.7,
+    containerAlternate: {
       backgroundColor: tokens.muted,
     },
-    avatarContainer: {
-      width: 44,
-      height: 44,
-      borderRadius: 12,
-      backgroundColor: 'rgba(74, 222, 128, 0.1)', // Subtle green tint for avatars
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 14,
-    },
-    avatarText: {
-      color: tokens.primary,
-      fontWeight: '700',
-      fontSize: 16,
-    },
-    content: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+    pressed: {
+      backgroundColor: tokens.muted,
     },
     info: {
       flex: 1,
@@ -133,36 +107,38 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     name: {
       fontSize: 16,
-      fontWeight: '600',
+      fontWeight: '700',
       color: tokens.foreground,
-      marginBottom: 2,
+      marginBottom: 3,
     },
     phone: {
-      fontSize: 14,
+      fontSize: 13,
       color: tokens.mutedForeground,
     },
     balanceContainer: {
       alignItems: 'flex-end',
     },
     balanceText: {
-      fontSize: 16,
-      fontWeight: '700',
+      fontSize: 17,
+      fontWeight: '800',
+      letterSpacing: -0.3,
     },
     statusRow: {
       flexDirection: 'row',
       alignItems: 'center',
       marginTop: 4,
+      gap: 4,
     },
     statusDot: {
       width: 6,
       height: 6,
       borderRadius: 3,
-      marginRight: 6,
     },
     statusLabel: {
-      fontSize: 10,
+      fontSize: 9,
       fontWeight: '700',
-      letterSpacing: 0.5,
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
     },
   });
 

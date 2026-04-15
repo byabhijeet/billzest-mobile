@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { Share2, Printer } from 'lucide-react-native';
 import { Product } from '../types/domain';
 import { useThemeTokens } from '../theme/ThemeProvider';
 import { ThemeTokens } from '../theme/tokens';
@@ -13,7 +12,6 @@ export type ProductStatus =
 
 export const getProductStatus = (product: Product): ProductStatus => {
   if (product.stock_quantity <= 0) return 'out-of-stock';
-  // Use low_stock_threshold if available, otherwise default to 10
   const threshold = (product as any).low_stock_threshold ?? 10;
   if (product.stock_quantity < threshold) return 'low-stock';
 
@@ -32,33 +30,18 @@ export const getProductStatus = (product: Product): ProductStatus => {
 const getStatusVisual = (status: ProductStatus, tokens: ThemeTokens) => {
   switch (status) {
     case 'low-stock':
-      return {
-        label: 'Low Stock',
-        backgroundColor: 'rgba(254,176,77,0.18)',
-        color: tokens.warning,
-      };
+      return { label: 'Low Stock', bgColor: 'rgba(168,53,62,0.1)', color: tokens.destructive };
     case 'out-of-stock':
-      return {
-        label: 'Out of Stock',
-        backgroundColor: 'rgba(220,76,70,0.2)',
-        color: tokens.destructive,
-      };
+      return { label: 'Out of Stock', bgColor: 'rgba(220,76,70,0.12)', color: tokens.destructive };
     case 'near-expiry':
-      return {
-        label: 'Near Expiry',
-        backgroundColor: 'rgba(250,204,21,0.18)',
-        color: tokens.warning,
-      };
+      return { label: 'Near Expiry', bgColor: 'rgba(250,204,21,0.18)', color: tokens.warning };
     default:
-      return {
-        label: 'In Stock',
-        backgroundColor: 'rgba(34,197,94,0.2)',
-        color: tokens.accent,
-      };
+      return { label: 'In Stock', bgColor: 'rgba(29,185,84,0.12)', color: tokens.primary };
   }
 };
 
-const formatCurrency = (value: number) => `₹${value.toFixed(2)}`;
+const formatCurrency = (value: number) =>
+  `₹ ${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 interface ProductCardProps {
   product: Product;
@@ -70,106 +53,43 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onPress,
-  onShare = () => {},
-  onPrint = () => {},
+  onShare,
+  onPrint,
 }) => {
   const { tokens } = useThemeTokens();
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
   const status = getProductStatus(product);
   const statusVisual = getStatusVisual(status, tokens);
-  const stockColor =
-    product.stock_quantity <= 0 ? tokens.destructive : tokens.accent;
+  const categoryName = (product as any).categories?.name || (product as any).category || null;
+  const skuMeta = [product.sku, categoryName].filter(Boolean).join(' · ');
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+      style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
       accessibilityRole="button"
       accessibilityLabel={`View details for ${product.name}`}
       onPress={onPress}
     >
-      <View style={styles.cardHeader}>
-        <View style={styles.titleBlock}>
-          <Text style={styles.productName}>{product.name}</Text>
-          <Text style={styles.productMeta}>{product.sku || 'No SKU'}</Text>
-        </View>
-        <View
-          style={[
-            styles.statusChip,
-            { backgroundColor: statusVisual.backgroundColor },
-          ]}
-        >
-          <Text style={[styles.statusChipText, { color: statusVisual.color }]}>
-            {statusVisual.label}
+      <View style={styles.topRow}>
+        <Text style={styles.productName} numberOfLines={1} ellipsizeMode="tail">
+          {product.name}
+        </Text>
+        <View style={styles.stockBlock}>
+          <Text style={[styles.stockCount, { color: statusVisual.color }]}>
+            {`Stock: ${product.stock_quantity}`}
           </Text>
+          <View style={[styles.statusBadge, { backgroundColor: statusVisual.bgColor }]}>
+            <Text style={[styles.statusBadgeText, { color: statusVisual.color }]}>
+              {statusVisual.label.toUpperCase()}
+            </Text>
+          </View>
         </View>
       </View>
-
-      <View style={styles.detailsRow}>
-        <View style={styles.detailBlock}>
-          <Text style={styles.detailLabel}>Sale Price</Text>
-          <Text style={styles.detailValue}>
-            {formatCurrency(product.selling_price)}
-          </Text>
-        </View>
-        <View style={styles.detailBlock}>
-          <Text style={styles.detailLabel}>Purchase Price</Text>
-          <Text style={styles.detailValue}>
-            {product.purchase_price
-              ? formatCurrency(product.purchase_price)
-              : '-'}
-          </Text>
-        </View>
-        <View style={styles.detailBlock}>
-          <Text style={styles.detailLabel}>In Stock</Text>
-          <Text style={[styles.detailValue, { color: stockColor }]}>
-            {product.stock_quantity}
-          </Text>
-        </View>
-      </View>
-
-      {/* Inventory Cost Display */}
-      {!!product.purchase_price && product.stock_quantity > 0 && (
-        <View style={styles.inventoryCostRow}>
-          <Text style={styles.inventoryCostLabel}>Inventory Cost</Text>
-          <Text style={styles.inventoryCostValue}>
-            {formatCurrency(product.purchase_price * product.stock_quantity)}
-          </Text>
-        </View>
-      )}
-
-      <View style={styles.footerRow}>
-        <View>
-          <Text style={styles.footerLabel}>Category</Text>
-          <Text style={styles.footerValue}>
-            {(product as any).categories?.name || '-'}
-          </Text>
-        </View>
-        <View>
-          <Text style={styles.footerLabel}>Expiry</Text>
-          <Text style={styles.footerValue}>
-            {product.expiry_date
-              ? new Date(product.expiry_date).toLocaleDateString()
-              : '-'}
-          </Text>
-        </View>
-        <View style={styles.footerActions}>
-          <Pressable
-            style={styles.cardIconButton}
-            accessibilityRole="button"
-            accessibilityLabel={`Share ${product.name}`}
-            onPress={onShare}
-          >
-            <Share2 color={tokens.foreground} size={16} />
-          </Pressable>
-          <Pressable
-            style={styles.cardIconButton}
-            accessibilityRole="button"
-            accessibilityLabel={`Print ${product.name}`}
-            onPress={onPrint}
-          >
-            <Printer color={tokens.foreground} size={16} />
-          </Pressable>
-        </View>
+      <View style={styles.bottomRow}>
+        <Text style={styles.price}>{formatCurrency(product.selling_price)}</Text>
+        {skuMeta ? (
+          <Text style={styles.skuMeta} numberOfLines={1}>{skuMeta}</Text>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -177,112 +97,64 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
-    card: {
-      backgroundColor: tokens.card,
-      borderRadius: 20,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      marginBottom: 16,
+    row: {
+      backgroundColor: tokens.surface_container_lowest,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      gap: 4,
     },
-    cardPressed: {
-      opacity: 0.95,
-      transform: [{ scale: 0.99 }],
+    rowPressed: {
+      backgroundColor: tokens.muted,
     },
-    cardHeader: {
+    topRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 14,
-    },
-    titleBlock: {
-      flex: 1,
-      paddingRight: 12,
+      alignItems: 'baseline',
+      gap: 8,
     },
     productName: {
-      fontSize: 16,
-      color: tokens.foreground,
-      fontWeight: '700',
-    },
-    productMeta: {
-      fontSize: 12,
-      color: tokens.mutedForeground,
-      marginTop: 4,
-    },
-    statusChip: {
-      borderRadius: 999,
-      paddingHorizontal: 14,
-      paddingVertical: 6,
-    },
-    statusChipText: {
-      fontWeight: '700',
-      fontSize: 12,
-    },
-    detailsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 14,
-    },
-    detailBlock: {
       flex: 1,
-      paddingRight: 10,
-    },
-    detailLabel: {
-      fontSize: 12,
-      color: tokens.mutedForeground,
-      marginBottom: 4,
-    },
-    detailValue: {
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: '700',
       color: tokens.foreground,
+      letterSpacing: -0.2,
     },
-    footerRow: {
+    stockBlock: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      flexShrink: 0,
+    },
+    stockCount: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
+    statusBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+    },
+    statusBadgeText: {
+      fontSize: 9,
+      fontWeight: '700',
+      letterSpacing: 0.4,
+    },
+    bottomRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      flexWrap: 'wrap',
     },
-    footerLabel: {
-      fontSize: 12,
+    price: {
+      fontSize: 14,
+      fontWeight: '800',
+      color: tokens.primary,
+    },
+    skuMeta: {
+      fontSize: 11,
       color: tokens.mutedForeground,
-      marginBottom: 4,
-    },
-    footerValue: {
-      fontSize: 13,
-      color: tokens.foreground,
-      fontWeight: '600',
-    },
-    footerActions: {
-      flexDirection: 'row',
-      marginLeft: -8,
-    },
-    cardIconButton: {
-      borderRadius: 999,
-      paddingHorizontal: 14,
-      paddingVertical: 6,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      marginLeft: 8,
-    },
-    inventoryCostRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: 8,
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: tokens.border,
-    },
-    inventoryCostLabel: {
-      fontSize: 13,
-      color: tokens.mutedForeground,
-      fontWeight: '600',
-    },
-    inventoryCostValue: {
-      fontSize: 16,
-      color: tokens.foreground,
-      fontWeight: '700',
+      fontWeight: '500',
+      flexShrink: 1,
+      textAlign: 'right',
     },
   });
 
