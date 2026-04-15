@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, BackHandler } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { useThemeTokens } from '../theme/ThemeProvider';
@@ -80,53 +80,53 @@ interface ErrorFallbackProps {
 }
 
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, onReset }) => {
+  const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
   const { tokens } = useThemeTokens();
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
-  const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
 
-  const handleGoHome = () => {
-    // Try multiple navigation strategies
+  const handleGoHome = React.useCallback(() => {
+    // Try multiple navigation strategies to get back to a safe state
     try {
-      // First, try to navigate to DashboardTab
-      if (navigation.canGoBack && navigation.canGoBack()) {
-        // If we can go back, navigate to dashboard and clear the stack
-        navigation.navigate('DashboardTab');
-      } else {
-        // If we can't go back, try to reset to dashboard
-        if (navigation.reset) {
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'DashboardTab' }],
-          });
-        } else {
-          navigation.navigate('DashboardTab');
-        }
-      }
+      // Check if we can reset to Home (the drawer root)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' as any }],
+      });
     } catch (err) {
-      // Fallback: try simple navigation
       try {
-        navigation.navigate('DashboardTab');
+        // Fallback to DashboardTab if Home reset fails
+        navigation.navigate('DashboardTab' as any);
       } catch (e) {
-        // If all navigation fails, try going back
-        try {
-          if (navigation.canGoBack && navigation.canGoBack()) {
-            navigation.goBack();
-          } else {
-            // Last resort: reset the error boundary
-            onReset();
-          }
-        } catch (finalErr) {
-          // If everything fails, just reset the error boundary
+        // If all navigation fails, try to just go back or reset the UI locally
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
           onReset();
         }
       }
     }
-  };
+  }, [navigation, onReset]);
+
+  // Handle hardware back button on Android
+  React.useEffect(() => {
+    const onBackPress = () => {
+      handleGoHome();
+      return true; // Intercept and handle
+    };
+
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      onBackPress
+    );
+
+    return () => subscription.remove();
+  }, [handleGoHome]);
 
   return (
     <View style={styles.container}>
       <DetailHeader
-        title="Error"
+        title="Unexpected Error"
+        onBack={handleGoHome}
         actions={[
           {
             icon: <Home size={18} color={tokens.foreground} />,
