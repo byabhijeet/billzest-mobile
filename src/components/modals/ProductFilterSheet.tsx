@@ -4,6 +4,7 @@ import ActionSheet from './ActionSheet';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { Check } from 'lucide-react-native';
+import FormActionBar from '../ui/FormActionBar';
 
 type ProductFilterSheetProps = {
   visible: boolean;
@@ -62,13 +63,36 @@ const ProductFilterSheet: React.FC<ProductFilterSheetProps> = ({
   };
 
   return (
-    <ActionSheet visible={visible} onClose={onClose} title="Filter By">
-      <View style={styles.container}>
-        <Text style={styles.sectionTitle}>Status</Text>
+    <ActionSheet
+      visible={visible}
+      onClose={onClose}
+      title="Filter Products"
+      scrollable={false}
+      footer={
+        <FormActionBar
+          variant="dual"
+          secondaryLabel="Clear All"
+          onSecondary={() => {
+            setSelectedCats([]);
+            setSelectedStatus('All');
+          }}
+          primaryLabel="Apply Filters"
+          onPrimary={handleApply}
+        />
+      }
+    >
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>STATUS</Text>
+        </View>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          style={styles.horizontalScroll}
+          contentContainerStyle={styles.chipRow}
         >
           {STATUS_OPTIONS.map(status => {
             const isSelected = selectedStatus === status;
@@ -77,10 +101,9 @@ const ProductFilterSheet: React.FC<ProductFilterSheetProps> = ({
                 key={status}
                 style={[styles.chip, isSelected && styles.chipActive]}
                 onPress={() => setSelectedStatus(status)}
+                accessibilityLabel={status}
               >
-                <Text
-                  style={[styles.chipText, isSelected && styles.chipTextActive]}
-                >
+                <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>
                   {status}
                 </Text>
               </Pressable>
@@ -88,141 +111,105 @@ const ProductFilterSheet: React.FC<ProductFilterSheetProps> = ({
           })}
         </ScrollView>
 
-        <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Categories</Text>
-        <ScrollView style={styles.list}>
+        <View style={[styles.sectionHeader, { marginTop: 20 }]}>
+          <Text style={styles.sectionTitle}>CATEGORIES</Text>
+        </View>
+        <View style={styles.checkList}>
           {categoriesToShow.map((cat: string) => {
             const isSelected = selectedCats.includes(cat);
             return (
               <Pressable
                 key={cat}
-                style={styles.row}
+                style={styles.checkRow}
                 onPress={() => toggleCategory(cat)}
+                accessibilityLabel={cat}
               >
-                <Text style={styles.label}>{cat}</Text>
-                <View style={[styles.checkbox, isSelected && styles.checked]}>
-                  {isSelected && (
-                    <Check size={14} color={tokens.primaryForeground} />
-                  )}
+                <Text style={styles.checkLabel}>{cat}</Text>
+                <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
+                  {isSelected && <Check size={13} color={tokens.primaryForeground} strokeWidth={3} />}
                 </View>
               </Pressable>
             );
           })}
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <Pressable
-            style={styles.clearBtn}
-            onPress={() => {
-              setSelectedCats([]);
-              setSelectedStatus('All');
-            }}
-          >
-            <Text style={styles.clearText}>Clear</Text>
-          </Pressable>
-          <Pressable style={styles.applyBtn} onPress={handleApply}>
-            <Text style={styles.applyText}>Apply</Text>
-          </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </ActionSheet>
   );
 };
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
-    container: {
-      paddingHorizontal: 16,
-      paddingBottom: 24,
-      maxHeight: 600,
+    scrollView: {
+      flexShrink: 1,
     },
-    horizontalScroll: {
+    scrollContent: {
+      paddingBottom: 8,
+    },
+    sectionHeader: {
       flexDirection: 'row',
-      marginBottom: 10,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: tokens.mutedForeground,
+      letterSpacing: 0.6,
+    },
+    chipRow: {
+      flexDirection: 'row',
+      gap: 8,
+      marginBottom: 4,
     },
     chip: {
       paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      marginRight: 10,
-      backgroundColor: tokens.background,
+      paddingVertical: 9,
+      borderRadius: 999,
+      backgroundColor: tokens.muted,
     },
     chipActive: {
       backgroundColor: tokens.primary,
-      borderColor: tokens.primary,
     },
     chipText: {
       fontSize: 14,
-      fontWeight: '500',
+      fontWeight: '600',
       color: tokens.foreground,
     },
     chipTextActive: {
       color: tokens.primaryForeground,
     },
-    sectionTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: tokens.foreground,
-      marginBottom: 12,
+    checkList: {
+      backgroundColor: tokens.muted,
+      borderRadius: 14,
+      paddingHorizontal: 16,
+      paddingVertical: 4,
     },
-    list: {
-      marginBottom: 20,
-      maxHeight: 250,
-    },
-    row: {
+    checkRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingVertical: 12,
-      borderBottomWidth: 1,
+      paddingVertical: 13,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: tokens.border,
     },
-    label: {
+    checkLabel: {
       fontSize: 15,
+      fontWeight: '500',
       color: tokens.foreground,
     },
     checkbox: {
-      width: 20,
-      height: 20,
-      borderRadius: 4,
+      width: 22,
+      height: 22,
+      borderRadius: 6,
       borderWidth: 2,
-      borderColor: tokens.mutedForeground,
+      borderColor: tokens.border,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    checked: {
+    checkboxActive: {
       backgroundColor: tokens.primary,
       borderColor: tokens.primary,
-    },
-    footer: {
-      flexDirection: 'row',
-      gap: 12,
-      marginTop: 10,
-    },
-    clearBtn: {
-      flex: 1,
-      padding: 14,
-      alignItems: 'center',
-      borderRadius: 12,
-      backgroundColor: tokens.background,
-      borderWidth: 1,
-      borderColor: tokens.border,
-    },
-    applyBtn: {
-      flex: 1,
-      padding: 14,
-      alignItems: 'center',
-      borderRadius: 12,
-      backgroundColor: tokens.primary,
-    },
-    clearText: {
-      fontWeight: '600',
-      color: tokens.mutedForeground,
-    },
-    applyText: {
-      fontWeight: '600',
-      color: tokens.primaryForeground,
     },
   });
 
