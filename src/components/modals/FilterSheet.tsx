@@ -4,7 +4,7 @@ import ActionSheet from './ActionSheet';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { Check } from 'lucide-react-native';
-import Button from '../ui/Button';
+import FormActionBar from '../ui/FormActionBar';
 
 export type FilterOption = {
   id: string;
@@ -91,24 +91,19 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
       visible={visible}
       onClose={onClose}
       title={title}
+      scrollable={false}
       footer={
-        <View style={styles.footerRow}>
-          <Button
-            label="Cancel"
-            variant="ghost"
-            onPress={onClose}
-            style={styles.footerBtn}
-          />
-          <Button
-            label="Apply"
-            variant="primary"
-            onPress={handleApply}
-            style={styles.footerBtn}
-          />
-        </View>
+        <FormActionBar
+          variant="dual"
+          secondaryLabel="Cancel"
+          onSecondary={onClose}
+          primaryLabel="Apply Filters"
+          onPrimary={handleApply}
+        />
       }
     >
       <ScrollView
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -173,6 +168,9 @@ const FilterSheet: React.FC<FilterSheetProps> = ({
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
+    scrollView: {
+      flexShrink: 1,
+    },
     scrollContent: {
       paddingBottom: 8,
     },
@@ -252,15 +250,6 @@ const createStyles = (tokens: ThemeTokens) =>
     checkboxActive: {
       backgroundColor: tokens.primary,
       borderColor: tokens.primary,
-    },
-    footerRow: {
-      flexDirection: 'row',
-      gap: 12,
-    },
-    footerBtn: {
-      flex: 1,
-      height: 52,
-      borderRadius: 16,
     },
   });
 

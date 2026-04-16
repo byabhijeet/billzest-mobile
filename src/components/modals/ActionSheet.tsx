@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -6,11 +6,21 @@ import {
   View,
   Text,
   ScrollView,
-  Platform,
+  Dimensions,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+const SPRING_CONFIG = { damping: 28, stiffness: 300, mass: 0.8 };
+const TIMING_CONFIG = { duration: 220 };
 
 type ActionSheetProps = {
   visible: boolean;
@@ -32,8 +42,43 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
   scrollable = true,
 }) => {
   const { tokens } = useThemeTokens();
-  const insets = useSafeAreaInsets();
-  const styles = React.useMemo(() => createStyles(tokens, insets), [tokens, insets]);
+  const styles = React.useMemo(() => createStyles(tokens), [tokens]);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const backdropOpacity = useSharedValue(0);
+  const translateY = useSharedValue(SCREEN_HEIGHT);
+
+  const openSheet = () => {
+    setModalVisible(true);
+    backdropOpacity.value = withTiming(1, TIMING_CONFIG);
+    translateY.value = withSpring(0, SPRING_CONFIG);
+  };
+
+  const closeSheet = () => {
+    backdropOpacity.value = withTiming(0, TIMING_CONFIG);
+    translateY.value = withTiming(SCREEN_HEIGHT, TIMING_CONFIG, (finished) => {
+      if (finished) {
+        runOnJS(setModalVisible)(false);
+        runOnJS(onClose)();
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (visible) {
+      openSheet();
+    } else if (modalVisible) {
+      closeSheet();
+    }
+  }, [visible]);
+
+  const backdropStyle = useAnimatedStyle(() => ({
+    opacity: backdropOpacity.value,
+  }));
+
+  const sheetStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
 
   const renderContent = () => {
     if (scrollable) {
@@ -47,64 +92,74 @@ const ActionSheet: React.FC<ActionSheetProps> = ({
         </ScrollView>
       );
     }
-    return <View style={[styles.scroll, styles.nonScrollableContent]}>{children}</View>;
+    return <View style={styles.nonScrollableContent}>{children}</View>;
   };
 
   return (
     <Modal
-      visible={visible}
+      visible={modalVisible}
       transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={closeSheet}
+      statusBarTranslucent
     >
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={styles.sheetContainer}>
-          <View style={styles.sheet}>
+        <Animated.View style={[StyleSheet.absoluteFill, styles.backdropBase, backdropStyle]}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={closeSheet} />
+        </Animated.View>
+        <Animated.View style={[styles.sheet, sheetStyle]}>
+          {/* ── Fixed header ── */}
+          <View style={styles.header}>
             <View style={styles.handle} />
             <Text style={styles.title}>{title}</Text>
             {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
             <View style={styles.divider} />
-            {renderContent()}
-            {footer ? <View style={styles.footer}>{footer}</View> : null}
           </View>
-        </View>
+
+          {/* ── Scrollable body — grows to fill available space ── */}
+          {renderContent()}
+
+          {/* ── Pinned footer — always visible, never overflows ── */}
+          {footer ? <View style={styles.footer}>{footer}</View> : null}
+        </Animated.View>
       </View>
     </Modal>
   );
 };
 
-const createStyles = (tokens: ThemeTokens, insets: { bottom: number }) =>
+const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
     overlay: {
       flex: 1,
       justifyContent: 'flex-end',
+    },
+    backdropBase: {
       backgroundColor: 'rgba(0,0,0,0.5)',
     },
-    backdrop: {
-      ...StyleSheet.absoluteFillObject,
-    },
-    sheetContainer: {
-      paddingHorizontal: 16,
-      paddingBottom: Math.max(insets.bottom, 24),
-    },
     sheet: {
-      borderRadius: 24,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
       backgroundColor: tokens.card,
-      borderWidth: 1,
-      borderColor: tokens.border,
+      maxHeight: '85%',
+      flexDirection: 'column',
+      shadowColor: tokens.shadowColor ?? '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 20,
+      elevation: 16,
+      overflow: 'hidden',
+    },
+    header: {
       paddingHorizontal: 20,
       paddingTop: 12,
-      paddingBottom: 8,
-      maxHeight: 600,
     },
     handle: {
       alignSelf: 'center',
-      width: 48,
+      width: 40,
       height: 4,
       borderRadius: 2,
       backgroundColor: tokens.border,
-      marginBottom: 12,
+      marginBottom: 14,
     },
     title: {
       color: tokens.foreground,
@@ -116,26 +171,27 @@ const createStyles = (tokens: ThemeTokens, insets: { bottom: number }) =>
       marginTop: 6,
     },
     divider: {
-      height: 1,
+      height: StyleSheet.hairlineWidth,
       backgroundColor: tokens.border,
       marginTop: 14,
-      marginBottom: 12,
+      marginBottom: 0,
+      opacity: 0.5,
     },
     scroll: {
-      maxHeight: 450,
+      flexShrink: 1,
     },
     nonScrollableContent: {
-      overflow: 'hidden',
+      flexShrink: 1,
+      paddingHorizontal: 20,
+      paddingTop: 16,
     },
     content: {
-      paddingBottom: 16,
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 8,
     },
     footer: {
-      borderTopWidth: 1,
-      borderTopColor: tokens.border,
-      paddingTop: 12,
-      paddingBottom: Math.max(insets.bottom, 12),
-      marginTop: 8,
+      marginTop: 4,
     },
   });
 
