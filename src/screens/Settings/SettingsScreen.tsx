@@ -12,73 +12,29 @@ import type { NavigationProp } from '@react-navigation/native';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import ScreenWrapper from '../../components/ScreenWrapper';
-import Button from '../../components/ui/Button';
 import {
   User,
-  Building,
-  Printer,
-  ShieldCheck,
-  ChevronRight,
-  Bell,
-  LogOut,
+  Building2,
+  FileText,
   Globe,
-  Moon,
-  Sun,
-  Monitor,
+  Barcode,
+  Zap,
+  LogOut,
+  ArrowLeft,
+  LayoutTemplate,
 } from 'lucide-react-native';
 import { useSupabase } from '../../contexts/SupabaseContext';
 import { supabase } from '../../supabase/supabaseClient';
 import { logger } from '../../utils/logger';
+import { useAppSettingsStore } from '../../stores/appSettingsStore';
 import type { AppNavigationParamList } from '../../navigation/types';
-
-const SECTIONS = [
-  {
-    id: 'account',
-    title: 'Account',
-    rows: [
-      { id: 'profile', label: 'Profile & Password', icon: <User size={18} /> },
-      /* { id: 'notifications', label: 'Notifications', icon: <Bell size={18} /> }, */
-    ],
-  },
-  {
-    id: 'business',
-    title: 'Business Profile',
-    rows: [
-      { id: 'store', label: 'Business Details', icon: <Building size={18} /> },
-      { id: 'online_store', label: 'Online Store', icon: <Globe size={18} /> },
-      { id: 'billing', label: 'Billing Settings', icon: <Printer size={18} /> },
-      { id: 'advanced_billing', label: 'Advanced Billing', icon: <Printer size={18} /> },
-      /* { id: 'gst', label: 'GST & Compliance', icon: <ShieldCheck size={18} /> }, */
-    ],
-  },
-  {
-    id: 'utilities',
-    title: 'Utilities',
-    rows: [
-      { id: 'barcodes', label: 'Barcode Generator', icon: <Printer size={18} /> },
-    ],
-  },
-  /*
-  {
-    id: 'devices',
-    title: 'Printers & Devices',
-    rows: [
-      {
-        id: 'printer',
-        label: 'Bluetooth Printers',
-        icon: <Printer size={18} />,
-      },
-    ],
-  },
-  */
-  {
-    id: 'preferences',
-    title: 'App Preferences',
-    rows: [
-      { id: 'theme', label: 'App Theme', icon: <Moon size={18} /> },
-    ],
-  },
-];
+import {
+  SettingsSectionCard,
+  SettingsRow,
+  PreferenceSwitchRow,
+  SegmentedThemeSelector,
+  AccountCard,
+} from '../../components/settings/SettingsComponents';
 
 const SettingsScreen: React.FC = () => {
   const { tokens, themeMode, setThemeMode } = useThemeTokens();
@@ -86,6 +42,7 @@ const SettingsScreen: React.FC = () => {
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
   const { user } = useSupabase();
   const [signingOut, setSigningOut] = React.useState(false);
+  const { simplifiedPOSEnabled, setSimplifiedPOSEnabled } = useAppSettingsStore();
 
   const performLogout = async (scope?: 'local' | 'global') => {
     // Global removes server session; local clears device session only.
@@ -130,134 +87,149 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <ScreenWrapper>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
-        <View style={styles.headerBlock}>
-          <Text style={styles.title}>Settings</Text>
-          <Text style={styles.subtitle}>
-            Control account, business, and device preferences.
-          </Text>
+      {/* ── Single sticky header ─────────────────────────────────────── */}
+      <View style={styles.toolbar}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={styles.toolbarBack}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
+          <ArrowLeft size={22} color={tokens.foreground} />
+        </Pressable>
+        <View style={styles.toolbarCenter}>
+          <Text style={styles.toolbarTitle}>Settings</Text>
+          <Text style={styles.toolbarSub}>Manage account & business</Text>
         </View>
+        <View style={styles.toolbarSpacer} />
+      </View>
 
-        {SECTIONS.map(section => (
-          <View key={section.id} style={styles.card}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
-            {section.id === 'account' && (
-              <View style={styles.profileRow}>
-                <View style={styles.profileAvatar}>
-                  <User color={tokens.primary} size={18} />
-                </View>
-                <View style={styles.profileCopy}>
-                  <Text style={styles.profileEmail}>
-                    {user?.email || 'Unknown email'}
-                  </Text>
-                  <Text style={styles.profileMeta}>
-                    User ID: {user?.id ? user.id : 'Unavailable'}
-                  </Text>
-                </View>
-              </View>
-            )}
-            {section.rows.map(row => (
-              <Pressable
-                key={row.id}
-                style={styles.row}
-                onPress={() => {
-                  if (row.id === 'store') navigation.navigate('BusinessInfo');
-                  if (row.id === 'online_store') navigation.navigate('OnlineStoreConfig');
-                  if (row.id === 'billing') navigation.navigate('BillingTemplates');
-                  if (row.id === 'advanced_billing') navigation.navigate('BillingScreen');
-                  if (row.id === 'barcodes') navigation.navigate('ProductsTab', { screen: 'BarcodeGenerator' });
-                }}
-              >
-                <View style={styles.rowIcon}>{row.icon}</View>
-                <Text style={styles.rowLabel}>{row.label}</Text>
-                {row.id === 'theme' ? (
-                  <View style={styles.themeSelector}>
-                    <Pressable
-                      style={[
-                        styles.themeOption,
-                        themeMode === 'light' && styles.themeOptionActive,
-                      ]}
-                      onPress={() => setThemeMode('light')}
-                    >
-                      <Sun
-                        size={14}
-                        color={
-                          themeMode === 'light'
-                            ? tokens.primary
-                            : tokens.mutedForeground
-                        }
-                      />
-                    </Pressable>
-                    <Pressable
-                      style={[
-                        styles.themeOption,
-                        themeMode === 'dark' && styles.themeOptionActive,
-                      ]}
-                      onPress={() => setThemeMode('dark')}
-                    >
-                      <Moon
-                        size={14}
-                        color={
-                          themeMode === 'dark'
-                            ? tokens.primary
-                            : tokens.mutedForeground
-                        }
-                      />
-                    </Pressable>
-                    <Pressable
-                      style={[
-                        styles.themeOption,
-                        themeMode === 'system' && styles.themeOptionActive,
-                      ]}
-                      onPress={() => setThemeMode('system')}
-                    >
-                      <Monitor
-                        size={14}
-                        color={
-                          themeMode === 'system'
-                            ? tokens.primary
-                            : tokens.mutedForeground
-                        }
-                      />
-                    </Pressable>
-                  </View>
-                ) : (
-                  <ChevronRight color={tokens.mutedForeground} size={18} />
-                )}
-              </Pressable>
-            ))}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Account ──────────────────────────────────────────────────── */}
+        <SettingsSectionCard title="Account">
+          <AccountCard email={user?.email} userId={user?.id} />
+          <SettingsRow
+            icon={<User size={17} color={tokens.primary} />}
+            iconTint={tokens.primaryAlpha10}
+            label="Profile & Password"
+            subtitle="Account security & login credentials"
+            onPress={() => navigation.navigate('BusinessInfo')}
+            isLast
+            accessibilityLabel="Profile and password"
+          />
+        </SettingsSectionCard>
+
+        {/* ── Business Profile ─────────────────────────────────────────── */}
+        <SettingsSectionCard title="Business Profile">
+          <SettingsRow
+            icon={<Building2 size={17} color={tokens.primary} />}
+            iconTint={tokens.primaryAlpha10}
+            label="Business Details"
+            subtitle="Store name, GSTIN, address"
+            onPress={() => navigation.navigate('BusinessInfo')}
+            accessibilityLabel="Business details"
+          />
+          <SettingsRow
+            icon={<Globe size={17} color={tokens.info} />}
+            iconTint={tokens.infoAlpha15}
+            label="Online Store"
+            subtitle="Catalog & storefront settings"
+            onPress={() => navigation.navigate('OnlineStoreConfig')}
+            accessibilityLabel="Online store"
+          />
+          <SettingsRow
+            icon={<FileText size={17} color={tokens.warning} />}
+            iconTint={tokens.warningAlpha15}
+            label="Billing Settings"
+            subtitle="Tax rates & invoice numbering"
+            onPress={() => navigation.navigate('BillingTemplates')}
+            accessibilityLabel="Billing settings"
+          />
+          <SettingsRow
+            icon={<LayoutTemplate size={17} color={tokens.primary} />}
+            iconTint={tokens.primaryAlpha10}
+            label="Advanced Billing"
+            subtitle="Templates & POS rules"
+            onPress={() => navigation.navigate('BillingScreen')}
+            isLast
+            accessibilityLabel="Advanced billing"
+          />
+        </SettingsSectionCard>
+
+        {/* ── Utilities ────────────────────────────────────────────────── */}
+        <SettingsSectionCard title="Utilities">
+          <SettingsRow
+            icon={<Barcode size={17} color={tokens.mutedForeground} />}
+            iconTint={tokens.surface_container_low}
+            label="Barcode Generator"
+            subtitle="Create product barcodes"
+            onPress={() =>
+              navigation.navigate('ProductsTab', { screen: 'BarcodeGenerator' })
+            }
+            isLast
+            accessibilityLabel="Barcode generator"
+          />
+        </SettingsSectionCard>
+
+        {/* ── App Preferences ──────────────────────────────────────────── */}
+        <SettingsSectionCard title="App Preferences">
+          <PreferenceSwitchRow
+            icon={
+              <Zap
+                size={17}
+                color={simplifiedPOSEnabled ? tokens.primary : tokens.mutedForeground}
+              />
+            }
+            label="Simplified POS"
+            subtitle="Faster billing for small catalogs"
+            value={simplifiedPOSEnabled}
+            onValueChange={setSimplifiedPOSEnabled}
+            accessibilityLabel="Enable simplified POS"
+          />
+          <View style={styles.themeRow}>
+            <Text style={styles.themeRowLabel}>App Theme</Text>
+            <SegmentedThemeSelector
+              value={themeMode}
+              onChange={setThemeMode}
+            />
           </View>
-        ))}
+        </SettingsSectionCard>
 
-        {/* OUT OF SCOPE FOR V1 — retained for future releases
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Security</Text>
-          <Pressable style={styles.row}>
-            <View style={styles.rowIcon}>
-              <ShieldCheck size={18} />
+        {/* ── Danger zone ──────────────────────────────────────────────── */}
+        <View style={styles.dangerCard}>
+          <Pressable
+            onPress={confirmLogout}
+            disabled={signingOut}
+            accessibilityLabel="Log out"
+            accessibilityRole="button"
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            style={({ pressed }) => [
+              styles.logoutRow,
+              pressed && styles.logoutRowPressed,
+            ]}
+          >
+            <View style={styles.logoutIcon}>
+              <LogOut size={17} color={tokens.destructive} />
             </View>
-            <Text style={styles.rowLabel}>Enable Passcode</Text>
-            <ChevronRight color={tokens.mutedForeground} size={18} />
+            <Text style={styles.logoutLabel}>
+              {signingOut ? 'Signing out…' : 'Log Out'}
+            </Text>
           </Pressable>
         </View>
-        */}
 
-        <View style={styles.actions}>
-          {/* OUT OF SCOPE FOR V1 — retained for future releases
-          <Button label="Manage Subscription" fullWidth />
-          */}
-          <Button
-            label="Log Out"
-            variant="secondary"
-            fullWidth
-            style={styles.secondaryCta}
-            icon={<LogOut color={tokens.foreground} size={16} />}
-            loading={signingOut}
-            onPress={confirmLogout}
-          />
+        {/* ── Footer ───────────────────────────────────────────────────── */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>BillZest · Version 1.0.0</Text>
+          <View style={styles.footerLinks}>
+            <Text style={styles.footerLink}>Privacy Policy</Text>
+            <Text style={styles.footerDot}>·</Text>
+            <Text style={styles.footerLink}>Terms of Service</Text>
+          </View>
         </View>
       </ScrollView>
     </ScreenWrapper>
@@ -266,103 +238,116 @@ const SettingsScreen: React.FC = () => {
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
-    container: {
+    // ── Toolbar ──────────────────────────────────────────────────────────
+    toolbar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      height: 60,
+      paddingHorizontal: 16,
+      backgroundColor: tokens.background,
+    },
+    toolbarBack: {
+      width: 38,
+      height: 38,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 19,
+    },
+    toolbarCenter: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    toolbarTitle: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: tokens.foreground,
+    },
+    toolbarSub: {
+      fontSize: 11,
+      color: tokens.mutedForeground,
+      marginTop: 1,
+    },
+    toolbarSpacer: {
+      width: 38,
+    },
+
+    // ── ScrollView ───────────────────────────────────────────────────────
+    scroll: {
       flex: 1,
     },
     content: {
-      padding: 20,
-      paddingBottom: 80,
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 48,
     },
-    headerBlock: {
-      marginBottom: 18,
+
+    // ── Theme row inside preferences card ────────────────────────────────
+    themeRow: {
+      paddingHorizontal: 14,
+      paddingTop: 14,
+      paddingBottom: 14,
     },
-    title: {
-      fontSize: 26,
-      fontWeight: '700',
+    themeRowLabel: {
+      fontSize: 15,
+      fontWeight: '600',
       color: tokens.foreground,
+      marginBottom: 10,
     },
-    subtitle: {
-      color: tokens.mutedForeground,
-      marginTop: 6,
-    },
-    card: {
-      backgroundColor: tokens.card,
+
+    // ── Danger / Logout card ─────────────────────────────────────────────
+    dangerCard: {
+      backgroundColor: tokens.destructiveAlpha10,
       borderRadius: 20,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      padding: 18,
       marginBottom: 16,
+      overflow: 'hidden',
     },
-    profileRow: {
+    logoutRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 16,
     },
-    profileAvatar: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: tokens.background,
+    logoutRowPressed: {
+      backgroundColor: tokens.destructiveAlpha20,
+    },
+    logoutIcon: {
+      width: 38,
+      height: 38,
+      borderRadius: 11,
+      backgroundColor: tokens.destructiveAlpha15,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 12,
+      marginRight: 13,
     },
-    profileCopy: { flex: 1 },
-    profileEmail: { color: tokens.foreground, fontWeight: '700' },
-    profileMeta: { color: tokens.mutedForeground, marginTop: 4 },
-    sectionTitle: {
+    logoutLabel: {
       fontSize: 15,
       fontWeight: '700',
-      color: tokens.foreground,
-      marginBottom: 12,
+      color: tokens.destructive,
     },
-    row: {
+
+    // ── Footer ───────────────────────────────────────────────────────────
+    footer: {
+      alignItems: 'center',
+      paddingTop: 8,
+      paddingBottom: 8,
+    },
+    footerText: {
+      fontSize: 11,
+      color: tokens.mutedForeground,
+    },
+    footerLinks: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: tokens.border,
+      marginTop: 6,
+      gap: 6,
     },
-    rowIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: tokens.background,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginRight: 12,
+    footerLink: {
+      fontSize: 11,
+      color: tokens.mutedForeground,
     },
-    rowLabel: {
-      flex: 1,
-      color: tokens.foreground,
-      fontWeight: '600',
-    },
-    actions: {
-      marginTop: 12,
-    },
-    secondaryCta: {
-      marginTop: 12,
-    },
-    themeSelector: {
-      flexDirection: 'row',
-      backgroundColor: tokens.background,
-      borderRadius: 12,
-      padding: 4,
-    },
-    themeOption: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    themeOptionActive: {
-      backgroundColor: tokens.card,
-      shadowColor: tokens.shadowColor,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
+    footerDot: {
+      fontSize: 11,
+      color: tokens.mutedForeground,
     },
   });
 

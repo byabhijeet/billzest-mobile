@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { ScrollView, View, Text, StyleSheet, Pressable, ActivityIndicator, RefreshControl } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, Pressable, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import ScreenWrapper from '../../components/ScreenWrapper';
+import ListHeader from '../../components/layout/ListHeader';
 import FAB from '../../components/ui/FAB';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
@@ -81,7 +81,8 @@ const PurchaseListScreen: React.FC = () => {
   };
 
   return (
-    <ScreenWrapper>
+    <View style={styles.screen}>
+      <ListHeader title="Purchases" />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -225,16 +226,20 @@ const PurchaseListScreen: React.FC = () => {
 
       <FAB
         label="New Purchase"
-        icon={<Package color="#fff" size={20} />}
+        icon={<Package color={tokens.primaryForeground} size={20} />}
         onPress={handleNewPurchase}
         accessibilityLabel="Create purchase"
       />
-    </ScreenWrapper>
+    </View>
   );
 };
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
+    screen: {
+      flex: 1,
+      backgroundColor: tokens.background,
+    },
     container: {
       flex: 1,
     },

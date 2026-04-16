@@ -4,11 +4,8 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  ActivityIndicator,
   RefreshControl,
-  Pressable,
 } from 'react-native';
-import ScreenWrapper from '../../components/ScreenWrapper';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import { useQuery } from '@tanstack/react-query';
@@ -17,6 +14,7 @@ import EmptyState from '../../components/EmptyState';
 import ExpenseListSkeleton from '../../components/skeletons/ExpenseListSkeleton';
 import FAB from '../../components/ui/FAB';
 import AddExpenseSheet from '../../components/modals/AddExpenseSheet';
+import ListHeader from '../../components/layout/ListHeader';
 import {
   Wallet,
   AlertTriangle,
@@ -25,7 +23,6 @@ import {
   Tag,
   TrendingDown,
 } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
 import { useOrganization } from '../../contexts/OrganizationContext';
 
 const formatCurrency = (amount: number) =>
@@ -34,7 +31,6 @@ const formatCurrency = (amount: number) =>
 const ExpensesScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
   const styles = useMemo(() => createStyles(tokens), [tokens]);
-  const navigation = useNavigation();
   const [isExpenseSheetVisible, setExpenseSheetVisible] = useState(false);
 
   const { organizationId } = useOrganization();
@@ -62,27 +58,25 @@ const ExpensesScreen: React.FC = () => {
 
   const handleExpenseSheetClose = () => {
     setExpenseSheetVisible(false);
-    // Refetch expenses when modal closes to get updated data
     refetch();
   };
 
-  const handleExpensePress = (expense: Expense) => {
-    // Navigate to expense detail if needed
-    // (navigation as any).navigate('ExpenseDetail', { expenseId: expense.id });
-  };
-
   return (
-    <ScreenWrapper>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Expenses</Text>
-          <Text style={styles.subtitle}>Track your business expenses</Text>
+    <View style={styles.screen}>
+      <ListHeader title="Expenses" />
+
+      {/* ── Total Summary Strip ── */}
+      <View style={styles.summaryStrip}>
+        <View style={styles.summaryCell}>
+          <Text style={styles.summaryLabel}>TOTAL SPENT</Text>
+          <Text style={styles.summaryValue}>{formatCurrency(total)}</Text>
         </View>
-        <View style={styles.totalCard}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalAmount}>{formatCurrency(total)}</Text>
+        <View style={styles.summaryCell}>
+          <Text style={styles.summaryLabel}>ENTRIES</Text>
+          <Text style={styles.summaryValue}>{expenses.length}</Text>
         </View>
       </View>
+
       {isLoading && !isRefetching ? (
         <ExpenseListSkeleton />
       ) : error ? (
@@ -115,13 +109,8 @@ const ExpensesScreen: React.FC = () => {
             />
           )}
           renderItem={({ item }) => (
-            <Pressable
-              style={({ pressed }) => [
-                styles.card,
-                pressed && styles.cardPressed,
-              ]}
-              onPress={() => handleExpensePress(item)}
-            >
+            // No detail screen — render as static card (no Pressable wrapper)
+            <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.cardTitleBlock}>
                   <Text style={styles.cardTitle} numberOfLines={2}>
@@ -153,7 +142,7 @@ const ExpensesScreen: React.FC = () => {
                 </View>
                 <TrendingDown color={tokens.destructive} size={14} />
               </View>
-            </Pressable>
+            </View>
           )}
           contentContainerStyle={
             expenses.length === 0 ? styles.listEmpty : styles.listContent
@@ -164,7 +153,7 @@ const ExpensesScreen: React.FC = () => {
 
       <FAB
         label="Add Expense"
-        icon={<Plus color="#fff" size={20} />}
+        icon={<Plus color={tokens.primaryForeground} size={20} />}
         onPress={handleAddExpense}
         accessibilityLabel="Add expense"
       />
@@ -173,93 +162,89 @@ const ExpensesScreen: React.FC = () => {
         visible={isExpenseSheetVisible}
         onClose={handleExpenseSheetClose}
       />
-    </ScreenWrapper>
+    </View>
   );
 };
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
-    header: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 16,
+    screen: {
+      flex: 1,
+      backgroundColor: tokens.background,
+    },
+    // ── Summary strip ────────────────────────────────────────────────────
+    summaryStrip: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
+      gap: tokens.spacingXs,
+      paddingHorizontal: tokens.spacingLg,
+      paddingBottom: tokens.spacingSm,
     },
-    title: {
-      fontSize: 26,
-      fontWeight: '700',
+    summaryCell: {
+      flex: 1,
+      backgroundColor: tokens.surface_container_lowest,
+      paddingVertical: tokens.spacingSm,
+      paddingHorizontal: tokens.spacingSm,
+      borderLeftWidth: 3,
+      borderLeftColor: tokens.destructiveAlpha30,
+    },
+    summaryLabel: {
+      fontSize: 10,
+      fontWeight: '800',
+      letterSpacing: 0.5,
+      color: tokens.mutedForeground,
+      textTransform: 'uppercase',
+      marginBottom: tokens.spacingXs,
+    },
+    summaryValue: {
+      fontSize: 16,
+      fontWeight: '800',
       color: tokens.foreground,
-      marginBottom: 4,
+      letterSpacing: -0.3,
     },
-    subtitle: {
-      fontSize: 14,
-      color: tokens.mutedForeground,
-    },
-    totalCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      alignItems: 'flex-end',
-      minWidth: 120,
-    },
-    totalLabel: {
-      fontSize: 12,
-      color: tokens.mutedForeground,
-      marginBottom: 4,
-      fontWeight: '600',
-    },
-    totalAmount: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: tokens.destructive,
-    },
+    // ── List ─────────────────────────────────────────────────────────────
     list: {
       flex: 1,
     },
     listContent: {
-      paddingHorizontal: 20,
+      paddingHorizontal: tokens.spacingLg,
       paddingBottom: 100,
     },
     listEmpty: {
       flexGrow: 1,
       justifyContent: 'center',
-      paddingHorizontal: 20,
+      paddingHorizontal: tokens.spacingLg,
     },
     separator: {
-      height: 14,
+      height: tokens.spacingMd,
     },
+    // ── Card ─────────────────────────────────────────────────────────────
     card: {
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      backgroundColor: tokens.card,
-      padding: 18,
-      marginBottom: 14,
-    },
-    cardPressed: {
-      opacity: 0.95,
-      transform: [{ scale: 0.99 }],
+      borderRadius: tokens.radiusLg,
+      backgroundColor: tokens.surface_container_lowest,
+      padding: tokens.spacingLg,
+      marginBottom: tokens.spacingMd,
+      // No-Line Rule: use shadow instead of border
+      shadowColor: tokens.shadowColor,
+      shadowOpacity: 0.06,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 8,
+      elevation: 2,
     },
     cardHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      marginBottom: 12,
+      marginBottom: tokens.spacingMd,
     },
     cardTitleBlock: {
       flex: 1,
-      paddingRight: 12,
+      paddingRight: tokens.spacingMd,
     },
     cardTitle: {
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: '700',
       color: tokens.foreground,
-      marginBottom: 8,
+      marginBottom: tokens.spacingSm,
       lineHeight: 22,
     },
     categoryBadge: {
@@ -267,8 +252,8 @@ const createStyles = (tokens: ThemeTokens) =>
       alignItems: 'center',
       alignSelf: 'flex-start',
       backgroundColor: tokens.primaryAlpha15,
-      borderRadius: 8,
-      paddingHorizontal: 10,
+      borderRadius: tokens.radiusSm,
+      paddingHorizontal: tokens.spacingSm + 2,
       paddingVertical: 4,
       gap: 6,
     },
@@ -281,17 +266,15 @@ const createStyles = (tokens: ThemeTokens) =>
       alignItems: 'flex-end',
     },
     cardAmount: {
-      fontSize: 20,
-      fontWeight: '700',
+      fontSize: 18,
+      fontWeight: '800',
       color: tokens.destructive,
     },
     cardFooter: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: tokens.border,
+      paddingTop: tokens.spacingMd,
     },
     cardMetaRow: {
       flexDirection: 'row',

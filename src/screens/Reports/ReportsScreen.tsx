@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,9 @@ import {
   Pressable,
   ActivityIndicator,
   Alert,
-  Platform,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -26,7 +27,9 @@ import {
   Download,
   FileText,
   Share2,
+  ArrowLeft,
 } from 'lucide-react-native';
+import type { AppNavigationParamList } from '../../navigation/types';
 import { useQuery } from '@tanstack/react-query';
 import { reportsService } from '../../supabase/reportsService';
 import { reportsExportService } from '../../services/reportsExportService';
@@ -84,8 +87,9 @@ const BarItem = ({ height, index, tokens }: { height: number; index: number; tok
 
 const ReportsScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
-  const styles = createStyles(tokens);
+  const styles = useMemo(() => createStyles(tokens), [tokens]);
   const { organizationId } = useOrganization();
+  const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
 
   const [dateRange, setDateRange] = useState<'Week' | 'Month' | 'Year'>('Week');
 
@@ -161,35 +165,53 @@ const ReportsScreen: React.FC = () => {
 
   return (
     <ScreenWrapper>
+      {/* ── Single Header: back + title + share ── */}
+      <View style={styles.topBar}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
+          <ArrowLeft size={22} color={tokens.foreground} />
+        </Pressable>
+        <Text style={styles.topBarTitle}>Reports</Text>
+        <Pressable
+          style={styles.shareButton}
+          onPress={handleExportPDF}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="Share report as PDF"
+          disabled={kpisLoading}
+        >
+          <Share2 size={20} color={kpisLoading ? tokens.mutedForeground : tokens.primary} />
+        </Pressable>
+      </View>
+
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Date Filter Header */}
-        <View style={styles.headerRow}>
-          <Text style={styles.screenTitle}>Reports</Text>
-          <View style={styles.headerActions}>
-            <View style={styles.filterContainer}>
-              {(['Week', 'Month', 'Year'] as const).map(range => (
-                <Pressable
-                  key={range}
+        {/* Date Range Filter Pills */}
+        <View style={styles.filterRow}>
+          <View style={styles.filterContainer}>
+            {(['Week', 'Month', 'Year'] as const).map(range => (
+              <Pressable
+                key={range}
+                style={[
+                  styles.filterPill,
+                  dateRange === range && styles.activeFilterPill,
+                ]}
+                onPress={() => setDateRange(range)}
+                accessibilityLabel={`Filter by ${range}`}
+              >
+                <Text
                   style={[
-                    styles.filterPill,
-                    dateRange === range && styles.activeFilterPill,
+                    styles.filterText,
+                    dateRange === range && styles.activeFilterText,
                   ]}
-                  onPress={() => setDateRange(range)}
                 >
-                  <Text
-                    style={[
-                      styles.filterText,
-                      dateRange === range && styles.activeFilterText,
-                    ]}
-                  >
-                    {range}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-            <Pressable style={styles.exportButton} onPress={handleExportPDF}>
-              <Share2 size={18} color={tokens.primary} />
-            </Pressable>
+                  {range}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         </View>
 
@@ -297,56 +319,53 @@ const ReportsScreen: React.FC = () => {
 
 const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
-    content: {
-      padding: 20,
-      paddingBottom: 100,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    headerActions: {
+    // ── Top bar ─────────────────────────────────────────────────────────
+    topBar: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      height: 56,
+      paddingHorizontal: tokens.spacingLg,
+      backgroundColor: tokens.background,
+      gap: 8,
     },
-    exportButton: {
+    backButton: {
       width: 40,
       height: 40,
-      borderRadius: 20,
-      backgroundColor: tokens.card,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      justifyContent: 'center',
       alignItems: 'center',
+      justifyContent: 'center',
     },
-    exportContainer: {
-      flexDirection: 'row',
-      gap: 12,
-      marginBottom: 24,
-    },
-    exportButtonItem: {
+    topBarTitle: {
       flex: 1,
-    },
-    screenTitle: {
-      fontSize: 24,
-      fontWeight: '800',
+      fontSize: 17,
+      fontWeight: '700',
       color: tokens.foreground,
+    },
+    shareButton: {
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    // ── Content ─────────────────────────────────────────────────────────
+    content: {
+      paddingHorizontal: tokens.spacingLg,
+      paddingBottom: 100,
+    },
+    filterRow: {
+      paddingVertical: tokens.spacingSm,
+      marginBottom: tokens.spacingMd,
     },
     filterContainer: {
       flexDirection: 'row',
-      backgroundColor: tokens.card,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: tokens.border,
+      backgroundColor: tokens.surface_container_low,
+      borderRadius: tokens.radiusMd,
       padding: 4,
+      alignSelf: 'flex-start',
     },
     filterPill: {
-      paddingHorizontal: 12,
+      paddingHorizontal: tokens.spacingMd,
       paddingVertical: 6,
-      borderRadius: 8,
+      borderRadius: tokens.radiusSm,
     },
     activeFilterPill: {
       backgroundColor: tokens.primary,
@@ -359,23 +378,29 @@ const createStyles = (tokens: ThemeTokens) =>
     activeFilterText: {
       color: tokens.primaryForeground,
     },
+    exportContainer: {
+      flexDirection: 'row',
+      gap: tokens.spacingMd,
+      marginBottom: tokens.spacingXl,
+    },
+    exportButtonItem: {
+      flex: 1,
+    },
     kpiContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       gap: 10,
-      marginBottom: 24,
+      marginBottom: tokens.spacingXl,
     },
     kpiCard: {
       flex: 1,
-      padding: 12,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: 'transparent', // Can change to tokens.border if needed
+      padding: tokens.spacingMd,
+      borderRadius: tokens.radiusLg,
     },
     kpiHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginBottom: 8,
+      marginBottom: tokens.spacingSm,
     },
     kpiLabel: {
       fontSize: 12,
@@ -387,17 +412,15 @@ const createStyles = (tokens: ThemeTokens) =>
       fontWeight: '800',
     },
     chartCard: {
-      backgroundColor: tokens.card,
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      padding: 20,
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: tokens.radiusXl,
+      padding: tokens.spacingXl,
     },
     chartHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 20,
+      marginBottom: tokens.spacingXl,
     },
     chartTitle: {
       fontSize: 16,
@@ -409,8 +432,6 @@ const createStyles = (tokens: ThemeTokens) =>
       justifyContent: 'space-between',
       alignItems: 'flex-end',
       height: 150,
-      borderBottomWidth: 1,
-      borderBottomColor: tokens.border,
       paddingBottom: 8,
     },
     barContainer: {
@@ -433,7 +454,7 @@ const createStyles = (tokens: ThemeTokens) =>
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 20,
+      padding: 40,
     },
   });
 
