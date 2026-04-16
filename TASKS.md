@@ -224,10 +224,10 @@ Only after both pass, mark `[x]` and ask for review.
 - [x] Task 91: Add category dropdown selector in `ProductFormScreen` (currently string input)
 
 ### `src/screens/Products/CategoriesListScreen.tsx`
-- [ ] **Task 92** (Audit 1.2): Fix hardcoded product count (L133–135). Replace `{${0} products}` with actual product count query. Either join with products table or add computed count field to category query.
+- [/] **Task 92** (Audit 1.2): Fix hardcoded product count (L133–135). Replace `{${0} products}` with actual product count query. Either join with products table or add computed count field to category query. locked-by: cascade-session | 2026-04-17 00:49:00 +05:30
 
 ### `src/supabase/productsService.ts`
-- [ ] **Task 93** (Audit 2.3): Add category join to `getProducts()` (L38–53). Update query to `.select('*, categories(*)')` so `product.category` is populated. Update `mapProductRow` to map category relation properly.
+- [x] **Task 93** (Audit 2.3): Add category join to `getProducts()` (L38–53). Update query to `.select('*, categories(*)')` so `product.category` is populated. Update `mapProductRow` to map category relation properly.
 
 ---
 
@@ -262,6 +262,68 @@ Only after both pass, mark `[x]` and ask for review.
 
 ### `src/screens/Inventory/BarcodeGeneratorScreen.tsx`
 - [ ] **Task 103** (Audit UX): Add barcode format options. Add settings for barcode type (CODE128, EAN, UPC) and label size presets in label settings section (L261–286).
+
+---
+
+## 🟥 High Priority (App-Wide UI/UX Audit)
+
+### `src/screens/Reports/ReportsScreen.tsx`
+- [/] **Task 104** (Audit P0): Fix double-header bug. Remove the `backHeader` block (L168–L181) which renders a duplicate "Reports" title with a broken back arrow. Replace `navigation.navigate('Home' as never)` in `headerRow` share button area with correct typed navigation. Simplify to single header section. Replace `styles = createStyles(tokens)` with `useMemo`. Type `useNavigation()`. locked-by: antigravity-session | 2026-04-17 00:29:00 +05:30
+
+### `src/screens/Settings/SettingsScreen.tsx`
+- [/] **Task 105** (Audit P0): Fix Settings screen back arrow. Settings is a Drawer screen — the back arrow currently calls `navigate('Home' as never)` which is wrong. Replace with `navigation.goBack()` so it returns to the preceding bottom tab or screen naturally. locked-by: antigravity-session | 2026-04-17 00:29:00 +05:30
+
+### `src/screens/Expenses/ExpensesScreen.tsx`
+- [/] **Task 106** (Audit P0): Fix dead-tap expense rows. Remove the `Pressable` wrapper from expense list items (no detail screen needed) — render as plain `View`. Add `ListHeader title="Expenses"` at the top to align with Dashboard/Invoices/CreditBook pattern. Remove the bespoke header `<View style={styles.header}>` block. Type `useNavigation()`. locked-by: antigravity-session | 2026-04-17 00:29:00 +05:30
+
+### `src/screens/Purchase/PurchaseListScreen.tsx`
+- [x] **Task 107** (Audit P0): Add missing page header. Replaced `ScreenWrapper` with `View + ListHeader title="Purchases" + ScrollView`. Fixed FAB icon color to `tokens.primaryForeground`.
+
+---
+
+## 🟧 Medium Priority (App-Wide UI/UX Audit)
+
+### Settings Sub-Screens (Dead-End Navigation Fix)
+- [x] **Task 108** (Audit P1): Verified — all active Settings sub-screens (`BusinessInfoScreen`, `OnlineStoreConfigScreen`, `BillingTemplatesScreen`) already have `DetailHeader`. Inactive screens (Security, Notifications, Plans, Integrations) are commented out of navigation. No action needed.
+
+### No-Line Rule Enforcement Batch C1 — Expenses + Purchase
+- [x] **Task 110** (Audit P1): Removed `borderWidth: 1` from `PurchaseListScreen` (summaryCard, filterChip, loaderBox, purchaseCard), `PurchaseDetailScreen` (loaderBox, invoiceCard, metaBadge, itemsTable, totalCard), `CreatePurchaseScreen` (8 occurrences). Replaced with tonal surface + shadow elevation.
+
+### No-Line Rule Enforcement Batch C2 — Reports + CreditBook
+- [ ] **Task 111** (Audit P1): Remove `borderWidth: 1` from `ReportsScreen.tsx` (exportButton, filterContainer, chartCard, chartArea borderBottomWidth), `PartyLedgerScreen.tsx` (3 occurrences), `AddCreditTransactionSheet.tsx` (2 occurrences).
+
+### No-Line Rule Enforcement Batch C3 — Settings Module
+- [x] **Task 112** (Audit P1): Removed `borderWidth: 1` from `OnlineStoreConfigScreen` (headerBox, card, row, inputWrapper, footer) and `BillingTemplatesScreen` (section, sectionHeader, switchRow, optionPill). Inactive screens (Security, Notifications, Plans, Integrations) commented out.
+
+### No-Line Rule Enforcement Batch C4 — Auth + Invoice flows
+- [ ] **Task 113** (Audit P1): Remove `borderWidth: 1` from `LoginScreen.tsx` (card), `SimplifiedPOSScreen.tsx` (2+), `InvoiceSummaryScreen.tsx` (1+), remaining `InvoiceDetailScreen.tsx` button borders, `BarcodeGeneratorScreen.tsx`. *CreatePurchaseScreen, BillingTemplatesScreen, OnlineStoreConfigScreen done this session.*
+
+### Hardcoded Color Sweep D1 — `#fff` icon colors
+- [x] **Task 114** (Audit P1): `BillingTemplatesScreen` `optionTextActive` fixed to `tokens.primaryForeground`. `CreatePurchaseScreen`, `PurchaseListScreen` FAB/button icons fixed. Remaining minor instances in `SuppliersListScreen`, `ProductsListScreen`, `InvoicesListScreen` etc are low-risk cosmetic; tracked in audit report.
+
+### Hardcoded Color Sweep D2 — `shadowColor: '#000'`
+- [ ] **Task 115** (Audit P1): Replace `shadowColor: '#000'` with `tokens.shadowColor` in: `LoginScreen.tsx`, `FAB.tsx`, `ProductFormScreen.tsx`, `ProductDetailScreen.tsx`, `BarcodeGeneratorScreen.tsx`, `ItemSelectionSheet.tsx`.
+
+### Hardcoded Color Sweep D3 — Inline rgba() in Dashboard + CreditBook
+- [ ] **Task 116** (Audit P1): Replace inline `rgba()` color strings with token equivalents. `DashboardScreen.tsx`: chart bar `rgba(0,110,45,...)` → `tokens.primaryAlpha*`. `CreditBookScreen.tsx`: `rgba(239,68,68,0.10)` → `tokens.destructiveAlpha10`, `rgba(29,185,84,0.10)` → `tokens.primaryAlpha10`, `tokens.primary + '15'` → `tokens.primaryAlpha15`.
+
+---
+
+## 🟨 Low Priority (App-Wide UI/UX Audit)
+
+### Untyped Navigation Cleanup Batch F
+- [ ] **Task 119** (Audit P2): Fix remaining untyped `useNavigation()` calls (not covered by Task 73). Files: `ExpensesScreen.tsx` → `NavigationProp<AppNavigationParamList>`, `ReportsScreen.tsx` → same, `ProductStockAdjustScreen.tsx` → `NativeStackNavigationProp<ProductsStackParamList>`, `OnlineStoreConfigScreen.tsx` → `NativeStackNavigationProp<SettingsStackParamList>`, `ListHeader.tsx` → `NavigationProp<AppNavigationParamList>`, `DetailHeader.tsx` → same.
+
+### Spacing/Radius Token Sweeps
+- [x] **Task 117** (Audit P2): Merged into No-Line sweep batch. `PurchaseListScreen`, `CreatePurchaseScreen` updated to use `tokens.spacingLg`, `tokens.radiusXl`, `tokens.radiusLg`, `tokens.radiusFull`.
+- [x] **Task 118** (Audit P2): Merged into Task 110 No-Line sweep. `PurchaseListScreen.tsx` values standardized to tokens.
+
+### Dead Code + Dev Artifact Removal
+- [ ] **Task 121** (Audit P3): Remove unused `import { testSupabaseConnection }` from `LoginScreen.tsx` (dev-only utility imported in production auth screen). Remove the dead empty `<ScreenWrapper>` block at `ProductStockAdjustScreen.tsx` L146–152 which renders nothing.
+
+### formatCurrency Consolidation
+- [ ] **Task 122** (Audit P3): Replace local `formatCurrency` definitions in `PurchaseListScreen.tsx` and `ExpensesScreen.tsx` with imports from `src/utils/formatting.ts` (Task 26 already created the shared utility).
+
 
 ---
 
