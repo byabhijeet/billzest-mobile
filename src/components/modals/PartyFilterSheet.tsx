@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, Pressable, TouchableOpacity } from 'react-nativ
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import ActionSheet from './ActionSheet';
-import { Check, X } from 'lucide-react-native';
-import Button from '../ui/Button';
+import { Check } from 'lucide-react-native';
+import FormActionBar from '../ui/FormActionBar';
 
 interface PartyFilterSheetProps {
   visible: boolean;
@@ -68,21 +68,15 @@ const PartyFilterSheet: React.FC<PartyFilterSheetProps> = ({
       visible={visible}
       onClose={onClose}
       title="Filter Parties"
+      scrollable={false}
       footer={
-        <View style={styles.footerRow}>
-          <Button
-            label="Cancel"
-            onPress={onClose}
-            variant="ghost"
-            style={styles.cancelButton}
-          />
-          <Button
-            label="Apply Filters"
-            onPress={handleApply}
-            variant="primary"
-            style={styles.applyButton}
-          />
-        </View>
+        <FormActionBar
+          variant="dual"
+          secondaryLabel="Cancel"
+          onSecondary={onClose}
+          primaryLabel="Apply Filters"
+          onPrimary={handleApply}
+        />
       }
     >
       <View style={styles.headerRow}>
@@ -209,20 +203,6 @@ const createStyles = (tokens: ThemeTokens) =>
     checkboxActive: {
         backgroundColor: tokens.primary,
         borderColor: tokens.primary,
-    },
-    footerRow: {
-      flexDirection: 'row',
-      gap: 12,
-    },
-    cancelButton: {
-      flex: 1,
-      borderRadius: 16,
-      height: 52,
-    },
-    applyButton: {
-      flex: 1,
-      borderRadius: 16,
-      height: 52,
     },
   });
 
