@@ -232,19 +232,20 @@ const createStyles = (tokens: ThemeTokens) =>
     loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 12, color: tokens.mutedForeground },
     section: {
-      backgroundColor: tokens.card,
-      borderRadius: 16,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: tokens.border,
+      backgroundColor: tokens.surface_container_lowest,
+      borderRadius: tokens.radiusLg,
+      padding: tokens.spacingLg,
       marginBottom: 20,
+      shadowColor: tokens.shadowColor,
+      shadowOpacity: 0.06,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 8,
+      elevation: 2,
     },
     sectionHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginBottom: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: tokens.border,
+      marginBottom: tokens.spacingLg,
       paddingBottom: 8,
     },
     sectionTitle: {
@@ -261,8 +262,6 @@ const createStyles = (tokens: ThemeTokens) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: tokens.border,
       marginBottom: 8,
     },
     switchLabel: {
@@ -293,13 +292,10 @@ const createStyles = (tokens: ThemeTokens) =>
       paddingHorizontal: 16,
       paddingVertical: 8,
       borderRadius: 20,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      backgroundColor: tokens.background,
+      backgroundColor: tokens.surface_container_low,
     },
     optionPillActive: {
       backgroundColor: tokens.primary,
-      borderColor: tokens.primary,
     },
     optionText: {
       fontSize: 14,
@@ -307,7 +303,7 @@ const createStyles = (tokens: ThemeTokens) =>
       fontWeight: '500',
     },
     optionTextActive: {
-      color: '#fff',
+      color: tokens.primaryForeground,
     },
     actions: {
       marginTop: 10,

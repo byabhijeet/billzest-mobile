@@ -128,10 +128,8 @@ const createStyles = (tokens: ThemeTokens) => StyleSheet.create({
   headerBox: {
     alignItems: 'center',
     padding: 24,
-    backgroundColor: tokens.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: tokens.border,
+    backgroundColor: tokens.primaryAlpha10,
+    borderRadius: tokens.radiusLg,
     marginBottom: 20,
   },
   headerTitle: {
@@ -147,12 +145,15 @@ const createStyles = (tokens: ThemeTokens) => StyleSheet.create({
     marginTop: 6,
   },
   card: {
-    backgroundColor: tokens.card,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: tokens.border,
-    padding: 16,
+    backgroundColor: tokens.surface_container_lowest,
+    borderRadius: tokens.radiusLg,
+    padding: tokens.spacingLg,
     marginBottom: 16,
+    shadowColor: tokens.shadowColor,
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: 16,
@@ -164,8 +165,6 @@ const createStyles = (tokens: ThemeTokens) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: tokens.border,
   },
   label: {
     fontSize: 15,
@@ -184,10 +183,8 @@ const createStyles = (tokens: ThemeTokens) => StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: tokens.background,
-    borderWidth: 1,
-    borderColor: tokens.border,
-    borderRadius: 8,
+    backgroundColor: tokens.surface_container_low,
+    borderRadius: tokens.radiusSm,
     paddingHorizontal: 12,
     height: 44,
     marginTop: 8,
@@ -201,8 +198,6 @@ const createStyles = (tokens: ThemeTokens) => StyleSheet.create({
   footer: {
     padding: 16,
     backgroundColor: tokens.background,
-    borderTopWidth: 1,
-    borderTopColor: tokens.border,
   }
 });
 

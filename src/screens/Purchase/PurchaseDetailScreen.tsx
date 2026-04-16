@@ -404,13 +404,16 @@ const createStyles = (tokens: ThemeTokens) =>
       marginTop: 0,
     },
     loaderBox: {
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: tokens.border,
-      backgroundColor: tokens.card,
-      padding: 16,
+      borderRadius: tokens.radiusLg,
+      backgroundColor: tokens.surface_container_lowest,
+      padding: tokens.spacingLg,
       alignItems: 'center',
       marginBottom: 12,
+      shadowColor: tokens.shadowColor,
+      shadowOpacity: 0.05,
+      shadowOffset: { width: 0, height: 2 },
+      shadowRadius: 8,
+      elevation: 2,
     },
     loaderText: {
       marginTop: 8,
@@ -418,16 +421,14 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     // Invoice Display Styles (from BillingPreview)
     invoiceCard: {
-      borderRadius: tokens.radiusLg, // 16px
-      borderWidth: 1,
-      borderColor: tokens.border,
+      borderRadius: tokens.radiusLg,
       backgroundColor: tokens.card,
-      padding: tokens.spacingLg, // 16px
-      marginBottom: tokens.spacingLg, // 16px
+      padding: tokens.spacingLg,
+      marginBottom: tokens.spacingLg,
       shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 8,
+      shadowOpacity: 0.07,
+      shadowRadius: 10,
       elevation: 3,
     },
     brandRow: {
@@ -449,11 +450,9 @@ const createStyles = (tokens: ThemeTokens) =>
       lineHeight: 16,
     },
     metaBadge: {
-      borderRadius: tokens.radiusFull, // 999
-      borderWidth: 1,
-      borderColor: tokens.border,
-      paddingHorizontal: tokens.spacingMd, // 12px
-      paddingVertical: tokens.spacingXs, // 4px
+      borderRadius: tokens.radiusFull,
+      paddingHorizontal: tokens.spacingMd,
+      paddingVertical: tokens.spacingXs,
       backgroundColor: tokens.surface_container_low,
     },
     metaBadgeLabel: {
@@ -506,24 +505,20 @@ const createStyles = (tokens: ThemeTokens) =>
       padding: tokens.spacingMd, // 12px
     },
     itemsTable: {
-      borderRadius: tokens.radiusSm, // 8px
-      borderWidth: 1,
-      borderColor: tokens.border,
-      backgroundColor: tokens.card,
-      marginBottom: tokens.spacingLg, // 16px
+      borderRadius: tokens.radiusSm,
+      backgroundColor: tokens.surface_container_lowest,
+      marginBottom: tokens.spacingLg,
       overflow: 'hidden',
     },
     tableRow: {
       flexDirection: 'row',
-      paddingVertical: tokens.spacingSm, // 8px
-      paddingHorizontal: tokens.spacingMd, // 12px
-      borderBottomWidth: 1,
+      paddingVertical: tokens.spacingSm,
+      paddingHorizontal: tokens.spacingMd,
+      borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: tokens.border,
     },
     tableHeader: {
       backgroundColor: tokens.surface_container_low,
-      borderBottomWidth: 1,
-      borderBottomColor: tokens.border,
     },
     headerText: {
       fontWeight: '700', // Bold for emphasis
@@ -570,12 +565,10 @@ const createStyles = (tokens: ThemeTokens) =>
       textAlign: 'center',
     },
     totalCard: {
-      borderRadius: tokens.radiusSm, // 8px
-      borderWidth: 1,
-      borderColor: tokens.border,
+      borderRadius: tokens.radiusSm,
       backgroundColor: tokens.surface_container_low,
-      padding: tokens.spacingLg, // 16px
-      marginBottom: tokens.spacingLg, // 16px
+      padding: tokens.spacingLg,
+      marginBottom: tokens.spacingLg,
     },
     totalRow: {
       flexDirection: 'row',
