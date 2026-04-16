@@ -219,10 +219,10 @@ const AddExpenseSheet: React.FC<AddExpenseSheetProps> = ({
             disabled={isSubmitting}
           >
             {isSubmitting ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={tokens.primaryForeground} />
             ) : (
               <>
-                <Check color="#fff" size={20} />
+                <Check color={tokens.primaryForeground} size={20} />
                 <Text style={styles.submitBtnText}>Save Expense</Text>
               </>
             )}

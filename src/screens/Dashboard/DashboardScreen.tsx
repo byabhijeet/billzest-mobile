@@ -15,7 +15,9 @@ import { useOrganization } from "../../contexts/OrganizationContext";
 import { useDashboardKpis } from "../../logic/dashboardLogic";
 import { useOrders } from "../../logic/orderLogic";
 import AddExpenseSheet from "../../components/modals/AddExpenseSheet";
-import TxnFilterSheet, { TxnFilters } from "../../components/modals/TxnFilterSheet";
+import TxnFilterSheet, {
+  TxnFilters,
+} from "../../components/modals/TxnFilterSheet";
 import ListHeader from "../../components/layout/ListHeader";
 import {
   UserPlus,
@@ -42,7 +44,7 @@ const formatCompact = (value: number): string => {
 };
 
 const WEEKLY_BARS = [0.65, 0.42, 0.78, 0.91, 0.58, 0.33, 0.47]; // More realistic weekly pattern
-const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const DashboardScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
@@ -54,10 +56,15 @@ const DashboardScreen: React.FC = () => {
   });
   const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
   const [expenseSheetVisible, setExpenseSheetVisible] = useState(false);
-  const [dateRange, setDateRange] = useState<"Today" | "Week" | "Month" | "Year">("Month");
+  const [dateRange, setDateRange] = useState<
+    "Today" | "Week" | "Month" | "Year"
+  >("Month");
   const [refreshing, setRefreshing] = useState(false);
   const [txnSearch, setTxnSearch] = useState("");
-  const [txnFilters, setTxnFilters] = useState<TxnFilters>({ payment_status: 'all', type: 'all' });
+  const [txnFilters, setTxnFilters] = useState<TxnFilters>({
+    status: "all",
+    type: "all",
+  });
   const [txnFilterSheetVisible, setTxnFilterSheetVisible] = useState(false);
 
   const {
@@ -78,7 +85,9 @@ const DashboardScreen: React.FC = () => {
       const [ordersResult, partiesResult] = await Promise.all([
         supabase
           .from("orders")
-          .select("party_id, total_amount, received_amount, payment_status, is_cancelled")
+          .select(
+            "party_id, total_amount, received_amount, status, is_cancelled",
+          )
           .eq("organization_id", organization.id)
           .eq("is_cancelled", false),
         supabase
@@ -93,8 +102,15 @@ const DashboardScreen: React.FC = () => {
       parties.forEach((p) => partyTypeMap.set(p.id, p.type));
       const balanceByParty = new Map<string, number>();
       orders.forEach((ord) => {
-        const outstanding = Math.max(0, (ord.total_amount ?? 0) - (ord.received_amount ?? 0));
-        balanceByParty.set(ord.party_id, (balanceByParty.get(ord.party_id) ?? 0) + outstanding);
+        if (ord.status === "cancelled") return;
+        const outstanding = Math.max(
+          0,
+          (ord.total_amount ?? 0) - ((ord as any).received_amount ?? 0),
+        );
+        balanceByParty.set(
+          ord.party_id,
+          (balanceByParty.get(ord.party_id) ?? 0) + outstanding,
+        );
       });
       let receivables = 0;
       let payables = 0;
@@ -110,13 +126,14 @@ const DashboardScreen: React.FC = () => {
   });
 
   const overdueCount = useMemo(
-    () => invoices.filter((inv) => inv.payment_status?.toLowerCase() === "overdue").length,
+    () => invoices.filter((inv) => inv.status === "overdue").length,
     [invoices],
   );
   const overdueAmount = useMemo(
-    () => invoices
-      .filter((inv) => inv.payment_status?.toLowerCase() === "overdue")
-      .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0),
+    () =>
+      invoices
+        .filter((inv) => inv.status === "overdue")
+        .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0),
     [invoices],
   );
 
@@ -133,13 +150,13 @@ const DashboardScreen: React.FC = () => {
       return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
     };
     return invoices
-      .filter((inv) => !inv.is_cancelled)
+      .filter((inv) => inv.status !== "cancelled")
       .sort((a, b) => getTs(b.created_at) - getTs(a.created_at))
       .slice(0, 7)
       .map((inv) => {
         const received = (inv as any).received_amount ?? 0;
         const balance = Math.max(0, (inv.total_amount ?? 0) - received);
-        const s = inv.payment_status?.toLowerCase() ?? "pending";
+        const s = inv.status?.toLowerCase() ?? "pending";
         return {
           id: inv.id,
           title: (inv as any).party?.name || "Cash Sale",
@@ -167,7 +184,10 @@ const DashboardScreen: React.FC = () => {
           setExpenseSheetVisible(true);
           break;
         case "stock":
-          navigation.navigate("ProductsTab", { screen: "ProductsMain", params: { openScanner: false } });
+          navigation.navigate("ProductsTab", {
+            screen: "ProductsMain",
+            params: { openScanner: false },
+          });
           break;
       }
     },
@@ -187,7 +207,11 @@ const DashboardScreen: React.FC = () => {
     return (
       <View style={styles.screen}>
         <ListHeader title="Dashboard" />
-        <ScrollView style={styles.container} contentContainerStyle={contentContainerStyle} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={contentContainerStyle}
+          showsVerticalScrollIndicator={false}
+        >
           <DashboardSkeleton />
         </ScrollView>
       </View>
@@ -198,7 +222,11 @@ const DashboardScreen: React.FC = () => {
     return (
       <View style={styles.screen}>
         <ListHeader title="Dashboard" />
-        <ScrollView style={styles.container} contentContainerStyle={contentContainerStyle} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={contentContainerStyle}
+          showsVerticalScrollIndicator={false}
+        >
           <EmptyState
             icon={<AlertTriangle color={tokens.destructive} size={48} />}
             title="Unable to load dashboard"
@@ -230,15 +258,21 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.metricsRow}>
           <View style={[styles.metricCell, styles.metricBorderPrimary]}>
             <Text style={styles.metricLabel}>SALES</Text>
-            <Text style={styles.metricValue}>{formatCompact(kpis?.todaySales ?? 0)}</Text>
+            <Text style={styles.metricValue}>
+              {formatCompact(kpis?.todaySales ?? 0)}
+            </Text>
           </View>
           <View style={[styles.metricCell, styles.metricBorderReceivable]}>
             <Text style={styles.metricLabel}>RECEIVABLE</Text>
-            <Text style={styles.metricValue}>{formatCompact(creditSummary?.receivables ?? 0)}</Text>
+            <Text style={styles.metricValue}>
+              {formatCompact(creditSummary?.receivables ?? 0)}
+            </Text>
           </View>
           <View style={[styles.metricCell, styles.metricBorderPayable]}>
             <Text style={styles.metricLabel}>PAYABLE</Text>
-            <Text style={styles.metricValue}>{formatCompact(creditSummary?.payables ?? 0)}</Text>
+            <Text style={styles.metricValue}>
+              {formatCompact(creditSummary?.payables ?? 0)}
+            </Text>
           </View>
         </View>
 
@@ -282,13 +316,16 @@ const DashboardScreen: React.FC = () => {
         {overdueCount > 0 && (
           <Pressable
             style={styles.alertBannerWarning}
-            onPress={() => navigation.navigate("InvoicesTab", { screen: "InvoicesMain" })}
+            onPress={() =>
+              navigation.navigate("InvoicesTab", { screen: "InvoicesMain" })
+            }
             accessibilityLabel={`${overdueCount} overdue invoices`}
           >
             <View style={styles.alertBannerLeft}>
               <AlertTriangle color={tokens.destructive} size={14} />
               <Text style={styles.alertBannerTextWarning}>
-                {overdueCount} Overdue Invoice{overdueCount > 1 ? "s" : ""} ({formatCompact(overdueAmount)})
+                {overdueCount} Overdue Invoice{overdueCount > 1 ? "s" : ""} (
+                {formatCompact(overdueAmount)})
               </Text>
             </View>
             <Text style={styles.alertChevron}>›</Text>
@@ -301,7 +338,9 @@ const DashboardScreen: React.FC = () => {
           onSearchChange={setTxnSearch}
           onFilterPress={() => setTxnFilterSheetVisible(true)}
           txnFilters={txnFilters}
-          onViewAll={() => navigation.navigate("InvoicesTab", { screen: "InvoicesMain" })}
+          onViewAll={() =>
+            navigation.navigate("InvoicesTab", { screen: "InvoicesMain" })
+          }
         />
 
         {/* ── Weekly Run Rate ── */}
@@ -318,7 +357,10 @@ const DashboardScreen: React.FC = () => {
                     styles.bar,
                     {
                       height: Math.max(4, ratio * 48),
-                      backgroundColor: i === 4 ? tokens.primary : `rgba(0,110,45,${0.15 + ratio * 0.45})`,
+                      backgroundColor:
+                        i === 4
+                          ? tokens.primary
+                          : `rgba(0,110,45,${0.15 + ratio * 0.45})`,
                     },
                   ]}
                 />
@@ -327,7 +369,15 @@ const DashboardScreen: React.FC = () => {
           </View>
           <View style={styles.barLabelsRow}>
             {WEEK_DAYS.map((day, i) => (
-              <Text key={i} style={[styles.barDayLabel, i === 4 && styles.barDayLabelActive]}>{day}</Text>
+              <Text
+                key={i}
+                style={[
+                  styles.barDayLabel,
+                  i === 4 && styles.barDayLabelActive,
+                ]}
+              >
+                {day}
+              </Text>
             ))}
           </View>
         </View>
@@ -478,7 +528,7 @@ const createStyles = (tokens: ThemeTokens) =>
       marginTop: tokens.spacingSm, // 8px
       marginHorizontal: tokens.spacingLg, // 16px
       borderLeftWidth: 3,
-      borderLeftColor: "rgba(29,185,84,0.45)",
+      borderLeftColor: tokens.primaryAlpha45,
     },
     chartHeader: {
       flexDirection: "row",

@@ -330,7 +330,7 @@ const ProductsListScreen: React.FC = () => {
 
         <FAB
           label="Add New Item"
-          icon={<Plus color="#fff" size={24} />}
+          icon={<Plus color={tokens.primaryForeground} size={24} />}
           onPress={() => navigation.navigate('ProductForm', { mode: 'create' })}
           accessibilityLabel="Add new item"
         />

@@ -152,7 +152,7 @@ const SuppliersListScreen = () => {
       <FAB
         label="Add Vendor"
         onPress={() => navigation.navigate('PurchaseCreateVendor', {})}
-        icon={<UserPlus color="#fff" size={24} />}
+        icon={<UserPlus color={tokens.primaryForeground} size={24} />}
       />
     </View>
   );

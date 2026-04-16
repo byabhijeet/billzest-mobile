@@ -244,7 +244,7 @@ const CustomersListScreen: React.FC = () => {
 
       <FAB
         label="Add New Party"
-        icon={<Plus color="#fff" size={24} />}
+        icon={<Plus color={tokens.primaryForeground} size={24} />}
         onPress={() => navigation.navigate("CustomerForm", {})}
         style={{ bottom: tabBarHeight + Math.max(insets.bottom, 8) + 12 }}
       />

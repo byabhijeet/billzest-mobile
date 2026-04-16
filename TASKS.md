@@ -151,26 +151,26 @@ Only after both pass, mark `[x]` and ask for review.
 
 ### No-Line Rule — Batch C1 (Expenses + Purchase)
 - [x] **Task 110** (Audit P1): Removed `borderWidth: 1` from `PurchaseListScreen`, `PurchaseDetailScreen`, `CreatePurchaseScreen`. Tonal surface + shadow applied.
-- [/] **Task 110b** (Audit P1 — remaining): Remove `borderWidth: 1` from `ExpensesScreen.tsx` (totalCard, card, cardFooter). locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
+- [x] **Task 110b** (Audit P1 — remaining): Remove `borderWidth: 1` from `ExpensesScreen.tsx` (totalCard, card, cardFooter). locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
 
 ### No-Line Rule — Batch C2 (Reports + CreditBook)
-- [/] **Task 111** (Audit P1): Remove `borderWidth: 1` from `ReportsScreen.tsx` (exportButton, filterContainer, chartCard, chartArea borderBottomWidth), `PartyLedgerScreen.tsx` (3 occurrences), `AddCreditTransactionSheet.tsx` (2 occurrences). locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
+- [x] **Task 111** (Audit P1): Remove `borderWidth: 1` from `ReportsScreen.tsx` (exportButton, filterContainer, chartCard, chartArea borderBottomWidth), `PartyLedgerScreen.tsx` (3 occurrences), `AddCreditTransactionSheet.tsx` (2 occurrences). locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
 
 ### No-Line Rule — Batch C3 (Settings Module)
 - [x] **Task 112** (Audit P1): Removed `borderWidth: 1` from `OnlineStoreConfigScreen` and `BillingTemplatesScreen`. Inactive screens commented out.
 
 ### No-Line Rule — Batch C4 (Auth + Invoice flows)
-- [/] **Task 113** (Audit P1): Remove `borderWidth: 1` from `LoginScreen.tsx` (card), `SimplifiedPOSScreen.tsx` (2+), `InvoiceSummaryScreen.tsx` (1+), remaining `InvoiceDetailScreen.tsx` button borders, `BarcodeGeneratorScreen.tsx`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
+- [x] **Task 113** (Audit P1): Remove `borderWidth: 1` from `LoginScreen.tsx` (card), `SimplifiedPOSScreen.tsx` (2+), `InvoiceSummaryScreen.tsx` (1+), remaining `InvoiceDetailScreen.tsx` button borders, `BarcodeGeneratorScreen.tsx`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
 
 ### Hardcoded Color Sweep D1 — `#fff` icon colors
 - [x] **Task 114** (Audit P1): Fixed `BillingTemplatesScreen`, `CreatePurchaseScreen`, `PurchaseListScreen`. Remaining minor instances in `SuppliersListScreen`, `ProductsListScreen`, `InvoicesListScreen` tracked in audit report.
-- [/] **Task 114b** (Audit P1 — remaining): Replace `color="#fff"` on icon components in: `SuppliersListScreen`, `ProductsListScreen`, `InvoicesListScreen`, `CustomersListScreen`, `ExpensesScreen` (FAB), `InvoiceDetailScreen`, `SimplifiedPOSScreen`, `AddExpenseSheet`, `PartyFilterSheet`. Use `tokens.primaryForeground` or `tokens.white`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
+- [x] **Task 114b** (Audit P1 — remaining): Replace `color="#fff"` on icon components in: `SuppliersListScreen`, `ProductsListScreen`, `InvoicesListScreen`, `CustomersListScreen`, `ExpensesScreen` (FAB), `InvoiceDetailScreen`, `SimplifiedPOSScreen`, `AddExpenseSheet`, `PartyFilterSheet`. Use `tokens.primaryForeground` or `tokens.white`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
 
 ### Hardcoded Color Sweep D2 — `shadowColor: '#000'`
-- [/] **Task 115** (Audit P1): Replace `shadowColor: '#000'` with `tokens.shadowColor` in: `LoginScreen.tsx`, `FAB.tsx`, `ProductFormScreen.tsx`, `ProductDetailScreen.tsx`, `BarcodeGeneratorScreen.tsx`, `ItemSelectionSheet.tsx`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
+- [x] **Task 115** (Audit P1): Replace `shadowColor: '#000'` with `tokens.shadowColor` in: `LoginScreen.tsx`, `FAB.tsx`, `ProductFormScreen.tsx`, `ProductDetailScreen.tsx`, `BarcodeGeneratorScreen.tsx`, `ItemSelectionSheet.tsx`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
 
 ### Hardcoded Color Sweep D3 — Inline `rgba()` in Dashboard + CreditBook
-- [/] **Task 116** (Audit P1): Replace inline `rgba()` with token equivalents. `DashboardScreen.tsx`: `rgba(0,110,45,...)` → `tokens.primaryAlpha*`. `CreditBookScreen.tsx`: `rgba(239,68,68,0.10)` → `tokens.destructiveAlpha10`, `rgba(29,185,84,0.10)` → `tokens.primaryAlpha10`, `tokens.primary + '15'` → `tokens.primaryAlpha15`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
+- [x] **Task 116** (Audit P1): Replace inline `rgba()` with token equivalents. `DashboardScreen.tsx`: `rgba(0,110,45,...)` → `tokens.primaryAlpha*`. `CreditBookScreen.tsx`: `rgba(239,68,68,0.10)` → `tokens.destructiveAlpha10`, `rgba(29,185,84,0.10)` → `tokens.primaryAlpha10`, `tokens.primary + '15'` → `tokens.primaryAlpha15`. locked-by: antigravity-session | 2026-04-17 01:02:00 +05:30
 
 ---
 

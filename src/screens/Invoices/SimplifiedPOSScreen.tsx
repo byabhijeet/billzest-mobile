@@ -6,7 +6,7 @@
  *
  * Navigates to InvoiceSummary after billing via the same CreateOrder logic.
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -20,18 +20,16 @@ import {
   Platform,
   UIManager,
   LayoutAnimation,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NavigationProp } from '@react-navigation/native';
-import { useThemeTokens } from '../../theme/ThemeProvider';
-import { ThemeTokens } from '../../theme/tokens';
-import { useProducts } from '../../logic/productLogic';
-import { useInvoiceStore } from '../../stores/invoiceStore';
-import {
-  useCreateOrder,
-} from '../../logic/orderLogic';
-import { useOrganization } from '../../contexts/OrganizationContext';
-import { generateInvoiceNumber } from '../../utils/invoiceNumberGenerator';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NavigationProp } from "@react-navigation/native";
+import { useThemeTokens } from "../../theme/ThemeProvider";
+import { ThemeTokens } from "../../theme/tokens";
+import { useProducts } from "../../logic/productLogic";
+import { useInvoiceStore } from "../../stores/invoiceStore";
+import { useCreateOrder } from "../../logic/orderLogic";
+import { useOrganization } from "../../contexts/OrganizationContext";
+import { generateInvoiceNumber } from "../../utils/invoiceNumberGenerator";
 import {
   ArrowLeft,
   Search,
@@ -42,20 +40,23 @@ import {
   ArrowRight,
   ShoppingCart,
   PackageX,
-} from 'lucide-react-native';
-import SelectPartyBottomSheet from '../../components/modals/SelectPartyBottomSheet';
-import { Party } from '../../types/domain';
-import type { AppNavigationParamList } from '../../navigation/types';
+} from "lucide-react-native";
+import SelectPartyBottomSheet from "../../components/modals/SelectPartyBottomSheet";
+import { Party } from "../../types/domain";
+import type { AppNavigationParamList } from "../../navigation/types";
 
 // Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 const formatCurrency = (val: number) =>
-  new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
     maximumFractionDigits: 0,
   }).format(val);
 
@@ -71,7 +72,14 @@ interface ProductCardProps {
 }
 
 const ProductCard = React.memo(
-  ({ product, qty, onIncrement, onDecrement, tokens, styles }: ProductCardProps) => {
+  ({
+    product,
+    qty,
+    onIncrement,
+    onDecrement,
+    tokens,
+    styles,
+  }: ProductCardProps) => {
     const isSelected = qty > 0;
     const isOutOfStock = (product.stock_quantity ?? 0) <= 0;
 
@@ -100,7 +108,12 @@ const ProductCard = React.memo(
                 isOutOfStock && { opacity: 0.35 },
               ]}
             >
-              <Text style={[styles.cardInitial, isOutOfStock && { color: tokens.mutedForeground }]}>
+              <Text
+                style={[
+                  styles.cardInitial,
+                  isOutOfStock && { color: tokens.mutedForeground },
+                ]}
+              >
                 {product.name.charAt(0).toUpperCase()}
               </Text>
             </View>
@@ -117,12 +130,20 @@ const ProductCard = React.memo(
         {/* Name + price */}
         <View style={styles.cardInfo}>
           <Text
-            style={[styles.cardName, isOutOfStock && { color: tokens.mutedForeground }]}
+            style={[
+              styles.cardName,
+              isOutOfStock && { color: tokens.mutedForeground },
+            ]}
             numberOfLines={2}
           >
             {product.name}
           </Text>
-          <Text style={[styles.cardPrice, isOutOfStock && { color: tokens.mutedForeground }]}>
+          <Text
+            style={[
+              styles.cardPrice,
+              isOutOfStock && { color: tokens.mutedForeground },
+            ]}
+          >
             {formatCurrency(product.selling_price)}
           </Text>
         </View>
@@ -138,14 +159,22 @@ const ProductCard = React.memo(
           >
             <Minus
               size={16}
-              color={isSelected && !isOutOfStock ? tokens.primary : 'rgba(115,115,115,0.38)'}
+              color={
+                isSelected && !isOutOfStock
+                  ? tokens.primary
+                  : "rgba(115,115,115,0.38)"
+              }
               strokeWidth={2.5}
             />
           </Pressable>
           <Text
             style={[
               styles.stepperQty,
-              { color: isSelected ? tokens.foreground : 'rgba(115,115,115,0.38)' },
+              {
+                color: isSelected
+                  ? tokens.foreground
+                  : "rgba(115,115,115,0.38)",
+              },
             ]}
           >
             {qty}
@@ -159,7 +188,7 @@ const ProductCard = React.memo(
           >
             <Plus
               size={16}
-              color={isOutOfStock ? 'rgba(115,115,115,0.38)' : tokens.primary}
+              color={isOutOfStock ? "rgba(115,115,115,0.38)" : tokens.primary}
               strokeWidth={2.5}
             />
           </Pressable>
@@ -168,7 +197,7 @@ const ProductCard = React.memo(
     );
   },
 );
-ProductCard.displayName = 'ProductCard';
+ProductCard.displayName = "ProductCard";
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
@@ -178,12 +207,19 @@ const SimplifiedPOSScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
 
   const { data: products = [] } = useProducts();
-  const { lineItems, addItem, updateQuantity, removeLineItem, setClient, setMode, resetInvoice } =
-    useInvoiceStore();
+  const {
+    lineItems,
+    addItem,
+    updateQuantity,
+    removeLineItem,
+    setClient,
+    setMode,
+    resetInvoice,
+  } = useInvoiceStore();
   const createInvoice = useCreateOrder();
   const { organizationId } = useOrganization();
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
   const [isPartySheetVisible, setPartySheetVisible] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Party | null>(null);
@@ -196,8 +232,8 @@ const SimplifiedPOSScreen: React.FC = () => {
     return products.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
-        (p.sku ?? '').toLowerCase().includes(q) ||
-        (p.barcode ?? '').toLowerCase().includes(q),
+        (p.sku ?? "").toLowerCase().includes(q) ||
+        (p.barcode ?? "").toLowerCase().includes(q),
     );
   }, [products, query]);
 
@@ -241,7 +277,7 @@ const SimplifiedPOSScreen: React.FC = () => {
   // ── Proceed / bill ─────────────────────────────────────────────────────────
   const handleProceed = () => {
     if (lineItems.length === 0) {
-      Alert.alert('Cart Empty', 'Add at least one item to proceed.');
+      Alert.alert("Cart Empty", "Add at least one item to proceed.");
       return;
     }
     // Prompt party selection first
@@ -255,7 +291,7 @@ const SimplifiedPOSScreen: React.FC = () => {
       setIsSaving(true);
 
       try {
-        setMode('sale');
+        setMode("sale");
         setClient(party);
 
         const subtotal = lineItems.reduce((s, i) => s + i.rate * i.quantity, 0);
@@ -269,7 +305,8 @@ const SimplifiedPOSScreen: React.FC = () => {
           order: {
             party_id: party.id,
             invoice_number: invoiceNumber,
-            payment_status: 'PENDING',
+            payment_status: "PENDING",
+            status: "sent",
             subtotal,
             tax_amount: taxAmount,
             total_amount: finalTotal,
@@ -293,8 +330,8 @@ const SimplifiedPOSScreen: React.FC = () => {
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 7);
 
-        navigation.navigate('InvoicesTab', {
-          screen: 'InvoiceSummary',
+        navigation.navigate("InvoicesTab", {
+          screen: "InvoiceSummary",
           params: {
             invoiceId: created.id,
             invoiceNumber,
@@ -308,7 +345,10 @@ const SimplifiedPOSScreen: React.FC = () => {
           },
         });
       } catch (err: any) {
-        Alert.alert('Failed to save', err?.message ?? 'Unable to create invoice.');
+        Alert.alert(
+          "Failed to save",
+          err?.message ?? "Unable to create invoice.",
+        );
       } finally {
         setIsSaving(false);
       }
@@ -318,11 +358,11 @@ const SimplifiedPOSScreen: React.FC = () => {
 
   const handleBack = () => {
     if (lineItems.length > 0) {
-      Alert.alert('Discard Cart?', 'Your current cart will be cleared.', [
-        { text: 'Cancel', style: 'cancel' },
+      Alert.alert("Discard Cart?", "Your current cart will be cleared.", [
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Discard',
-          style: 'destructive',
+          text: "Discard",
+          style: "destructive",
           onPress: () => {
             resetInvoice();
             navigation.goBack();
@@ -354,7 +394,7 @@ const SimplifiedPOSScreen: React.FC = () => {
           <TextInput
             style={styles.searchInput}
             placeholder="Search by item name..."
-            placeholderTextColor='rgba(115,115,115,0.5)'
+            placeholderTextColor="rgba(115,115,115,0.5)"
             value={query}
             onChangeText={setQuery}
             returnKeyType="search"
@@ -395,7 +435,7 @@ const SimplifiedPOSScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <PackageX size={48} color='rgba(115,115,115,0.25)' />
+            <PackageX size={48} color="rgba(115,115,115,0.25)" />
             <Text style={styles.emptyText}>No products found</Text>
             <Text style={styles.emptySubText}>Try a different search</Text>
           </View>
@@ -417,7 +457,9 @@ const SimplifiedPOSScreen: React.FC = () => {
       {totalItems > 0 && (
         <View style={styles.cartBar}>
           <View>
-            <Text style={styles.cartCountLabel}>{totalItems} item{totalItems !== 1 ? 's' : ''} selected</Text>
+            <Text style={styles.cartCountLabel}>
+              {totalItems} item{totalItems !== 1 ? "s" : ""} selected
+            </Text>
             <Text style={styles.cartTotal}>{formatCurrency(totalAmount)}</Text>
           </View>
           <Pressable
@@ -425,8 +467,10 @@ const SimplifiedPOSScreen: React.FC = () => {
             onPress={handleProceed}
             disabled={isSaving}
           >
-            <Text style={styles.proceedText}>{isSaving ? 'Saving…' : 'Proceed'}</Text>
-            <ArrowRight size={20} color="#fff" strokeWidth={2.5} />
+            <Text style={styles.proceedText}>
+              {isSaving ? "Saving…" : "Proceed"}
+            </Text>
+            <ArrowRight size={20} color={tokens.primaryForeground} strokeWidth={2.5} />
           </Pressable>
         </View>
       )}
@@ -450,15 +494,13 @@ const createStyles = (tokens: ThemeTokens) =>
 
     // Header
     header: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       paddingHorizontal: 16,
       paddingVertical: 10,
       gap: 10,
       backgroundColor: tokens.background,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(0,0,0,0.06)',
-      shadowColor: '#000',
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
       shadowRadius: 8,
@@ -467,15 +509,14 @@ const createStyles = (tokens: ThemeTokens) =>
     backBtn: { padding: 8, borderRadius: 8 },
     searchBox: {
       flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       backgroundColor: tokens.card,
       borderRadius: 12,
       paddingHorizontal: 12,
       paddingVertical: 8,
       gap: 8,
-      borderWidth: 1,
-      borderColor: 'rgba(0,0,0,0.06)',
+      // No-Line Rule: Removed border
     },
     searchInput: {
       flex: 1,
@@ -489,7 +530,7 @@ const createStyles = (tokens: ThemeTokens) =>
     countStrip: { paddingHorizontal: 20, paddingVertical: 10 },
     countText: {
       fontSize: 12,
-      fontWeight: '600',
+      fontWeight: "600",
       color: tokens.mutedForeground,
     },
 
@@ -500,13 +541,12 @@ const createStyles = (tokens: ThemeTokens) =>
     // Card
     card: {
       flex: 1,
-      backgroundColor: tokens.card,
+
       borderRadius: 16,
       padding: 14,
       gap: 10,
-      borderWidth: 1,
-      borderColor: 'rgba(0,0,0,0.08)',
-      shadowColor: '#1a1a2e',
+      backgroundColor: tokens.surface_container_lowest, // Enhanced contrast to replace border
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
@@ -521,33 +561,33 @@ const createStyles = (tokens: ThemeTokens) =>
     cardImageBox: {
       aspectRatio: 1,
       borderRadius: 10,
-      overflow: 'hidden',
+      overflow: "hidden",
       backgroundColor: tokens.muted,
-      position: 'relative',
+      position: "relative",
     },
-    cardImage: { width: '100%', height: '100%' },
+    cardImage: { width: "100%", height: "100%" },
     cardImagePlaceholder: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: tokens.primaryAlpha15,
     },
     cardInitial: {
       fontSize: 28,
-      fontWeight: '800',
+      fontWeight: "800",
       color: tokens.primary,
     },
     outOfStockOverlay: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(255,255,255,0.65)',
-      alignItems: 'center',
-      justifyContent: 'center',
+      backgroundColor: "rgba(255,255,255,0.65)",
+      alignItems: "center",
+      justifyContent: "center",
     },
     outOfStockLabel: {
-      backgroundColor: '#1e1e1e',
-      color: '#ffffff',
+      backgroundColor: "#1e1e1e",
+      color: "#ffffff",
       fontSize: 9,
-      fontWeight: '900',
+      fontWeight: "900",
       letterSpacing: 1.5,
       paddingHorizontal: 8,
       paddingVertical: 3,
@@ -556,71 +596,71 @@ const createStyles = (tokens: ThemeTokens) =>
     cardInfo: { gap: 2 },
     cardName: {
       fontSize: 14,
-      fontWeight: '700',
+      fontWeight: "700",
       color: tokens.foreground,
       lineHeight: 18,
     },
     cardPrice: {
       fontSize: 13,
-      fontWeight: '700',
+      fontWeight: "700",
       color: tokens.primary,
     },
 
     // Stepper
     stepper: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       backgroundColor: tokens.muted,
       borderRadius: 8,
       paddingHorizontal: 4,
       paddingVertical: 4,
     },
     stepperSelected: {
-      backgroundColor: '#ffffff60',
+      backgroundColor: "#ffffff60",
     },
     stepperBtn: {
       width: 30,
       height: 30,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
     stepperQty: {
       fontSize: 14,
-      fontWeight: '800',
+      fontWeight: "800",
       minWidth: 20,
-      textAlign: 'center',
+      textAlign: "center",
     },
 
     // Empty state
     emptyState: {
-      alignItems: 'center',
+      alignItems: "center",
       paddingVertical: 60,
       gap: 8,
     },
     emptyText: {
       fontSize: 16,
-      fontWeight: '700',
+      fontWeight: "700",
       color: tokens.mutedForeground,
     },
-    emptySubText: { fontSize: 13, color: 'rgba(115,115,115,0.5)' },
+    emptySubText: { fontSize: 13, color: "rgba(115,115,115,0.5)" },
 
     // Cart bar
     cartBar: {
-      position: 'absolute',
+      position: "absolute",
       bottom: 0,
       left: 0,
       right: 0,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
       backgroundColor: tokens.card,
       borderTopWidth: 1,
-      borderTopColor: 'rgba(0,0,0,0.08)',
+      borderTopColor: "rgba(0,0,0,0.08)",
       paddingHorizontal: 20,
       paddingTop: 14,
-      paddingBottom: Platform.OS === 'ios' ? 28 : 16,
-      shadowColor: '#000',
+      paddingBottom: Platform.OS === "ios" ? 28 : 16,
+      shadowColor: tokens.shadowColor,
       shadowOffset: { width: 0, height: -4 },
       shadowOpacity: 0.06,
       shadowRadius: 16,
@@ -628,21 +668,21 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     cartCountLabel: {
       fontSize: 11,
-      fontWeight: '800',
+      fontWeight: "800",
       color: tokens.mutedForeground,
-      textTransform: 'uppercase',
+      textTransform: "uppercase",
       letterSpacing: 1,
     },
     cartTotal: {
       fontSize: 22,
-      fontWeight: '900',
+      fontWeight: "900",
       color: tokens.foreground,
       letterSpacing: -0.5,
       marginTop: 2,
     },
     proceedBtn: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 8,
       backgroundColor: tokens.primary,
       paddingHorizontal: 24,
@@ -656,8 +696,8 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     proceedText: {
       fontSize: 15,
-      fontWeight: '700',
-      color: '#ffffff',
+      fontWeight: "700",
+      color: "#ffffff",
     },
   });
 

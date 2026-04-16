@@ -5,8 +5,8 @@ import {
   Text,
   StyleSheet,
   Pressable,
-  FlatList,
-  ActivityIndicator,
+  TextInput,
+  Platform,
 } from 'react-native';
 import Button from '../../components/ui/Button';
 import { useNavigation } from '@react-navigation/native';
@@ -14,19 +14,19 @@ import type { NavigationProp } from '@react-navigation/native';
 import { useThemeTokens } from '../../theme/ThemeProvider';
 import { ThemeTokens } from '../../theme/tokens';
 import ScreenWrapper from '../../components/ScreenWrapper';
+import SearchBar from '../../components/SearchBar';
+import ListHeader from '../../components/layout/ListHeader';
 import {
-  TrendingUp,
-  TrendingDown,
   Users,
-  Wallet,
-  Plus,
-  ChevronRight,
   AlertTriangle,
+  PlusCircle,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
 } from 'lucide-react-native';
 import { useParties } from '../../hooks/useParties';
 import { useOrganization } from '../../contexts/OrganizationContext';
 import { useQuery } from '@tanstack/react-query';
-import { expensesService } from '../../supabase/expensesService';
 import { supabase } from '../../supabase/supabaseClient';
 import EmptyState from '../../components/EmptyState';
 import CreditBookSkeleton from '../../components/skeletons/CreditBookSkeleton';
@@ -40,9 +40,8 @@ const CreditBookScreen: React.FC = () => {
   const styles = React.useMemo(() => createStyles(tokens), [tokens]);
   const navigation = useNavigation<NavigationProp<AppNavigationParamList>>();
 
-  const [activeTab, setActiveTab] = useState<'customer' | 'vendor' | 'expense'>(
-    'customer',
-  );
+  const [activeTab, setActiveTab] = useState<'customer' | 'vendor'>('customer');
+  const [searchQuery, setSearchQuery] = useState('');
   const [paymentSheetVisible, setPaymentSheetVisible] = useState(false);
   const [selectedPartyForPayment, setSelectedPartyForPayment] =
     useState<Party | null>(null);
@@ -56,16 +55,6 @@ const CreditBookScreen: React.FC = () => {
   } = useParties();
 
   const { organizationId } = useOrganization();
-
-  // Fetch expenses total
-  const { data: totalExpenses = 0, error: expensesError } = useQuery({
-    queryKey: ['expenses', 'total', organizationId],
-    queryFn: async () => {
-      if (!organizationId) return 0;
-      return expensesService.getTotalExpenses(organizationId);
-    },
-    enabled: !!organizationId,
-  });
 
   // Calculate balances from orders
   const { data: partiesWithCalculatedBalances = [] } = useQuery({
@@ -107,10 +96,14 @@ const CreditBookScreen: React.FC = () => {
   });
 
   const filteredParties = partiesWithCalculatedBalances.filter(
-    p => p.party_type === activeTab,
+    p =>
+      p.party_type === activeTab &&
+      (p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.mobile && p.mobile.includes(searchQuery))),
   );
 
-  // Calculate totals from real data
+  // Calculate totals from real data (all active tabs?) 
+  // No, the HTML shows totals across everything, we'll keep as before but show based on all entries
   const totalReceivable = useMemo(() => {
     return partiesWithCalculatedBalances
       .filter(p => p.party_type === 'customer')
@@ -122,6 +115,8 @@ const CreditBookScreen: React.FC = () => {
       .filter(p => p.party_type === 'vendor')
       .reduce((sum, p) => sum + (p.balance ?? 0), 0);
   }, [partiesWithCalculatedBalances]);
+  
+  const netBalance = Math.abs(totalReceivable - totalPayable);
 
   const handleAddParty = () => {
     navigation.navigate('AddPartySheet');
@@ -145,143 +140,103 @@ const CreditBookScreen: React.FC = () => {
 
   return (
     <ScreenWrapper>
+      <ListHeader title="Credit Book" />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        {/* ACTION HEADER */}
-        <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.headerTitle}>Credit Book</Text>
-            <Text style={styles.headerSubtitle}>Manage your Khata</Text>
+        {/* KPI Row: Invoice Style 3-Stats */}
+        <View style={styles.summaryRow}>
+          <View style={[styles.summaryStatItem, { flex: 1.2 }]}>
+            <View style={[styles.summaryIconBox, styles.summaryIconBoxReceivable]}>
+              <TrendingUp color={tokens.primary} size={14} />
+            </View>
+            <View style={styles.summaryStatText}>
+              <Text style={styles.summaryStatLabel}>YOU GET</Text>
+              <Text style={styles.summaryStatValue} numberOfLines={1}>
+                ₹{totalReceivable.toLocaleString('en-IN')}
+              </Text>
+            </View>
           </View>
-          <Button
-            label="+ Party"
-            variant="primary"
-            size="sm"
-            onPress={handleAddParty}
-            accessibilityLabel="Add party"
+          <View style={styles.summaryDivider} />
+          <View style={[styles.summaryStatItem, { flex: 1.2 }]}>
+            <View style={[styles.summaryIconBox, styles.summaryIconBoxPayable]}>
+              <TrendingDown color={tokens.destructive} size={14} />
+            </View>
+            <View style={styles.summaryStatText}>
+              <Text style={styles.summaryStatLabel}>YOU PAY</Text>
+              <Text style={styles.summaryStatValue} numberOfLines={1}>
+                ₹{totalPayable.toLocaleString('en-IN')}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.summaryDivider} />
+          <View style={[styles.summaryStatItem, { flex: 0.8 }]}>
+            <View style={[styles.summaryIconBox, styles.summaryIconBoxNet]}>
+              <Wallet color={tokens.foreground} size={14} />
+            </View>
+            <View style={styles.summaryStatText}>
+              <Text style={styles.summaryStatLabel}>NET</Text>
+              <Text style={styles.summaryStatValue} numberOfLines={1}>
+                ₹{netBalance.toLocaleString('en-IN')}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Search & Filter Row */}
+        <View style={styles.searchRow}>
+          <SearchBar
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="Search parties..."
+            showFilter={true}
+            onFilterPress={() => {}}
+            filterActive={false}
           />
         </View>
 
-        {/* SUMMARY CARDS */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.summaryRow}
-          contentContainerStyle={{ paddingHorizontal: 4 }}
+        {/* Quick Filters */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          style={styles.quickFiltersScroll}
+          contentContainerStyle={styles.quickFiltersContent}
         >
-          <View style={[styles.summaryCard, { borderColor: tokens.primary }]}>
-            <View style={styles.summaryHeader}>
-              <Text style={styles.summaryLabel}>Total Receivable</Text>
-              <TrendingUp size={16} color={tokens.primary} />
-            </View>
-            <Text style={[styles.summaryValue, { color: tokens.primary }]}>
-              ₹{totalReceivable.toLocaleString('en-IN')}
-            </Text>
-          </View>
-
-          <View
-            style={[styles.summaryCard, { borderColor: tokens.destructive }]}
-          >
-            <View style={styles.summaryHeader}>
-              <Text style={styles.summaryLabel}>Total Payable</Text>
-              <TrendingDown size={16} color={tokens.destructive} />
-            </View>
-            <Text style={[styles.summaryValue, { color: tokens.destructive }]}>
-              ₹{totalPayable.toLocaleString('en-IN')}
-            </Text>
-          </View>
-
-          <View style={[styles.summaryCard, { borderColor: tokens.warning }]}>
-            <View style={styles.summaryHeader}>
-              <Text style={styles.summaryLabel}>Total Expenses</Text>
-              <Wallet size={16} color={tokens.warning} />
-            </View>
-            <Text style={[styles.summaryValue, { color: tokens.warning }]}>
-              ₹{totalExpenses.toLocaleString('en-IN')}
-            </Text>
-          </View>
-        </ScrollView>
-
-        {/* TABS */}
-        <View style={styles.tabRow}>
           <Pressable
             style={[
-              styles.tabChip,
-              activeTab === 'customer' && styles.tabChipActive,
+              styles.chip,
+              activeTab === 'customer' ? styles.chipActive : styles.chipInactive
             ]}
             onPress={() => setActiveTab('customer')}
           >
-            <Users
-              color={
-                activeTab === 'customer'
-                  ? tokens.primaryForeground
-                  : tokens.mutedForeground
-              }
-              size={16}
-            />
-            <Text
-              style={[
-                styles.tabChipText,
-                activeTab === 'customer' && styles.tabChipTextActive,
-              ]}
-            >
-              Customers
+            <Text style={[
+              styles.chipText,
+              activeTab === 'customer' ? styles.chipTextActive : styles.chipTextInactive
+            ]}>
+              CUSTOMERS ({partiesWithCalculatedBalances.filter(p => p.party_type === 'customer').length})
             </Text>
           </Pressable>
+
           <Pressable
             style={[
-              styles.tabChip,
-              activeTab === 'vendor' && styles.tabChipActive,
+              styles.chip,
+              activeTab === 'vendor' ? styles.chipActive : styles.chipInactive
             ]}
             onPress={() => setActiveTab('vendor')}
           >
-            <Users
-              color={
-                activeTab === 'vendor'
-                  ? tokens.primaryForeground
-                  : tokens.mutedForeground
-              }
-              size={16}
-            />
-            <Text
-              style={[
-                styles.tabChipText,
-                activeTab === 'vendor' && styles.tabChipTextActive,
-              ]}
-            >
-              Vendors
+            <Text style={[
+              styles.chipText,
+              activeTab === 'vendor' ? styles.chipTextActive : styles.chipTextInactive
+            ]}>
+              VENDORS ({partiesWithCalculatedBalances.filter(p => p.party_type === 'vendor').length})
             </Text>
           </Pressable>
-          <Pressable
-            style={[
-              styles.tabChip,
-              activeTab === 'expense' && styles.tabChipActive,
-            ]}
-            onPress={() => setActiveTab('expense')}
-          >
-            <Wallet
-              color={
-                activeTab === 'expense'
-                  ? tokens.primaryForeground
-                  : tokens.mutedForeground
-              }
-              size={16}
-            />
-            <Text
-              style={[
-                styles.tabChipText,
-                activeTab === 'expense' && styles.tabChipTextActive,
-              ]}
-            >
-              Expenses
-            </Text>
-          </Pressable>
-        </View>
+        </ScrollView>
 
-        {/* LIST */}
-        <View style={styles.listSection}>
+        {/* Ledger List: FlatList Style */}
+        <View style={styles.listContainer}>
           {partiesLoading ? (
             <CreditBookSkeleton />
           ) : partiesError && !partiesLoading ? (
@@ -295,100 +250,98 @@ const CreditBookScreen: React.FC = () => {
           ) : !partiesLoading &&
             !partiesError &&
             filteredParties.length === 0 ? (
-            <EmptyState
-              icon={
-                activeTab === 'customer' ? (
-                  <Users color={tokens.primary} size={32} />
-                ) : activeTab === 'vendor' ? (
-                  <Users color={tokens.primary} size={32} />
-                ) : (
-                  <Wallet color={tokens.primary} size={32} />
-                )
-              }
-              title={`No ${
-                activeTab === 'customer'
-                  ? 'customers'
-                  : activeTab === 'vendor'
-                  ? 'vendors'
-                  : 'expenses'
-              } yet`}
-              description={
-                activeTab === 'customer'
-                  ? 'Add customers to start tracking receivables.'
-                  : activeTab === 'vendor'
-                  ? 'Add vendors to start tracking payables.'
-                  : 'Add expenses to track your business spending.'
-              }
-              actionLabel={`Add ${
-                activeTab === 'customer'
-                  ? 'Customer'
-                  : activeTab === 'vendor'
-                  ? 'Vendor'
-                  : 'Expense'
-              }`}
-              onAction={handleAddParty}
-            />
+            <View style={styles.emptyStateContainer}>
+               <EmptyState
+                 icon={<Users color={tokens.primary} size={32} />}
+                 title="No entries found."
+                 description={
+                   searchQuery 
+                     ? `No results for "${searchQuery}"`
+                     : activeTab === 'customer'
+                     ? 'Add customers to start tracking receivables.'
+                     : 'Add vendors to start tracking payables.'
+                 }
+                 actionLabel={searchQuery ? 'Clear Search' : (activeTab === 'customer' ? 'Add Customer' : 'Add Vendor')}
+                 onAction={searchQuery ? () => setSearchQuery('') : handleAddParty}
+               />
+            </View>
           ) : (
-            filteredParties.map(party => (
-              <View key={party.id} style={styles.partyCardWrapper}>
-                <Pressable
-                  style={styles.partyCard}
-                  onPress={() => handlePartyPress(party)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`View ${party.name} credit details`}
-                >
-                  <View style={styles.partyInfo}>
-                    <View style={styles.avatar}>
-                      <Text style={styles.avatarText}>
-                        {party.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                    <View>
-                      <Text style={styles.partyName}>{party.name}</Text>
-                      {party.mobile ? (
-                        <Text style={styles.partyMobile}>{party.mobile}</Text>
-                      ) : null}
-                    </View>
-                  </View>
-                  <View style={styles.partyBalance}>
-                    <Text
-                      style={[
-                        styles.balanceText,
-                        activeTab === 'customer'
-                          ? { color: tokens.primary }
-                          : { color: tokens.destructive },
-                        // Generally: Customer Positive = Receivable (Green), Vendor Positive = Payable (Red)
-                        // For Expense -> Red/Orange
-                        // Using simplistic logic for now
-                      ]}
+            filteredParties.map((party, index) => {
+              const isVendor = party.party_type === 'vendor';
+              
+              return (
+                <View key={party.id}>
+                  {index > 0 && <View style={styles.rowDivider} />}
+                  <View style={styles.partyRow}>
+                    <Pressable
+                      style={({ pressed }) => [styles.partyPressable, pressed && styles.partyPressed]}
+                      onPress={() => handlePartyPress(party)}
+                      accessibilityRole="button"
                     >
-                      ₹{party.balance.toLocaleString('en-IN')}
-                    </Text>
-                    <Text style={styles.balanceLabelSmall}>
-                      {activeTab === 'customer'
-                        ? 'You get'
-                        : activeTab === 'vendor'
-                        ? 'You give'
-                        : 'Spent'}
-                    </Text>
+                      <View style={styles.partyInfo}>
+                        <View style={styles.avatar}>
+                          <Text style={styles.avatarText}>
+                            {party.name.charAt(0).toUpperCase()}{party.name.split(' ')[1] ? party.name.split(' ')[1].charAt(0).toUpperCase() : ''}
+                          </Text>
+                        </View>
+                        <View>
+                          <Text style={styles.partyName} numberOfLines={1}>{party.name}</Text>
+                          {party.mobile ? (
+                            <Text style={styles.partyMobile}>{party.mobile}</Text>
+                          ) : null}
+                        </View>
+                      </View>
+                      <View style={styles.partyBalanceContainer}>
+                        {party.balance > 0 ? (
+                           <>
+                             <Text
+                               style={[
+                                 styles.balanceValue,
+                                 isVendor ? { color: tokens.destructive } : { color: tokens.primary }
+                               ]}
+                             >
+                               ₹ {party.balance.toLocaleString('en-IN')}
+                             </Text>
+                             <Text style={[styles.balanceSub, isVendor ? { color: tokens.destructive } : { color: tokens.primary }]}>
+                               {isVendor ? 'You Pay' : 'You Get'}
+                             </Text>
+                           </>
+                        ) : (
+                          <>
+                             <Text style={styles.settledValue}>Settled</Text>
+                             <Text style={styles.settledSub}>Balanced</Text>
+                          </>
+                        )}
+                      </View>
+                    </Pressable>
+                    {/* Embedded Pay Action strictly for Customers with Balance directly below info like original */}
+                    {activeTab === 'customer' && party.balance > 0 && (
+                      <Pressable 
+                        style={styles.quickPayButton} 
+                        onPress={() => handleRecordPayment(party)}
+                      >
+                         <Banknote size={14} color={tokens.primary} />
+                         <Text style={styles.quickPayText}>Pay</Text>
+                      </Pressable>
+                    )}
                   </View>
-                </Pressable>
-                {activeTab === 'customer' && party.balance > 0 && (
-                  <Button
-                    label="Pay"
-                    variant="primary"
-                    size="sm"
-                    onPress={() => handleRecordPayment(party)}
-                    icon={<Banknote color={tokens.primaryForeground} size={14} />}
-                    style={styles.paymentButtonNew}
-                    accessibilityLabel={`Record payment for ${party.name}`}
-                  />
-                )}
-              </View>
-            ))
+                </View>
+              );
+            })
           )}
         </View>
       </ScrollView>
+
+      {/* FAB: Entry */}
+      <Pressable 
+        style={[styles.fab, Platform.OS === 'ios' && styles.fabShadow]} 
+        onPress={handleAddParty}
+        accessibilityRole="button"
+        accessibilityLabel="Add party"
+      >
+        <PlusCircle size={20} color={tokens.primaryForeground} />
+        <Text style={styles.fabText}>+ ENTRY</Text>
+      </Pressable>
 
       {/* Payment Recording Sheet */}
       <RecordPaymentSheet
@@ -405,156 +358,224 @@ const createStyles = (tokens: ThemeTokens) =>
   StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: tokens.background,
     },
     content: {
-      padding: 20,
-      paddingBottom: 100,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    headerTitle: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: tokens.foreground,
-    },
-    headerSubtitle: {
-      color: tokens.mutedForeground,
-      fontSize: 14,
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 120, // Leave room for absolute FAB
     },
     summaryRow: {
       flexDirection: 'row',
-      marginBottom: 24,
-      marginHorizontal: -4,
-    },
-    summaryCard: {
-      width: 160,
-      padding: 16,
-      backgroundColor: tokens.card,
-      borderRadius: 16,
-      borderWidth: 1,
-      marginRight: 12,
-      justifyContent: 'space-between',
-      height: 100,
-    },
-    summaryHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
+      paddingVertical: 8,
+      marginBottom: 16,
+      gap: 0,
     },
-    summaryLabel: {
-      fontSize: 12,
-      color: tokens.mutedForeground,
-    },
-    summaryValue: {
-      fontSize: 20,
-      fontWeight: '700',
-    },
-    tabRow: {
-      flexDirection: 'row',
-      marginBottom: 18,
-    },
-    tabChip: {
+    summaryStatItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      borderRadius: 999,
-      borderWidth: 1,
-      borderColor: tokens.border,
+      gap: 8,
+    },
+    summaryIconBox: {
+      width: 28,
+      height: 28,
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    summaryIconBoxPayable: {
+      backgroundColor: tokens.destructiveAlpha10,
+    },
+    summaryIconBoxReceivable: {
+      backgroundColor: tokens.primaryAlpha10,
+    },
+    summaryIconBoxNet: {
+      backgroundColor: tokens.surface_container_low,
+    },
+    summaryStatText: {
+      flex: 1,
+      gap: 2,
+    },
+    searchRow: {
+      marginBottom: 16,
+    },
+    quickFiltersScroll: {
+      marginBottom: 16,
+    },
+    quickFiltersContent: {
+      paddingBottom: 4,
+      flexDirection: 'row',
+      gap: 8,
+    },
+    chip: {
       paddingHorizontal: 16,
-      paddingVertical: 10,
-      marginRight: 12,
-      backgroundColor: tokens.card,
+      paddingVertical: 8,
+      borderRadius: 999,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
-    tabChipActive: {
-      backgroundColor: tokens.primary,
-      borderColor: tokens.primary,
+    chipActive: {
+      backgroundColor: tokens.primary, // Equivalent of bg-on-primary-container returning white text usually, but bg-primary fits our tokens best
     },
-    tabChipText: {
-      marginLeft: 8,
-      color: tokens.mutedForeground,
-      fontWeight: '600',
+    chipInactive: {
+      backgroundColor: tokens.surface_container_low,
     },
-    tabChipTextActive: {
+    chipText: {
+      fontSize: 11,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    chipTextActive: {
       color: tokens.primaryForeground,
     },
-    listSection: {
-      marginBottom: 20,
+    chipTextInactive: {
+      color: tokens.mutedForeground,
     },
-    partyCardWrapper: {
-      marginBottom: 12,
-      position: 'relative',
+    listContainer: {
+      paddingBottom: 40,
     },
-    partyCard: {
+    partyRow: {
+      backgroundColor: tokens.surface_container_lowest,
+    },
+    rowDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: tokens.border,
+      marginLeft: 64, // To align past the avatar
+      opacity: 0.5,
+    },
+    partyPressable: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: tokens.card,
-      padding: 16,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: tokens.border,
+      justifyContent: 'space-between',
+      paddingHorizontal: 12,
+      paddingVertical: 14,
+    },
+    partyPressed: {
+      backgroundColor: tokens.muted,
     },
     partyInfo: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
+      flex: 1,
     },
     avatar: {
       width: 40,
       height: 40,
-      borderRadius: 20,
-      backgroundColor: tokens.muted,
-      justifyContent: 'center',
+      borderRadius: 12,
+      backgroundColor: tokens.surface_container_low,
       alignItems: 'center',
+      justifyContent: 'center',
+    },
+    summaryStatLabel: {
+      fontSize: 9,
+      fontWeight: '700',
+      letterSpacing: 0.5,
+      color: tokens.mutedForeground,
+      textTransform: 'uppercase',
+    },
+    summaryStatValue: {
+      fontSize: 14,
+      fontWeight: '800',
+      color: tokens.foreground,
+    },
+    summaryDivider: {
+      width: 1,
+      height: 28,
+      backgroundColor: tokens.border,
+      marginHorizontal: 8,
+      opacity: 0.4,
     },
     avatarText: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: tokens.mutedForeground,
+      fontSize: 14,
+      fontWeight: '700',
+      color: tokens.foreground,
     },
     partyName: {
-      fontSize: 16,
-      fontWeight: '600',
+      fontSize: 14,
+      fontWeight: '700',
       color: tokens.foreground,
     },
     partyMobile: {
-      fontSize: 13,
-      color: tokens.mutedForeground,
-    },
-    partyBalance: {
-      alignItems: 'flex-end',
-    },
-    balanceText: {
-      fontSize: 16,
-      fontWeight: '700',
-    },
-    balanceLabelSmall: {
       fontSize: 11,
       color: tokens.mutedForeground,
+      marginTop: 2,
     },
-    paymentButtonNew: {
-      marginTop: 8,
-      alignSelf: 'flex-end',
+    partyBalanceContainer: {
+      alignItems: 'flex-end',
+      marginLeft: 12,
     },
-    emptyState: {
-      padding: 40,
-      alignItems: 'center',
+    balanceValue: {
+      fontSize: 14,
+      fontWeight: '800',
     },
-    emptyStateText: {
+    balanceSub: {
+      fontSize: 10,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: -0.2,
+      marginTop: 2,
+    },
+    settledValue: {
+      fontSize: 14,
+      fontWeight: '800',
       color: tokens.mutedForeground,
-      marginBottom: 8,
     },
-    emptyStateLink: {
-      color: tokens.primary,
-      fontWeight: '600',
+    settledSub: {
+      fontSize: 10,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: -0.2,
+      marginTop: 2,
+      color: tokens.mutedForeground,
     },
-    loadingContainer: {
-      padding: 40,
+    quickPayButton: {
+      flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center',
+      alignSelf: 'flex-end',
+      backgroundColor: tokens.primaryAlpha15,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 999,
+      marginRight: 20,
+      marginBottom: 12,
+      gap: 4,
+    },
+    quickPayText: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: tokens.primary,
+    },
+    emptyStateContainer: {
+      paddingVertical: 32,
+    },
+    fab: {
+      position: 'absolute',
+      bottom: 24, // Keep it above tabs
+      right: 24,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: tokens.primary, // Using primary for gradient style placeholder
+      paddingHorizontal: 20,
+      paddingVertical: 14,
+      borderRadius: 16,
+      gap: 8,
+      elevation: 6,
+    },
+    // iOS shadow specifically to match Tailwind shadow-xl loosely
+    fabShadow: {
+      shadowColor: tokens.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+    },
+    fabText: {
+      color: tokens.primaryForeground,
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 0.5,
     },
   });
 

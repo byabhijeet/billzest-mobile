@@ -127,7 +127,7 @@ const PartyFilterSheet: React.FC<PartyFilterSheetProps> = ({
                           styles.checkbox, 
                           isSelected && styles.checkboxActive
                       ]}>
-                          {isSelected && <Check size={14} color="#fff" strokeWidth={3} />}
+                          {isSelected && <Check size={14} color={tokens.primaryForeground} strokeWidth={3} />}
                       </View>
                   </Pressable>
               );
@@ -177,7 +177,7 @@ const createStyles = (tokens: ThemeTokens) =>
       fontSize: 14,
     },
     chipTextActive: {
-      color: '#fff',
+      color: tokens.primaryForeground,
     },
     groupList: {
         marginTop: 12,

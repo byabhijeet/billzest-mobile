@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from "react";
 import {
   FlatList,
   View,
@@ -8,25 +8,25 @@ import {
   Alert,
   RefreshControl,
   ActivityIndicator,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useThemeTokens } from '../../theme/ThemeProvider';
-import { ThemeTokens } from '../../theme/tokens';
-import InvoiceCard from '../../components/InvoiceCard';
-import SearchBar from '../../components/SearchBar';
-import ScreenWrapper from '../../components/ScreenWrapper';
-import FAB from '../../components/ui/FAB';
-import EmptyState from '../../components/EmptyState';
-import InvoiceListSkeleton from '../../components/skeletons/InvoiceListSkeleton';
-import { useInfiniteOrders } from '../../logic/orderLogic';
-import type { Order } from '../../types/domain';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useThemeTokens } from "../../theme/ThemeProvider";
+import { ThemeTokens } from "../../theme/tokens";
+import InvoiceCard from "../../components/InvoiceCard";
+import SearchBar from "../../components/SearchBar";
+import ScreenWrapper from "../../components/ScreenWrapper";
+import FAB from "../../components/ui/FAB";
+import EmptyState from "../../components/EmptyState";
+import InvoiceListSkeleton from "../../components/skeletons/InvoiceListSkeleton";
+import { useInfiniteOrders } from "../../logic/orderLogic";
+import type { Order } from "../../types/domain";
 import InvoiceFilterSheet, {
   InvoiceFilters,
-} from '../../components/modals/InvoiceFilterSheet';
-import { useAppSettingsStore } from '../../stores/appSettingsStore';
-import { useScreenContentPadding } from '../../components/layout/ScreenContent';
-import ListHeader from '../../components/layout/ListHeader';
+} from "../../components/modals/InvoiceFilterSheet";
+import { useAppSettingsStore } from "../../stores/appSettingsStore";
+import { useScreenContentPadding } from "../../components/layout/ScreenContent";
+import ListHeader from "../../components/layout/ListHeader";
 import {
   ArrowUpDown,
   Plus,
@@ -34,21 +34,22 @@ import {
   BarChart3,
   TrendingUp,
   TrendingDown,
-} from 'lucide-react-native';
-import type { InvoicesStackParamList } from '../../navigation/types';
+} from "lucide-react-native";
+import type { InvoicesStackParamList } from "../../navigation/types";
 
-const STATUS_FILTERS = ['All', 'Paid', 'Sent', 'Overdue', 'Draft'];
+const STATUS_FILTERS = ["All", "Paid", "Sent", "Overdue", "Draft"];
 const INVOICES_PAGE_SIZE = 20;
 
 const InvoicesListScreen: React.FC = () => {
   const { tokens } = useThemeTokens();
   const styles = useMemo(() => createStyles(tokens), [tokens]);
   const contentContainerStyle = useScreenContentPadding({
-    top: 'none',
+    top: "none",
     bottom: 120,
   });
-  const navigation = useNavigation<NativeStackNavigationProp<InvoicesStackParamList>>();
-  const [searchTerm, setSearchTerm] = useState('');
+  const navigation =
+    useNavigation<NativeStackNavigationProp<InvoicesStackParamList>>();
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(STATUS_FILTERS[0]);
   const [isFilterSheetVisible, setFilterSheetVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<InvoiceFilters>({});
@@ -65,15 +66,15 @@ const InvoicesListScreen: React.FC = () => {
   } = useInfiniteOrders(searchTerm, selectedStatus, INVOICES_PAGE_SIZE);
 
   const invoices = useMemo(() => {
-    return data?.pages.flatMap(page => page) ?? [];
+    return data?.pages.flatMap((page) => page) ?? [];
   }, [data]);
 
   const kpis = useMemo(() => {
     const received = (invoices as Order[])
-      .filter(inv => inv.payment_status?.toLowerCase() === 'paid')
+      .filter((inv) => inv.status === "paid")
       .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
     const outstanding = (invoices as Order[])
-      .filter(inv => inv.payment_status?.toLowerCase() !== 'paid' && !inv.is_cancelled)
+      .filter((inv) => inv.status !== "paid" && inv.status !== "cancelled")
       .reduce((sum, inv) => sum + (inv.total_amount ?? 0), 0);
     return { outstanding, received };
   }, [invoices]);
@@ -87,38 +88,38 @@ const InvoicesListScreen: React.FC = () => {
   const handleShareInvoice = useCallback(async (orderId: string) => {
     try {
       // Fetch full order data
-      const { ordersService } = await import('../../supabase/ordersService');
+      const { ordersService } = await import("../../supabase/ordersService");
       const fullInvoice = await ordersService.getOrderById(orderId);
 
       if (!fullInvoice) {
-        Alert.alert('Error', 'Invoice not found.');
+        Alert.alert("Error", "Invoice not found.");
         return;
       }
 
       // Use PDF service to share
-      const { pdfService } = await import('../../services/pdfService');
+      const { pdfService } = await import("../../services/pdfService");
       await pdfService.shareInvoiceAsPDF(fullInvoice);
     } catch (error: unknown) {
-      const { logger } = await import('../../utils/logger');
-      logger.error('Failed to share invoice:', error);
+      const { logger } = await import("../../utils/logger");
+      logger.error("Failed to share invoice:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'Failed to share invoice. Please try again.';
-      Alert.alert('Error', errorMessage);
+          : "Failed to share invoice. Please try again.";
+      Alert.alert("Error", errorMessage);
     }
   }, []);
 
   const handlePayment = useCallback(
     (orderId: string, invoice: (typeof invoices)[number]) => {
-      navigation.navigate('InvoiceDetail', {
+      navigation.navigate("InvoiceDetail", {
         orderId,
         invoice: {
           id: invoice.id,
           invoice_number: invoice.invoice_number,
-          client_name: invoice.party?.name ?? 'Customer',
+          client_name: invoice.party?.name ?? "Customer",
           created_at: invoice.created_at,
-          payment_status: invoice.payment_status,
+          status: invoice.status,
           subtotal: invoice.subtotal,
           tax_amount: invoice.tax_amount ?? 0,
           total_amount: invoice.total_amount,
@@ -137,13 +138,13 @@ const InvoicesListScreen: React.FC = () => {
     // Apply status filter if provided
     if (filters.status) {
       const statusMap: Record<string, string> = {
-        draft: 'Draft',
-        sent: 'Sent',
-        paid: 'Paid',
-        overdue: 'Overdue',
-        cancelled: 'Cancelled',
+        draft: "Draft",
+        sent: "Sent",
+        paid: "Paid",
+        overdue: "Overdue",
+        cancelled: "Cancelled",
       };
-      const statusLabel = statusMap[filters.status] || 'All';
+      const statusLabel = statusMap[filters.status] || "All";
       setSelectedStatus(statusLabel);
     }
   }, []);
@@ -155,7 +156,7 @@ const InvoicesListScreen: React.FC = () => {
         rightElement={
           <Pressable
             style={styles.headerAction}
-            onPress={() => navigation.navigate('Reports')}
+            onPress={() => navigation.navigate("Reports")}
             accessibilityLabel="Open reports"
           >
             <BarChart3 color={tokens.primary} size={18} />
@@ -179,22 +180,33 @@ const InvoicesListScreen: React.FC = () => {
           <>
             <View style={styles.summaryRow}>
               <View style={styles.summaryStatItem}>
-                <View style={[styles.summaryIconBox, styles.summaryIconBoxOutstanding]}>
+                <View
+                  style={[
+                    styles.summaryIconBox,
+                    styles.summaryIconBoxOutstanding,
+                  ]}
+                >
                   <TrendingUp color={tokens.destructive} size={16} />
                 </View>
                 <View style={styles.summaryStatText}>
                   <Text style={styles.summaryStatLabel}>OUTSTANDING</Text>
-                  <Text style={styles.summaryStatValue}>₹{kpis.outstanding.toLocaleString('en-IN')}</Text>
+                  <Text style={styles.summaryStatValue}>
+                    ₹{kpis.outstanding.toLocaleString("en-IN")}
+                  </Text>
                 </View>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.summaryStatItem}>
-                <View style={[styles.summaryIconBox, styles.summaryIconBoxReceived]}>
+                <View
+                  style={[styles.summaryIconBox, styles.summaryIconBoxReceived]}
+                >
                   <TrendingDown color={tokens.primary} size={16} />
                 </View>
                 <View style={styles.summaryStatText}>
                   <Text style={styles.summaryStatLabel}>RECEIVED</Text>
-                  <Text style={styles.summaryStatValue}>₹{kpis.received.toLocaleString('en-IN')}</Text>
+                  <Text style={styles.summaryStatValue}>
+                    ₹{kpis.received.toLocaleString("en-IN")}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -209,7 +221,7 @@ const InvoicesListScreen: React.FC = () => {
               trailingActions={
                 <Pressable
                   style={styles.roundedIconButton}
-                  onPress={() => Alert.alert('Sort', 'Sort options')}
+                  onPress={() => Alert.alert("Sort", "Sort options")}
                 >
                   <ArrowUpDown color={tokens.foreground} size={20} />
                 </Pressable>
@@ -218,7 +230,9 @@ const InvoicesListScreen: React.FC = () => {
 
             <View style={styles.recentActivityHeader}>
               <Text style={styles.recentActivityLabel}>RECENT ACTIVITY</Text>
-              <Text style={styles.recentActivityCount}>Showing {invoices.length} items</Text>
+              <Text style={styles.recentActivityCount}>
+                Showing {invoices.length} items
+              </Text>
             </View>
           </>
         }
@@ -241,14 +255,14 @@ const InvoicesListScreen: React.FC = () => {
               actionLabel="New Invoice"
               onAction={() =>
                 simplifiedPOSEnabled
-                  ? navigation.navigate('SimplifiedPOS')
-                  : navigation.navigate('AddSale', { initialMode: 'sale' })
+                  ? navigation.navigate("SimplifiedPOS")
+                  : navigation.navigate("AddSale", { initialMode: "sale" })
               }
             />
           ) : null
         }
         renderItem={({ item: invoice, index }) => {
-          const clientName = invoice.party?.name || 'Customer';
+          const clientName = invoice.party?.name || "Customer";
           return (
             <>
               {index > 0 && <View style={styles.rowDivider} />}
@@ -260,10 +274,10 @@ const InvoicesListScreen: React.FC = () => {
                   date: invoice.created_at || new Date().toISOString(),
                   dueDate: invoice.created_at || new Date().toISOString(),
                   amount: invoice.total_amount,
-                  status: invoice.payment_status || 'PENDING',
+                  status: invoice.status,
                 }}
                 onPress={() =>
-                  navigation.navigate('InvoiceDetail', {
+                  navigation.navigate("InvoiceDetail", {
                     orderId: invoice.id,
                     invoice,
                   })
@@ -294,11 +308,11 @@ const InvoicesListScreen: React.FC = () => {
 
       <FAB
         label="New Invoice"
-        icon={<Plus color="#fff" size={24} />}
+        icon={<Plus color={tokens.primaryForeground} size={24} />}
         onPress={() =>
           simplifiedPOSEnabled
-            ? navigation.navigate('SimplifiedPOS')
-            : navigation.navigate('AddSale', { initialMode: 'sale' })
+            ? navigation.navigate("SimplifiedPOS")
+            : navigation.navigate("AddSale", { initialMode: "sale" })
         }
         accessibilityLabel="Create new invoice"
       />
@@ -312,8 +326,8 @@ const createStyles = (tokens: ThemeTokens) =>
       flex: 1,
     },
     summaryRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       paddingVertical: 8,
       paddingHorizontal: 16,
       marginBottom: 8,
@@ -321,36 +335,36 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     summaryStatItem: {
       flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 12,
     },
     summaryIconBox: {
       width: 34,
       height: 34,
       borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
     },
     summaryIconBoxOutstanding: {
-      backgroundColor: 'rgba(239,68,68,0.10)',
+      backgroundColor: tokens.destructiveAlpha10,
     },
     summaryIconBoxReceived: {
-      backgroundColor: 'rgba(29,185,84,0.10)',
+      backgroundColor: tokens.primaryAlpha10,
     },
     summaryStatText: {
       gap: 2,
     },
     summaryStatLabel: {
       fontSize: 10,
-      fontWeight: '700',
+      fontWeight: "700",
       letterSpacing: 0.8,
       color: tokens.mutedForeground,
-      textTransform: 'uppercase',
+      textTransform: "uppercase",
     },
     summaryStatValue: {
       fontSize: 16,
-      fontWeight: '800',
+      fontWeight: "800",
       color: tokens.foreground,
     },
     summaryDivider: {
@@ -367,27 +381,27 @@ const createStyles = (tokens: ThemeTokens) =>
       opacity: 0.5,
     },
     recentActivityHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
       marginBottom: 8,
       marginTop: 4,
     },
     recentActivityLabel: {
       fontSize: 10,
-      fontWeight: '700',
+      fontWeight: "700",
       letterSpacing: 0.8,
       color: tokens.mutedForeground,
-      textTransform: 'uppercase',
+      textTransform: "uppercase",
     },
     recentActivityCount: {
       fontSize: 12,
-      fontWeight: '500',
+      fontWeight: "500",
       color: tokens.mutedForeground,
     },
     headerAction: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       gap: 6,
       paddingHorizontal: 10,
       paddingVertical: 8,
@@ -400,8 +414,8 @@ const createStyles = (tokens: ThemeTokens) =>
       elevation: 2,
     },
     searchRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       marginBottom: 14,
     },
     searchField: {
@@ -419,8 +433,8 @@ const createStyles = (tokens: ThemeTokens) =>
       width: 60,
       height: 52,
       borderRadius: 14,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: tokens.card,
       marginLeft: 6,
       shadowColor: tokens.shadowColor,
@@ -436,7 +450,7 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     roundedIconLabel: {
       color: tokens.foreground,
-      fontWeight: '600',
+      fontWeight: "600",
       fontSize: 12,
     },
     filterScroll: {
@@ -458,7 +472,7 @@ const createStyles = (tokens: ThemeTokens) =>
     },
     filterChipText: {
       color: tokens.foreground,
-      fontWeight: '500',
+      fontWeight: "500",
     },
     filterChipTextActive: {
       color: tokens.primaryForeground,
@@ -467,24 +481,24 @@ const createStyles = (tokens: ThemeTokens) =>
       marginBottom: 4,
     },
     fabText: {
-      color: '#fff',
-      fontWeight: '700',
+      color: tokens.primaryForeground,
+      fontWeight: "700",
       fontSize: 15,
     },
     footerSpacer: {
       height: 32,
     },
     fab: {
-      position: 'absolute',
+      position: "absolute",
       right: 24,
       bottom: 32,
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       backgroundColor: tokens.primary,
       borderRadius: 999,
       paddingHorizontal: 20,
       paddingVertical: 12,
-      shadowColor: '#000',
+      shadowColor: tokens.shadowColor,
       shadowOpacity: 0.35,
       shadowOffset: { width: 0, height: 4 },
       shadowRadius: 8,
@@ -494,14 +508,14 @@ const createStyles = (tokens: ThemeTokens) =>
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: 'rgba(0,0,0,0.15)',
-      alignItems: 'center',
-      justifyContent: 'center',
+      backgroundColor: "rgba(0,0,0,0.15)",
+      alignItems: "center",
+      justifyContent: "center",
       marginRight: 10,
     },
     fabIconText: {
-      color: '#fff',
-      fontWeight: '700',
+      color: tokens.primaryForeground,
+      fontWeight: "700",
       fontSize: 18,
     },
   });
