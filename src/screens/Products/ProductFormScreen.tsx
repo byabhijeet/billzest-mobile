@@ -25,6 +25,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import FormActionBar from '../../components/ui/FormActionBar';
 import { useCategories } from '../../logic/categoryLogic';
 import CategorySelectionSheet from '../../components/modals/CategorySelectionSheet';
+import ScreenWrapper from '../../components/ScreenWrapper';
 
 // ─── Note: All colors now use theme tokens from useThemeTokens() ────────────────────────────────────────
 
@@ -393,7 +394,7 @@ const ProductFormScreen: React.FC = () => {
   const headerTitle = mode === 'create' ? 'Add Item' : 'Edit Item';
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <DetailHeader
         title={headerTitle}
         actions={[
@@ -677,7 +678,7 @@ const ProductFormScreen: React.FC = () => {
           navigation.navigate('CategoryFormSheet', {});
         }}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

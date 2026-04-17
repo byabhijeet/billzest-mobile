@@ -24,6 +24,7 @@ import {
   TrendingDown,
 } from 'lucide-react-native';
 import { useOrganization } from '../../contexts/OrganizationContext';
+import ScreenWrapper from '../../components/ScreenWrapper';
 
 const formatCurrency = (amount: number) =>
   `₹${(amount ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -62,7 +63,7 @@ const ExpensesScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <ListHeader title="Expenses" />
 
       {/* ── Total Summary Strip ── */}
@@ -162,7 +163,7 @@ const ExpensesScreen: React.FC = () => {
         visible={isExpenseSheetVisible}
         onClose={handleExpenseSheetClose}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

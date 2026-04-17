@@ -171,8 +171,7 @@ const CustomersListScreen: React.FC = () => {
 
   return (
     <ScreenWrapper>
-      <View style={styles.screen}>
-        <ListHeader title="Parties" />
+      <ListHeader title="Parties" />
 
       <ScrollView
         style={styles.container}
@@ -255,7 +254,6 @@ const CustomersListScreen: React.FC = () => {
         initialFilters={filters}
         onApply={setFilters}
       />
-      </View>
     </ScreenWrapper>
   );
 };

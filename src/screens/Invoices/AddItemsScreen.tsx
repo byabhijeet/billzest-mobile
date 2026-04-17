@@ -17,10 +17,10 @@ import {
   ScrollView,
   FlatList,
   TextInput,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NavigationProp, RouteProp } from "@react-navigation/native";
 import { useThemeTokens } from "../../theme/ThemeProvider";
@@ -109,7 +109,7 @@ const AddItemsScreen = () => {
   const handleDone = () => navigation.goBack();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}

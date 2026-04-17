@@ -17,6 +17,7 @@ import { ThemeTokens } from '../../theme/tokens';
 import { Product } from '../../types/domain';
 import { ProductsStackParamList } from '../../navigation/types';
 import DetailHeader from '../../components/DetailHeader';
+import ScreenWrapper from '../../components/ScreenWrapper';
 import {
   Share2,
   Printer,
@@ -487,7 +488,7 @@ const ProductDetailScreen: React.FC = () => {
   }, [setActiveTab]);
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <DetailHeader
         title="Item Details"
         actions={[
@@ -527,7 +528,7 @@ const ProductDetailScreen: React.FC = () => {
         {activeTab === 'pricing' && <PricingTab product={product} styles={styles} />}
         {activeTab === 'inventory' && <InventoryTab product={product} styles={styles} />}
       </ScrollView>
-    </View>
+    </ScreenWrapper>
   );
 };
 

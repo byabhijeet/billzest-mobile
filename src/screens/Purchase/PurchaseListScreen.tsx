@@ -11,6 +11,7 @@ import EmptyState from '../../components/EmptyState';
 import PurchaseListSkeleton from '../../components/skeletons/PurchaseListSkeleton';
 import { usePurchases } from '../../logic/purchaseLogic';
 import StatusBadge, { StatusType } from '../../components/ui/StatusBadge';
+import ScreenWrapper from '../../components/ScreenWrapper';
 import type { PurchaseStackParamList } from '../../navigation/types';
 
 const STATUS_FILTERS = ['All', 'Pending', 'Received', 'Draft'];
@@ -81,7 +82,7 @@ const PurchaseListScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <ListHeader title="Purchases" />
       <ScrollView
         style={styles.container}
@@ -230,7 +231,7 @@ const PurchaseListScreen: React.FC = () => {
         onPress={handleNewPurchase}
         accessibilityLabel="Create purchase"
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

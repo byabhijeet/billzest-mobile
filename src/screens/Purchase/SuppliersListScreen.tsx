@@ -21,6 +21,8 @@ import { Users, AlertTriangle, UserPlus, Menu, Search } from 'lucide-react-nativ
 import EmptyState from '../../components/EmptyState';
 import SearchBar from '../../components/SearchBar';
 import type { PurchaseStackParamList } from '../../navigation/types';
+import ScreenWrapper from '../../components/ScreenWrapper';
+import ListHeader from '../../components/layout/ListHeader';
 
 const formatMetricCurrency = (value: number): string =>
   `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
@@ -63,14 +65,8 @@ const SuppliersListScreen = () => {
   }, [normalizedSuppliers, searchTerm]);
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.header}>
-          <TouchableOpacity style={styles.headerIcon}>
-              <Menu color={tokens.foreground} size={22} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Vendors</Text>
-          <View style={{ width: 40 }} />
-      </View>
+    <ScreenWrapper>
+      <ListHeader title="Vendors" />
 
       <ScrollView
         style={styles.container}
@@ -154,7 +150,7 @@ const SuppliersListScreen = () => {
         onPress={() => navigation.navigate('PurchaseCreateVendor', {})}
         icon={<UserPlus color={tokens.primaryForeground} size={24} />}
       />
-    </View>
+    </ScreenWrapper>
   );
 };
 

@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useThemeTokens } from "../../theme/ThemeProvider";
 import { ThemeTokens } from "../../theme/tokens";
 import DetailHeader from "../../components/DetailHeader";
+import ScreenWrapper from "../../components/ScreenWrapper";
 import {
   Share2,
   MessageCircle,
@@ -165,7 +166,7 @@ const CustomerDetailScreen: React.FC = () => {
   }, [deleteClient, customerId, navigation]);
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <DetailHeader
         title="Party Overview"
         actions={[
@@ -378,7 +379,7 @@ const CustomerDetailScreen: React.FC = () => {
           style={styles.reminderButton}
         />
       </ScrollView>
-    </View>
+    </ScreenWrapper>
   );
 };
 

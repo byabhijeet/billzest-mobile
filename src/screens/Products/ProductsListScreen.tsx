@@ -233,8 +233,7 @@ const ProductsListScreen: React.FC = () => {
 
   return (
     <ScreenWrapper>
-      <View style={styles.screen}>
-        <ListHeader title="Products" />
+      <ListHeader title="Products" />
         <FlatList
           style={styles.container}
           contentContainerStyle={contentContainerStyle}
@@ -334,7 +333,6 @@ const ProductsListScreen: React.FC = () => {
           onPress={() => navigation.navigate('ProductForm', { mode: 'create' })}
           accessibilityLabel="Add new item"
         />
-      </View>
 
       <ProductFilterSheet
         visible={isFilterSheetVisible}

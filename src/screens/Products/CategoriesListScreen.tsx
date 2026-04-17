@@ -22,6 +22,7 @@ import { Badge } from '../../components/ui/Badge';
 import EmptyState from '../../components/EmptyState';
 import { Package, AlertTriangle, Edit, Trash2, Tag, EyeOff } from 'lucide-react-native';
 import { Category } from '../../types/domain';
+import ListHeader from '../../components/layout/ListHeader';
 
 const CategoriesListScreen = () => {
   const { tokens } = useThemeTokens();
@@ -72,8 +73,8 @@ const CategoriesListScreen = () => {
 
   return (
     <ScreenWrapper>
-      <View style={styles.screen}>
-        <ScrollView
+      <ListHeader title="Categories" />
+      <ScrollView
           style={styles.container}
           contentContainerStyle={styles.content}
           refreshControl={
@@ -189,7 +190,6 @@ const CategoriesListScreen = () => {
           onPress={() => navigation.navigate('CategoryFormSheet', {})}
           accessibilityLabel="Add new category"
         />
-      </View>
     </ScreenWrapper>
   );
 };

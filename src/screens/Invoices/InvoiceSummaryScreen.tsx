@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NavigationProp, RouteProp } from "@react-navigation/native";
 import { useThemeTokens } from "../../theme/ThemeProvider";
@@ -78,7 +79,7 @@ const InvoiceSummaryScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
       <ScreenHeader
         title="Invoice Summary"
         onBack={handleGoBack}
@@ -181,7 +182,7 @@ const InvoiceSummaryScreen: React.FC = () => {
         primaryIcon={<Plus size={16} color={tokens.primaryForeground} strokeWidth={3} />}
         onPrimary={handleCreateNew}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

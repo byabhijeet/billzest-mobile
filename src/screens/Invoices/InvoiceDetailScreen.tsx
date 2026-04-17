@@ -20,6 +20,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useThemeTokens } from "../../theme/ThemeProvider";
 import { ThemeTokens } from "../../theme/tokens";
 import DetailHeader from "../../components/DetailHeader";
+import ScreenWrapper from "../../components/ScreenWrapper";
 import {
   Share2,
   Printer,
@@ -315,14 +316,14 @@ const InvoiceDetailScreen: React.FC = () => {
 
   if (isLoadingInvoice && !fullInvoice) {
     return (
-      <View style={[styles.screen, { justifyContent: "center", alignItems: "center" }]}>
+      <ScreenWrapper style={{ justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tokens.primary} />
-      </View>
+      </ScreenWrapper>
     );
   }
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <DetailHeader
         title="Invoice Details"
         actions={[
@@ -468,7 +469,7 @@ const InvoiceDetailScreen: React.FC = () => {
           )}
         </View>
       </View>
-    </View>
+    </ScreenWrapper>
   );
 };
 

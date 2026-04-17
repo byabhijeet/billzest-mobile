@@ -27,6 +27,7 @@ import {
   Plus,
 } from "lucide-react-native";
 import EmptyState from "../../components/EmptyState";
+import ScreenWrapper from "../../components/ScreenWrapper";
 import { useAppSettingsStore } from "../../stores/appSettingsStore";
 import DashboardSkeleton from "../../components/skeletons/DashboardSkeleton";
 import RecentActivityList, {
@@ -205,7 +206,7 @@ const DashboardScreen: React.FC = () => {
 
   if (isLoading && !refreshing) {
     return (
-      <View style={styles.screen}>
+      <ScreenWrapper>
         <ListHeader title="Dashboard" />
         <ScrollView
           style={styles.container}
@@ -214,13 +215,13 @@ const DashboardScreen: React.FC = () => {
         >
           <DashboardSkeleton />
         </ScrollView>
-      </View>
+      </ScreenWrapper>
     );
   }
 
   if (error && !refreshing) {
     return (
-      <View style={styles.screen}>
+      <ScreenWrapper>
         <ListHeader title="Dashboard" />
         <ScrollView
           style={styles.container}
@@ -235,12 +236,12 @@ const DashboardScreen: React.FC = () => {
             onAction={refetch}
           />
         </ScrollView>
-      </View>
+      </ScreenWrapper>
     );
   }
 
   return (
-    <View style={styles.screen}>
+    <ScreenWrapper>
       <ListHeader title="Dashboard" />
       <ScrollView
         style={styles.container}
@@ -395,7 +396,7 @@ const DashboardScreen: React.FC = () => {
           initialFilters={txnFilters}
         />
       </ScrollView>
-    </View>
+    </ScreenWrapper>
   );
 };
 

@@ -36,6 +36,7 @@ import InvoiceBottomBar from "./components/InvoiceBottomBar";
 import { formatCurrency } from "../../utils/formatting";
 import { ArrowLeft, MoreVertical, Search, ScanLine } from "lucide-react-native";
 import type { InvoicesStackParamList } from "../../navigation/types";
+import ScreenWrapper from "../../components/ScreenWrapper";
 
 type Mode = "sale" | "purchase";
 
@@ -224,7 +225,7 @@ const AddSaleScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenWrapper>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
@@ -359,7 +360,7 @@ const AddSaleScreen = () => {
           totalAmount={grandTotal}
         />
       </Modal>
-    </View>
+    </ScreenWrapper>
   );
 };
 
